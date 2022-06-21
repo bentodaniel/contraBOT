@@ -1,2 +1,2 @@
-# discord_voice_manager
-A Discord bot that manages voice channels
+# discord_price_checker_bot
+A Discord bot that checks the price of items

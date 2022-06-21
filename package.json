@@ -1,0 +1,25 @@
+{
+  "name": "price_checker_bot",
+  "version": "1.0.0",
+  "description": "A Discord bot that checkes the price of games",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bentodaniel/discord_voice_manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bentodaniel/discord_voice_manager/issues"
+  },
+  "homepage": "https://github.com/bentodaniel/discord_voice_manager#readme",
+  "dependencies": {
+    "discord.js": "^13.8.0",
+    "dotenv": "^16.0.1",
+    "puppeteer": "^14.4.1"
+  }
+}
