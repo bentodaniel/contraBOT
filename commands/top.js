@@ -1,8 +1,8 @@
-const puppeteer = require("puppeteer");
+
 
 module.exports = {
-    name: 'hotel',
-    description: 'This checks the price of hotels in trivago',
+    name: 'top',
+    description: 'Checks the top deals at CheapShark',
     execute(client, message, args, Discord) {
         //args = args.split(/\s*\|\s*/);
         message.channel.send("Searching for results...").then(msg => {
@@ -11,4 +11,4 @@ module.exports = {
     }
 }
 
-// https://www.trivago.pt/
+// https://www.cheapshark.com/

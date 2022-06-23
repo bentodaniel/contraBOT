@@ -1,4 +1,5 @@
-const puppeteer = require("puppeteer");
+const request = require('request');
+const cheerio = require('cheerio');
 
 const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const PAGE_LIMIT = 5;
@@ -11,42 +12,42 @@ module.exports = {
 
         var embeds_list = []
         var buttons_list = [];
-        var bot_msg = undefined;
-
-        // check if the user is the owner of the request and if the interaction is in the same message
-        const filter = (click) => click.user.id === message.author.id && click.message.id == bot_msg.id
-        const collector = message.channel.createMessageComponentCollector({
-            max: 1, // The number of times a user can click on the button
-            time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-            filter // Add the filter
-        });
 
         message.channel.send("Searching for results...").then(msg => {
-            bot_msg = msg; // Define first~
 
-            search_and_scrape(msg, args).then(data => {
-                embeds_list = data[0]
-                buttons_list = data[1]
-                bot_msg = data[2]
-            })
-        });
+            scrape_search(args, reply_search, msg).then((ret) => {
 
-        collector.on("collect", async interaction => {
-            bot_msg.edit({
-                "components": []
-            })
+                embeds_list = ret[0]
+                buttons_list = ret[1]
+                
+                // check if the user is the owner of the request and if the interaction is in the same message
+                const filter = (click) => click.user.id === message.author.id && click.message.id == msg.id
+                const collector = message.channel.createMessageComponentCollector({
+                    max: 1, // The number of times a user can click on the button
+                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
+                    filter // Add the filter
+                });
 
-            var i = find_index_of_button(buttons_list, interaction['customId'])
+                collector.on("collect", async interaction => {
+                    msg.edit({
+                        "components": []
+                    })
+        
+                    var i = find_index_of_button(buttons_list, interaction['customId'])
+        
+                    interaction.reply('Not implemented yet :>')
 
-            interaction.reply({ content: `Searching for info on '**${embeds_list[i]['title'].slice(6)}**'`, fetchReply: true }).then((msg) => {
-                handle_reply(embeds_list[i], msg)
-            })
-        });
-
-        collector.on("end", (collected) => {
-            // Disable all buttons if time runs out
-            bot_msg.edit({
-                "components": []
+                    /*interaction.reply({ content: `Searching for info on '**${embeds_list[i]['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
+                        scrape_buy(embeds_list[i], handle_reply, response_msg);
+                    })*/
+                });
+        
+                collector.on("end", (collected) => {
+                    // Disable all buttons if time runs out
+                    msg.edit({
+                        "components": []
+                    })
+                });
             })
         });
     }
@@ -61,11 +62,61 @@ function find_index_of_button(buttons_list, id) {
     return -1;
 }
 
-async function search_and_scrape(message, search_val) {
-    var json_data = await scrape_search(search_val);
+async function scrape_search(search_val, callback, message) {
+    const res = new Promise((success, failure) => {
+        request(`https://www.allkeyshop.com/blog/catalogue/search-${search_val}/`, function (error, response, body) {
+            if (error || !body){
+                console.log(error);
+                failure ([[], []])
+            }
+            else {
+                var json_data = [];
+                const $ = cheerio.load(body);
+
+                // Loop through each of the link results
+                $('.search-results-row-link').each(function(i, link_child){
+                    var data = {}
+
+                    var link_url = $(link_child).attr('href')
+                    data['link'] = link_url;
+                    
+                    // Loop through the children
+                    for (child of $(link_child).children()) {
+                        var cName = $(child).attr('class')
+
+                        if (cName === 'search-results-row-image') {
+                            var image_div_url = $(child).children()[0].attribs['style']
+                            image_div_url = image_div_url.replace(/.*url\(/g, '').slice(0, -1) // keep only the link
+                            data['image_link'] = image_div_url;
+                        }
+                        else if (cName === 'search-results-row-game') {
+                            for (gamec of $(child).children()) {
+                                if ($(gamec).attr('class') === 'search-results-row-game-title') {
+                                    data['title'] = $(gamec).text();
+                                }
+                                else if ($(gamec).attr('class') === 'search-results-row-game-infos') {
+                                    data['infos'] = $(gamec).text();
+                                }
+                            }
+                        }
+                        else if (cName === 'search-results-row-price') {
+                            data['price'] = $(child).text().trim().replace(/(\r\n|\n|\r)/gm, "");
+                        }
+                    }
+                    json_data.push(data)
+                });
+                var callback_res = callback(json_data, message);
+                success(callback_res)
+            }
+        });
+    })
+    return res
+}
+
+async function reply_search(json_data, message) {
     if (json_data === undefined) {
         message.edit({
-            "content": '',
+            "content": '-',
             'embeds' : [{
                 'type' : 'rich',
                 'title': 'Could not get the data',
@@ -88,60 +139,7 @@ async function search_and_scrape(message, search_val) {
             }
         ]
     });
-
-    return [embeds, buttons, message]
-}
-
-async function scrape_search(search_val) {
-    const browser = await puppeteer.launch({})
-    const page = await browser.newPage()
-
-    try {
-        await page.goto(`https://www.allkeyshop.com/blog/catalogue/search-${search_val}/`)
-    } catch (error) {
-        console.log("error :: ", error.message)
-        return undefined
-    }
-    
-    var element = await page.waitForSelector('.search-results')
-
-    var json_data = await page.evaluate((el) => {
-        var data = [];
-
-        for (c of el.children) {
-            var child_data = {};
-            
-            var link_child = c.children[0];
-            child_data['link'] = link_child.href;
-
-            for (lc of link_child.children) {
-                if (lc.className === 'search-results-row-image') {
-                    var image_div = lc.children[0]
-                    child_data['image_link'] = image_div.style.backgroundImage.slice(4, -1).replace(/"/g, "");;
-                }
-                else if (lc.className === 'search-results-row-game') {
-                    for (gamec of lc.children) {
-                        if (gamec.className === 'search-results-row-game-title') {
-                            child_data['title'] = gamec.textContent;
-                        }
-                        else if (gamec.className === 'search-results-row-game-infos') {
-                            child_data['infos'] = gamec.textContent;
-                        }
-                    }
-                }
-                else if (lc.className === 'search-results-row-price') {
-                    child_data['price'] = lc.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                }
-            }
-
-            data.push(child_data);
-        }
-        return data
-    }, element);
-
-    browser.close();
-
-    return json_data;
+    return [embeds, buttons]
 }
 
 function generate_embeds_search(json_data) {
@@ -191,11 +189,103 @@ function generate_buttons(embeds) {
     return buttons
 }
 
+
+
+
+
+
+
+async function scrape_buy(embed, callback, msg) {
+    var search_link = embed['url']
+
+    request(search_link, function (error, response, body) {
+        if (error || !body){
+            console.log(error);
+        }
+        else {
+            var json_data = [];
+            const $ = cheerio.load(body);
+
+           
+
+            $('.offers-table-row.x-offer').each(function(i, row_component){
+                var data = {}
+
+                console.log($(row_component).text())
+
+                // Loop through the children
+                for (child of $(row_component).children()) {
+                    var cName = $(child).attr('class')
+
+                    if (cName === 'offers-table-row-cell offers-table-row-cell-first') {  // MARKET
+                        var name_div = $(child).children().first()
+                        //console.log($(name_div))
+
+                        var name_span = $(name_div).children()[1]
+                        //console.log($(name_span).text())
+
+                        for (c of $(name_div).children()){
+                            //console.log($(c).attr('class'))
+                        }
+                        
+                        /*for (c of $(child).children()){
+
+                            console.log($(c).attr('class'))
+                            console.log($(c).text().trim().replace(/(\r\n|\n|\r)/gm, ""))
+
+                            if (c.className === 'x-offer-merchant-title offers-merchant text-truncate') {
+                                child_data['market'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                            }
+                        }*/
+                    }
+                    else if (cName === 'x-offer-region offers-table-row-cell text-center x-popover d-none d-md-table-cell') {     // REGION
+                        // Contains a sprite and text, so it should be ok
+                        //child_data['region'] = c_div.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                    }
+                    else if (cName === 'x-offer-edition offers-table-row-cell text-center d-none d-md-table-cell') {  // EDITION
+                        //child_data['edition'] = c_div.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                    }
+                    else if (cName === 'offers-table-row-cell text-right d-none d-md-table-cell') {   // OG PRICE (note that one could also get the fees)
+                        /*for (c of c_div.children){
+                            if (c.className === 'old-price') {
+                                child_data['og_price'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                            }
+                        }*/
+                    }
+                    else if (cName === 'offers-table-row-cell text-center') {     // COUPON
+                        // Can get the coupon itself and the percentage of discount
+                        /*for (c of c_div.children[0].children[0].children) {
+                            if (c.className === 'x-offer-coupon-value coupon-value text-truncate') { // discount percentage
+                                child_data['coupon_value'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                            }
+                            else if (c.className === 'x-offer-coupon-code coupon-code text-truncate') { // ciscount code
+                                child_data['coupon_code'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                            }
+                        }*/
+                    }
+                    else if (cName === 'offers-table-row-cell buy-btn-cell') {    // PRICE
+                        /*for (c of c_div.children) {
+                            if (c.className === 'd-lg-none buy-btn x-offer-buy-btn text-center') {
+                                child_data['price'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
+                                child_data['buy_link'] = c.href
+                            }
+                        }*/
+                    }
+                }
+                json_data.push(data)
+            })
+            console.log(json_data)
+            //callback(json_data, msg);
+        }
+    })
+}
+
+
 async function handle_reply(embed, message) {
     var json_data = await scrape_buy(embed['url']);
     if (json_data === undefined) {
         message.edit({
-            "content": '',
+            "content": '-',
             'embeds' : [{
                 'type' : 'rich',
                 'title': 'Could not get the data',
@@ -211,82 +301,6 @@ async function handle_reply(embed, message) {
         "tts": false,
         "embeds": embeds,
     });
-}
-
-async function scrape_buy(search_link) {
-    const browser = await puppeteer.launch({})
-    const page = await browser.newPage()
-
-    try {
-        await page.goto(search_link)
-    } catch (error) {
-        console.log("error :: ", error.message)
-        return undefined
-    }
-    
-    var element = await page.waitForSelector('.offers-table.x-offers').catch((error) => { 
-        console.log('error :: ', error.message)   
-        return undefined; 
-    })  
-
-    var json_data = await page.evaluate((el) => {
-        var data = [];
-        
-        for (c_row of el.children) {
-            var child_data = {};
-
-            for (c_div of c_row.children) {
-                if (c_div.className === 'offers-table-row-cell offers-table-row-cell-first') {  // MARKET
-                    for (c of c_div.children){
-                        if (c.className === 'x-offer-merchant-title offers-merchant text-truncate') {
-                            child_data['market'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                        }
-                    }
-                }
-                else if (c_div.className === 'x-offer-region offers-table-row-cell text-center x-popover d-none d-md-table-cell') {     // REGION
-                    // Contains a sprite and text, so it should be ok
-                    child_data['region'] = c_div.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                }
-                else if (c_div.className === 'x-offer-edition offers-table-row-cell text-center d-none d-md-table-cell') {  // EDITION
-                    child_data['edition'] = c_div.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                }
-                else if (c_div.className === 'offers-table-row-cell text-right d-none d-md-table-cell') {   // OG PRICE (note that one could also get the fees)
-                    for (c of c_div.children){
-                        if (c.className === 'old-price') {
-                            child_data['og_price'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                        }
-                    }
-                }
-                else if (c_div.className === 'offers-table-row-cell text-center') {     // COUPON
-                    // Can get the coupon itself and the percentage of discount
-                    for (c of c_div.children[0].children[0].children) {
-                        if (c.className === 'x-offer-coupon-value coupon-value text-truncate') { // discount percentage
-                            child_data['coupon_value'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                        }
-                        else if (c.className === 'x-offer-coupon-code coupon-code text-truncate') { // ciscount code
-                            child_data['coupon_code'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                        }
-                    }
-                }
-                else if (c_div.className === 'offers-table-row-cell buy-btn-cell') {    // PRICE
-                    for (c of c_div.children) {
-                        if (c.className === 'd-lg-none buy-btn x-offer-buy-btn text-center') {
-                            child_data['price'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                            child_data['buy_link'] = c.href
-                        }
-                    }
-                }
-            }
-            data.push(child_data);
-        }
-        return data;
-    }, element);
-
-    console.log(json_data)
-
-    browser.close();
-
-    return json_data;
 }
 
 function generate_embeds_buy(json_data) {
