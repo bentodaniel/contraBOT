@@ -1,5 +1,6 @@
 const request = require('request');
 const cheerio = require('cheerio');
+const xhr_req = require('xhr-request')
 
 const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const PAGE_LIMIT = 5;
@@ -35,11 +36,11 @@ module.exports = {
         
                     var i = find_index_of_button(buttons_list, interaction['customId'])
         
-                    interaction.reply('Not implemented yet :>')
+                    //interaction.reply('Not implemented yet :>')
 
-                    /*interaction.reply({ content: `Searching for info on '**${embeds_list[i]['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
+                    interaction.reply({ content: `Searching for info on '**${embeds_list[i]['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
                         scrape_buy(embeds_list[i], handle_reply, response_msg);
-                    })*/
+                    })
                 });
         
                 collector.on("end", (collected) => {
@@ -173,32 +174,22 @@ function generate_embeds_search(json_data) {
 }
 
 function generate_buttons(embeds) {
-    buttons = []
-
+    var btns = []
     for (let i = 0; i < embeds.length; i++) {
-        var new_button = {}
-        new_button = {
+        var new_button = {
             "style": 1,
             "label": `${i+1}`,
             "custom_id": `row_0_button_${i}`,
             "disabled": false,
             "type": 2
         }
-        buttons.push(new_button)
+        btns.push(new_button)
     }
-    return buttons
+    return btns
 }
 
-
-
-
-
-
-
 async function scrape_buy(embed, callback, msg) {
-    var search_link = embed['url']
-
-    request(search_link, function (error, response, body) {
+    request(embed['url'], function (error, response, body) {
         if (error || !body){
             console.log(error);
         }
@@ -206,83 +197,57 @@ async function scrape_buy(embed, callback, msg) {
             var json_data = [];
             const $ = cheerio.load(body);
 
-           
+            const game_id = $('footer').next().text().replace('var game_id=','').replaceAll('\"', '')
+            
+            // TODO - could also get with other currencies - accepted:  \"eur\", \"gbp\", \"usd\"
+            const currency = 'eur'
 
-            $('.offers-table-row.x-offer').each(function(i, row_component){
-                var data = {}
-
-                console.log($(row_component).text())
-
-                // Loop through the children
-                for (child of $(row_component).children()) {
-                    var cName = $(child).attr('class')
-
-                    if (cName === 'offers-table-row-cell offers-table-row-cell-first') {  // MARKET
-                        var name_div = $(child).children().first()
-                        //console.log($(name_div))
-
-                        var name_span = $(name_div).children()[1]
-                        //console.log($(name_span).text())
-
-                        for (c of $(name_div).children()){
-                            //console.log($(c).attr('class'))
-                        }
-                        
-                        /*for (c of $(child).children()){
-
-                            console.log($(c).attr('class'))
-                            console.log($(c).text().trim().replace(/(\r\n|\n|\r)/gm, ""))
-
-                            if (c.className === 'x-offer-merchant-title offers-merchant text-truncate') {
-                                child_data['market'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                            }
-                        }*/
-                    }
-                    else if (cName === 'x-offer-region offers-table-row-cell text-center x-popover d-none d-md-table-cell') {     // REGION
-                        // Contains a sprite and text, so it should be ok
-                        //child_data['region'] = c_div.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                    }
-                    else if (cName === 'x-offer-edition offers-table-row-cell text-center d-none d-md-table-cell') {  // EDITION
-                        //child_data['edition'] = c_div.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                    }
-                    else if (cName === 'offers-table-row-cell text-right d-none d-md-table-cell') {   // OG PRICE (note that one could also get the fees)
-                        /*for (c of c_div.children){
-                            if (c.className === 'old-price') {
-                                child_data['og_price'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                            }
-                        }*/
-                    }
-                    else if (cName === 'offers-table-row-cell text-center') {     // COUPON
-                        // Can get the coupon itself and the percentage of discount
-                        /*for (c of c_div.children[0].children[0].children) {
-                            if (c.className === 'x-offer-coupon-value coupon-value text-truncate') { // discount percentage
-                                child_data['coupon_value'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                            }
-                            else if (c.className === 'x-offer-coupon-code coupon-code text-truncate') { // ciscount code
-                                child_data['coupon_code'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                            }
-                        }*/
-                    }
-                    else if (cName === 'offers-table-row-cell buy-btn-cell') {    // PRICE
-                        /*for (c of c_div.children) {
-                            if (c.className === 'd-lg-none buy-btn x-offer-buy-btn text-center') {
-                                child_data['price'] = c.textContent.trim().replace(/(\r\n|\n|\r)/gm, "");
-                                child_data['buy_link'] = c.href
-                            }
-                        }*/
-                    }
+            xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${game_id}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
+                json: true
+            }, function (err, req_data) {
+                if (err) {
+                    console.log(err)
                 }
-                json_data.push(data)
+                else {
+                
+                    // the JSON result
+                    //console.log(req_data)
+
+                    Object.entries(req_data['offers']).forEach(([key, value]) => {
+                        var data = {}
+                        //console.log(key , value); // key ,value
+
+                        data['buy_link'] = value.affiliateUrl
+                        data['market'] = req_data['merchants'][value.merchant].name
+                        data['region'] = req_data['regions'][value.region].filterName
+                        data['edition'] = req_data['editions'][value.edition].name
+
+                        var price_data = value.price[currency]
+
+                        data['og_price'] = price_data.priceWithoutCoupon
+                        data['price'] = price_data.price
+
+                        var coupon_data = price_data.bestCoupon
+                        if (coupon_data === null || coupon_data === undefined) {
+                            data['coupon_value'] = 'N/A'
+                            data['coupon_code'] = 'No coupon'
+                        }
+                        else {
+                            data['coupon_code'] = coupon_data.code
+                        }
+                        json_data.push(data)
+                    });
+
+                    //console.log(json_data)
+                    callback(json_data, msg, embed['title'].slice(6));
+                }
             })
-            console.log(json_data)
-            //callback(json_data, msg);
         }
     })
 }
 
 
-async function handle_reply(embed, message) {
-    var json_data = await scrape_buy(embed['url']);
+async function handle_reply(json_data, message, game_title) {
     if (json_data === undefined) {
         message.edit({
             "content": '-',
@@ -297,7 +262,7 @@ async function handle_reply(embed, message) {
     var embeds = generate_embeds_buy(json_data);
 
     message.edit({
-        "content": `Here are the first five results for '**${embed['title'].slice(6)}**':`,
+        "content": `Here are the first five results for '**${game_title}**':`,
         "tts": false,
         "embeds": embeds,
     });
@@ -305,7 +270,7 @@ async function handle_reply(embed, message) {
 
 function generate_embeds_buy(json_data) {
     var embeds = [];
-
+    var count = 1;
     for (game of json_data) {
         var new_embed = {}
 
@@ -335,7 +300,7 @@ function generate_embeds_buy(json_data) {
                 "inline": true
             },
             {
-                "name": `Coupon ${game['coupon_value']}`,
+                "name": `Coupon`,
                 "value": `*${game['coupon_code']}*`,
                 "inline": true
             },
@@ -348,6 +313,9 @@ function generate_embeds_buy(json_data) {
         new_embed['url'] = game['buy_link'];
 
         embeds.push(new_embed)
+
+        count += 1
+        if (count > 10) break
     }
     return embeds;
 }
