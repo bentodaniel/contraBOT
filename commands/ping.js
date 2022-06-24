@@ -1,9 +1,18 @@
 module.exports = {
     name: 'ping',
-    description: 'This is a ping command',
+    description: 'Check the bot\'s status',
     arguments: '',
     isImplemented: true,
     execute(client, message, args, Discord) {
-        message.channel.send('I\'m alive!! \\o/');
+        message.channel.send({
+            'content' : ' ',
+            'tts': false,
+            'embeds' : [{
+                'type' : 'rich',
+                'title': 'I\'m alive',
+                'color' : 0x6fff00,
+                'description': '\\o/'
+            }]
+        });
     }
 }

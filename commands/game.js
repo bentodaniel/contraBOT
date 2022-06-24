@@ -250,7 +250,7 @@ async function scrape_buy(embed, msg) {
                         json_data.push(data)
                     });
 
-                    if (check_good_data(json_data, message)) {
+                    if (check_good_data(json_data, msg)) {
                         handle_reply(json_data, msg, embed['title'].slice(6));
                     }                    
                 }
