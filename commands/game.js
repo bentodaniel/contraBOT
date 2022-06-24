@@ -16,7 +16,7 @@ module.exports = {
 
         message.channel.send("Searching for results...").then(msg => {
 
-            scrape_search(args, reply_search, msg).then((ret) => {
+            scrape_search(args, msg).then((ret) => {
 
                 embeds_list = ret[0]
                 buttons_list = ret[1]
@@ -39,7 +39,7 @@ module.exports = {
                     //interaction.reply('Not implemented yet :>')
 
                     interaction.reply({ content: `Searching for info on '**${embeds_list[i]['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
-                        scrape_buy(embeds_list[i], handle_reply, response_msg);
+                        scrape_buy(embeds_list[i], response_msg);
                     })
                 });
         
@@ -49,6 +49,8 @@ module.exports = {
                         "components": []
                     })
                 });
+            }).catch(e => {
+                console.log(`ERROR :: trying to search for '${args}'`)
             })
         });
     }
@@ -63,7 +65,7 @@ function find_index_of_button(buttons_list, id) {
     return -1;
 }
 
-async function scrape_search(search_val, callback, message) {
+async function scrape_search(search_val, message) {
     const res = new Promise((success, failure) => {
         request(`https://www.allkeyshop.com/blog/catalogue/search-${search_val}/`, function (error, response, body) {
             if (error || !body){
@@ -106,31 +108,39 @@ async function scrape_search(search_val, callback, message) {
                     }
                     json_data.push(data)
                 });
-                var callback_res = callback(json_data, message);
-                success(callback_res)
+                if (check_good_data(json_data, message)) {
+                    success(reply_search(json_data, message))
+                }
+                else {
+                    failure([[],[]])
+                }
             }
         });
     })
     return res
 }
 
-async function reply_search(json_data, message) {
-    if (json_data === undefined) {
+function check_good_data(json_data, message) {
+    if (json_data === undefined || json_data.length === 0) {
         message.edit({
-            "content": '-',
+            'content' : ' ',
             'embeds' : [{
                 'type' : 'rich',
                 'title': 'Could not get the data',
                 'color' : 0xff0000,
             }]
         });
+        return false
     }
+    return true
+}
 
+async function reply_search(json_data, message) {
     var embeds = generate_embeds_search(json_data);
     var buttons = generate_buttons(embeds);
 
     message.edit({
-        "content": `Here are the first five results:`,
+        "content": `Here are the first results:`,
         "tts": false,
         "embeds": embeds,
         "components": [
@@ -188,7 +198,7 @@ function generate_buttons(embeds) {
     return btns
 }
 
-async function scrape_buy(embed, callback, msg) {
+async function scrape_buy(embed, msg) {
     request(embed['url'], function (error, response, body) {
         if (error || !body){
             console.log(error);
@@ -238,31 +248,20 @@ async function scrape_buy(embed, callback, msg) {
                         json_data.push(data)
                     });
 
-                    //console.log(json_data)
-                    callback(json_data, msg, embed['title'].slice(6));
+                    if (check_good_data(json_data, message)) {
+                        handle_reply(json_data, msg, embed['title'].slice(6));
+                    }                    
                 }
             })
         }
     })
 }
 
-
 async function handle_reply(json_data, message, game_title) {
-    if (json_data === undefined) {
-        message.edit({
-            "content": '-',
-            'embeds' : [{
-                'type' : 'rich',
-                'title': 'Could not get the data',
-                'color' : 0xff0000,
-            }]
-        });
-    }    
-
     var embeds = generate_embeds_buy(json_data);
 
     message.edit({
-        "content": `Here are the first five results for '**${game_title}**':`,
+        "content": `Here are the top results for '**${game_title}**':`,
         "tts": false,
         "embeds": embeds,
     });
