@@ -16,6 +16,15 @@ module.exports = (Discord, client, message) => {
         command_file.execute(client, message, args, Discord);
     }
     else {
-        message.channel.send('What?!');
+        message.channel.send({
+            'content' : ' ',
+            'tts': false,
+            'embeds' : [{
+                'type' : 'rich',
+                'title': 'Bad command',
+                'color' : 0xff0000,
+                'description': 'I don\'t recognize that command.\nTry using \'**$help**\''
+            }]
+        });
     }
 }

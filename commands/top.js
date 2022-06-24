@@ -3,6 +3,8 @@
 module.exports = {
     name: 'top',
     description: 'Checks the top deals at CheapShark',
+    arguments: '',
+    isImplemented: false,
     execute(client, message, args, Discord) {
         //args = args.split(/\s*\|\s*/);
         message.channel.send("Searching for results...").then(msg => {
