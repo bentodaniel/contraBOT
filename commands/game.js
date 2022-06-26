@@ -9,7 +9,7 @@ module.exports = {
     name: 'game',
     description: 'This checks the price of a game in allkeyshop',
     arguments: '<game to search>',
-    isImplemented: true,
+    showOnHelp: true,
     execute(client, message, args, Discord) {
         //args = args.split(/\s*\|\s*/);
 

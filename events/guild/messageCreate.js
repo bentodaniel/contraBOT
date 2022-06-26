@@ -1,4 +1,4 @@
-module.exports = (Discord, client, message) => {
+module.exports = (Discord, client, db, message) => {
     const prefix = '$';
     
     if (!message.content.startsWith(prefix) || message.author.bot)

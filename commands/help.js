@@ -4,7 +4,7 @@ module.exports = {
     name: 'help',
     description: 'Displays this message',
     arguments: '',
-    isImplemented: true,
+    showOnHelp: true,
     execute(client, message, args, Discord) {
         message.channel.send({
             'content' : ' ',
@@ -23,16 +23,28 @@ module.exports = {
 }
 
 function get_commands() {
-    res = ''
+    general = ''
+    admin = ''
     for (let file of fs.readdirSync('./commands/').filter(file => file.endsWith('.js'))) {
         const command = require(`../commands/${file}`);
 
-        if (command.name && command.isImplemented) {
-            res += `**${command.name} ${command.arguments}** - ${command.description}\n`;
+        if (command.showOnHelp) {
+            if (command.adminOnly) {
+                admin += `**${command.name} ${command.arguments}** - ${command.description}\n`;
+                if (command.arguments_help) {
+                    admin += `\u1CBC\u1CBC\u1CBC\u1CBC - ${command.arguments_help}\n`
+                }
+            }
+            else {
+                general += `**${command.name} ${command.arguments}** - ${command.description}\n`;
+                if (command.arguments_help) {
+                    general += `\u1CBC\u1CBC\u1CBC\u1CBC - ${command.arguments_help}\n`
+                }
+            }
         }
         else {
             continue;
         }
     }
-    return res
+    return `__General__\n${general}\n\n__Admin__\n${admin}`
 }

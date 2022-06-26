@@ -2,7 +2,7 @@ module.exports = {
     name: 'ping',
     description: 'Check the bot\'s status',
     arguments: '',
-    isImplemented: true,
+    showOnHelp: true,
     execute(client, message, args, Discord) {
         message.channel.send({
             'content' : ' ',

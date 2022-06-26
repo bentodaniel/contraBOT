@@ -1,3 +1,5 @@
+const db_functs = require('../../database/db')
+
 module.exports = (Discord, client, message) => {
     console.log('IM ONLINE');
 

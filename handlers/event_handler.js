@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-module.exports = (client, Discord) => {
+module.exports = (client, Discord, db) => {
     const load_dir = (dir) => {
         const event_files = fs.readdirSync(`./events/${dir}`).filter(file => file.endsWith('.js'));
 
@@ -8,7 +8,7 @@ module.exports = (client, Discord) => {
             const event = require(`../events/${dir}/${file}`);
             const event_name = file.split('.')[0];
             
-            client.on(event_name, event.bind(null, Discord, client));
+            client.on(event_name, event.bind(null, Discord, client, db));
         }
     }
 
