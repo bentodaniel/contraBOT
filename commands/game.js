@@ -1,6 +1,6 @@
 const request = require('request');
 const cheerio = require('cheerio');
-const xhr_req = require('xhr-request')
+const xhr_req = require('xhr-request');
 
 const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const PAGE_LIMIT = 5;
@@ -10,7 +10,7 @@ module.exports = {
     description: 'This checks the price of a game in allkeyshop',
     arguments: '<game to search>',
     showOnHelp: true,
-    execute(client, message, args, Discord) {
+    execute(client, message, args, Discord, db) {
         //args = args.split(/\s*\|\s*/);
 
         var embeds_list = []

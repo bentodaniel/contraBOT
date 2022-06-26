@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const config = require('dotenv').config();
 
+console.log('Connecting to database...')
 const db = require('./database/db')
-console.log('Connected to database')
 
 const allIntents = { 
     intents: [

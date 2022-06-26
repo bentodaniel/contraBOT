@@ -13,3 +13,5 @@ CREATE TABLE UpdatesChannels (
         REFERENCES Guilds(guildID)
         ON DELETE CASCADE
 );
+
+ALTER TABLE `UpdatesChannels` ADD UNIQUE `unique_index`(`gameID`, `guildID`);

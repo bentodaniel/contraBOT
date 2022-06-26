@@ -13,7 +13,7 @@ module.exports = (Discord, client, db, message) => {
     const command_file = client.commands.get(command)
 
     if (command_file) {
-        command_file.execute(client, message, args, Discord);
+        command_file.execute(client, message, args, Discord, db);
     }
     else {
         message.channel.send({

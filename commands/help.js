@@ -5,7 +5,7 @@ module.exports = {
     description: 'Displays this message',
     arguments: '',
     showOnHelp: true,
-    execute(client, message, args, Discord) {
+    execute(client, message, args, Discord, db) {
         message.channel.send({
             'content' : ' ',
             'tts': false,

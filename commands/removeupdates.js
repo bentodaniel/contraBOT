@@ -1,9 +1,9 @@
 const constants = require('../utils/constants')
 
 module.exports = {
-    name: 'setupdates',
-    description: 'Defines a channel for news about a game',
-    arguments: '<game> <channel>',
+    name: 'removeupdates',
+    description: 'Stop receiving news about a game',
+    arguments: '<game>',
     arguments_help: `<game> can be one of the following: ${Object.keys(constants.games)}`,
     adminOnly: true,
     showOnHelp: true,
@@ -36,9 +36,9 @@ module.exports = {
                 });
             }
             else {
-                const channel = await client.channels.fetch(args[1].replace(/\D/g,''))
+                const q = `DELETE FROM UpdatesChannels WHERE gameID = '${game}' AND guildID = ${message.guild.id}`
 
-                const q = `REPLACE INTO UpdatesChannels (gameID, channelID, guildID) VALUES('${game}', ${channel.id}, ${message.guild.id})`
+                // This is not optimal as it says a game is deleted even if the game did not exist in the first place, but it is still acceptable
                 
                 db.query(q, async (error, results) => {
                     if (error) {
@@ -49,7 +49,7 @@ module.exports = {
                                 'type' : 'rich',
                                 'title': 'Error',
                                 'color' : 0xff0000,
-                                'description': `Failed to set the channel ${channel.toString()} as default for ${game} updates`
+                                'description': `Failed to remove the game '${game}' from the updates list`
                             }]
                         });
                     }
@@ -61,7 +61,7 @@ module.exports = {
                                 'type' : 'rich',
                                 'title': 'Game updates have been set',
                                 'color' : 0x6fff00,
-                                'description': `Channel ${channel.toString()} has been set as default for ${game} updates`
+                                'description': `Game '${game}' has been removed from the updates list`
                             }]
                         });
                     }
