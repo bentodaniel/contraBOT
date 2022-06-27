@@ -2,6 +2,7 @@ const constants = require('../utils/constants')
 
 module.exports = {
     name: 'removeupdates',
+    short_name: 'remu',
     description: 'Stop receiving news about a game',
     arguments: '<game>',
     arguments_help: `<game> can be one of the following: ${Object.keys(constants.games)}`,

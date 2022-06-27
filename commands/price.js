@@ -6,7 +6,8 @@ const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6
 const PAGE_LIMIT = 5;
 
 module.exports = {
-    name: 'game',
+    name: 'price',
+    short_name: 'p',
     description: 'This checks the price of a game in allkeyshop',
     arguments: '<game to search>',
     showOnHelp: true,

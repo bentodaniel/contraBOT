@@ -2,6 +2,7 @@ const constants = require('../utils/constants')
 
 module.exports = {
     name: 'setupdates',
+    short_name: 'setu',
     description: 'Defines a channel for news about a game',
     arguments: '<game> <channel>',
     arguments_help: `<game> can be one of the following: ${Object.keys(constants.games)}`,

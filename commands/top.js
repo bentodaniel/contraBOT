@@ -2,6 +2,7 @@
 
 module.exports = {
     name: 'top',
+    short_name: 't',
     description: 'Checks the top deals at CheapShark',
     arguments: '',
     showOnHelp: false,

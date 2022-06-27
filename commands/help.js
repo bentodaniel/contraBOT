@@ -2,6 +2,7 @@ const fs = require('fs');
 
 module.exports = {
     name: 'help',
+    short_name: 'h',
     description: 'Displays this message',
     arguments: '',
     showOnHelp: true,
@@ -30,13 +31,13 @@ function get_commands() {
 
         if (command.showOnHelp) {
             if (command.adminOnly) {
-                admin += `**${command.name} ${command.arguments}** - ${command.description}\n`;
+                admin += `[${command.short_name}] **${command.name} ${command.arguments}** - ${command.description}\n`;
                 if (command.arguments_help) {
                     admin += `\u1CBC\u1CBC\u1CBC\u1CBC - ${command.arguments_help}\n`
                 }
             }
             else {
-                general += `**${command.name} ${command.arguments}** - ${command.description}\n`;
+                general += `[${command.short_name}] **${command.name} ${command.arguments}** - ${command.description}\n`;
                 if (command.arguments_help) {
                     general += `\u1CBC\u1CBC\u1CBC\u1CBC - ${command.arguments_help}\n`
                 }
