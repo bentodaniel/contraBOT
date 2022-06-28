@@ -1,7 +1,7 @@
 module.exports = {
-    name: 'stopwatch',
+    name: 'stopwish',
     short_name: 'sw',
-    description: 'Remove a game from your watch list.',
+    description: 'Remove a game from your wish list.',
     arguments: '<game>',
     showOnHelp: false,
     async execute(client, message, args, Discord, db) {

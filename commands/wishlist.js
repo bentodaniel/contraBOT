@@ -1,7 +1,7 @@
 module.exports = {
-    name: 'watchlist',
+    name: 'wishlist',
     short_name: 'wl',
-    description: 'Displays your watch list',
+    description: 'Displays your wish list',
     arguments: '',
     showOnHelp: false,
     async execute(client, message, args, Discord, db) {
