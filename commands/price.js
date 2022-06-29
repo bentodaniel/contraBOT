@@ -298,7 +298,7 @@ function generate_embeds_buy(json_data) {
             },
             {
                 "name": `Old Price`,
-                "value": `${game['og_price'] === '' ? 'N/A' : game['og_price']}`,
+                "value": `${game['og_price'] === '' ? 'N/A' : game['og_price']}€`, // Note that it could not be eur
                 "inline": true
             },
             {
@@ -308,7 +308,7 @@ function generate_embeds_buy(json_data) {
             },
             {
                 "name": `Price`,
-                "value": `${game['price']}`,
+                "value": `${game['price']}€`, // Note that it could not be eur
                 "inline": true
             }
         ]
