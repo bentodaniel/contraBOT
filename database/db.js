@@ -1,10 +1,29 @@
 require('dotenv').config();
 const mysql = require('mysql2')
 
+module.exports = handle_connection()
 
-module.exports = mysql.createConnection({
-    host: 'localhost',  //process.env.DB_HOST
-    database: 'test',   //process.env.DB_NAME
-    user: 'root',       //process.env.DB_USER
-    password: ''        //process.env.DB_PASS
-});
+function handle_connection() {
+    console.log('Connecting to database...')
+
+    // Default all to prod
+    var host_name = process.env.PROD_DB_HOST;
+    var db_name = process.env.PROD_DB_NAME;
+    var u = process.env.PROD_DB_USER;
+    var pw = process.env.PROD_DB_PASS;
+
+    // Change to test env if need
+    if (process.env.ENV_TYPE === 'test') {
+        var host_name = process.env.TEST_DB_HOST;
+        var db_name = process.env.TEST_DB_NAME;
+        var u = process.env.TEST_DB_USER;
+        var pw = process.env.TEST_DB_PASS;
+    }
+
+    return mysql.createConnection({
+        host: host_name,
+        database: db_name,
+        user: u,
+        password: pw
+    });
+}

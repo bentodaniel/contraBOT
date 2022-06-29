@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
-const config = require('dotenv').config();
+require('dotenv').config();
 
-console.log('Connecting to database...')
 const db = require('./database/db')
 
 const allIntents = { 
@@ -20,4 +19,13 @@ client.events = new Discord.Collection();
     require(`./handlers/${handler}`)(client, Discord, db);
 })
 
-client.login(process.env.BOT_TOKEN);
+if (process.env.ENV_TYPE === 'test') {
+    client.login(process.env.TEST_BOT_TOKEN);
+}
+else if (process.env.ENV_TYPE === 'production') {
+    client.login(process.env.PROD_BOT_TOKEN);
+}
+else {
+    console.log('Using wrong env type')
+    process.exit(1)
+}
