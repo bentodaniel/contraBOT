@@ -148,7 +148,7 @@ async function scrape_valorant(body) {
         var data = {}
 
         data['title'] = value.title
-        data['date'] = value.date
+        data['date'] = value.date.split('T')[0]
         data['content'] = value.description
         data['url'] = value.external_link
         if (data['url'] === '') {
@@ -162,15 +162,32 @@ async function scrape_valorant(body) {
 // -----------------------------------------------
 
 async function scrape_lol(body) {
+    var json_data = []
 
-    // xhr - https://www.leagueoflegends.com/page-data/pt-br/news/tags/patch-notes/page-data.json
-    return []
+    const articles = body.result.data.articles.nodes
+
+    Object.entries(articles).forEach(([key, value]) => {
+        var data = {}
+
+        data['title'] = value.title
+        data['date'] = value.date.split('T')[0]
+        data['content'] = value.description
+        data['url'] = value.youtube_link
+        if (data['url'] === '') {
+            data['url'] = value.external_link
+            
+            if (data['url'] === '') {
+                data['url'] = 'https://www.leagueoflegends.com/en-us' + value.url.url
+            }
+        }
+        json_data.push(data)
+    })
+    return json_data
 }
 
 // -----------------------------------------------
 
 async function scrape_cycle(body) {
-    var json_data = []
     const $ = cheerio.load(body);
 
     var urls = []
