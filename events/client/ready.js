@@ -1,4 +1,5 @@
 const request = require('request');
+const xhr_req = require('xhr-request');
 const constants = require('../../utils/constants')
 const updates = require('../../utils/updates')
 
@@ -22,17 +23,36 @@ async function handle_news(client, db) {
         else {
             for (const [ key, value ] of Object.entries(constants.games)) {
                 new Promise(resolve => {
-                    // get the html data
-                    request(value.url, function (error, response, body) {
-                        if (error || !body){
-                            console.log(error);
-                        }
-                        else {
-                            const game_recorded_data = get_recorded_game_data(recorded_results, key)
-                            const game_news_data = updates.execute(body, key, game_recorded_data)
-                            resolve(game_news_data)
-                        }
-                    })
+                    if (value.is_xhr) { // Get xhr data
+                        xhr_req(value.url, {
+                            json: true
+                        }, function (err, req_data) {
+                            if (err) {
+                                console.log(err)
+                            }
+                            else {
+                                // Get last recorded news from db
+                                const game_recorded_data = get_recorded_game_data(recorded_results, key)
+                                // Get news according to recorded data
+                                const game_news_data = updates.execute(req_data, key, game_recorded_data)
+                                resolve(game_news_data)
+                            }
+                        })
+                    }
+                    else { // Get html data
+                        request(value.url, function (error, response, body) {
+                            if (error || !body){
+                                console.log(error);
+                            }
+                            else {
+                                // Get last recorded news from db
+                                const game_recorded_data = get_recorded_game_data(recorded_results, key)
+                                // Get news according to recorded data
+                                const game_news_data = updates.execute(body, key, game_recorded_data)
+                                resolve(game_news_data)
+                            }
+                        })
+                    }
                 }).then(news_data => {
                     handle_news_messaging(client, db, key, news_data, value)
 

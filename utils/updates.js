@@ -42,6 +42,7 @@ async function scrape_parse(body, game) {
 }
 
 // Remove news that are too old
+// Limit to 10
 function parse_data(json_data, game_recorded_data) {
     if (json_data === undefined) {
         return undefined
@@ -51,6 +52,7 @@ function parse_data(json_data, game_recorded_data) {
     }
 
     var res_data = []
+    count = 0
     for (j_data of json_data) {
         // According to the way it is scraped, the most recent should come in first
         // therefore, as soon as we see the same link, just return the ones we found until now
@@ -59,6 +61,11 @@ function parse_data(json_data, game_recorded_data) {
             return res_data
         }
         res_data.push(j_data)
+        count += 1
+
+        if (count >= 10) {
+            break
+        }
     }
     return res_data
 }
@@ -133,14 +140,30 @@ async function scrape_csgo(body) {
 // -----------------------------------------------
 
 async function scrape_valorant(body) {
+    var json_data = []
 
-    return []
+    const articles = body.result.pageContext.data.articles
+
+    Object.entries(articles).forEach(([key, value]) => {
+        var data = {}
+
+        data['title'] = value.title
+        data['date'] = value.date
+        data['content'] = value.description
+        data['url'] = value.external_link
+        if (data['url'] === '') {
+            data['url'] = 'https://playvalorant.com/en-us' + value.url.url
+        }
+        json_data.push(data)
+    })
+    return json_data
 }
 
 // -----------------------------------------------
 
 async function scrape_lol(body) {
 
+    // xhr - https://www.leagueoflegends.com/page-data/pt-br/news/tags/patch-notes/page-data.json
     return []
 }
 
