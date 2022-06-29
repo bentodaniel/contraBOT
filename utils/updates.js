@@ -19,7 +19,10 @@ async function execute(body, game, game_recorded_data) {
 
 // Execute the scrape function correspondent to the game
 async function scrape_parse(body, game) {
-    if (game === 'csgo') {
+    if (game === 'free') {
+        return await scrape_free(body)
+    }
+    else if (game === 'csgo') {
         return await scrape_csgo(body)
     }
     else if (game === 'valorant') {
@@ -59,6 +62,37 @@ function parse_data(json_data, game_recorded_data) {
 /**************************************************************
  *              GAME SCRAPE FUNCTIONS
  **************************************************************/
+
+ async function scrape_free(body) {
+    var json_data = []
+    const $ = cheerio.load(body);
+
+    // Loop through each of the free game news posts
+    await $('.td-module-container.td-category-pos-image').each(function(i, post){
+        var data = {}
+
+        const contentData = $(post).children()[1]
+
+        // Loop through the children
+        for (child of $(contentData).children()) {
+            var cName = $(child).attr('class')
+
+            if (child.name === 'h3') {
+                const link_child = $(child).children()[0]
+                data['url'] = $(link_child).attr('href')
+                data['title'] = $(link_child).text()
+            }
+            else if (cName === 'td-editor-date') {
+                data['date'] = $(child).text().match(/(\w+\s+\d+\,\s+\d+)/g)[0]
+            }
+            else if (cName === 'td-excerpt') {
+                data['content'] = $(child).text()
+            }
+        }
+        json_data.push(data)
+    })
+    return json_data
+}
 
 async function scrape_csgo(body) {
     var json_data = []

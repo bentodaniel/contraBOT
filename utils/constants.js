@@ -1,5 +1,10 @@
 module.exports = {
     games : {
+        free : {
+            url : 'https://www.indiegamebundles.com/category/free/',
+            title : 'Free Games',
+            logo : ''
+        },
         csgo : {
             url : 'https://blog.counter-strike.net/index.php/category/updates/',
             title : 'Counter-Strike: Global Offensive',

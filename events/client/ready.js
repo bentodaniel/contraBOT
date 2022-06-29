@@ -103,7 +103,7 @@ async function send_news_messages(db_data, client, data, value) {
                     'color' : 0xff7d00,
                     'description': `${d['content']}`,
                     'footer': {
-                        'text': `${value.title}`
+                        'text': `${value.title} - ${d['date']}`
                     },
                     'url' : `${d['url']}`,
                     'thumbnail': {
