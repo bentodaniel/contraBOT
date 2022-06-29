@@ -1,4 +1,5 @@
 const cheerio = require('cheerio');
+const request = require('request');
 
 module.exports = {
     execute
@@ -30,6 +31,9 @@ async function scrape_parse(body, game) {
     }
     else if (game === 'lol') {
         return await scrape_lol(body)
+    }
+    else if (game === 'cycle') {
+        return await scrape_cycle(body)
     }
     else {
         console.log(`ERROR :: Not implemented. Tried to get news for '${game}'`)
@@ -94,6 +98,8 @@ function parse_data(json_data, game_recorded_data) {
     return json_data
 }
 
+// -----------------------------------------------
+
 async function scrape_csgo(body) {
     var json_data = []
     const $ = cheerio.load(body);
@@ -124,12 +130,79 @@ async function scrape_csgo(body) {
     return json_data
 }
 
+// -----------------------------------------------
+
 async function scrape_valorant(body) {
 
     return []
 }
 
+// -----------------------------------------------
+
 async function scrape_lol(body) {
 
     return []
+}
+
+// -----------------------------------------------
+
+async function scrape_cycle(body) {
+    var json_data = []
+    const $ = cheerio.load(body);
+
+    var urls = []
+
+    // Loop through each of the news posts
+    await $('.group.blog-item').each(function(i, post){
+        const link_child = $(post).children()[0]
+        urls.push('https://thecycle.game' + $(link_child).attr('href'))
+    })
+
+    var promises = []
+    for (url of urls) {
+        const data = scrape_cycle_helper(url)
+        promises.push(data)
+    }
+    return Promise.all(promises)
+}
+
+async function scrape_cycle_helper(url) {
+    return new Promise(resolve => {
+        var data = {}
+        request(url, function (error, response, body) {
+            if (error || !body){
+                console.log(error);
+            }
+            else {
+                data['url'] = url
+
+                const $ = cheerio.load(body);
+
+                $('.grid.grid-cols-1').each(function(i, grid_header){
+                    const header_content = $(grid_header).children()[0]
+
+                    for (child of $(header_content).children()) {
+                        if (child.name === 'span') {
+                            data['date'] = $(child).text()
+                        }
+                        else if (child.name === 'h1') {
+                            data['title'] = $(child).text()
+                        }
+                    }
+                })
+
+                $('.main-content.relative').each(function(i, grid_content){
+                    const content_data = $(grid_content).children()[0]
+
+                    data['content'] = ''
+                    for (let i = 0; i < 3; i++) {
+                        const element = $(content_data).children()[i];
+                        data['content'] += $(element).text() + '\n'
+                    }
+                })
+
+                resolve(data)
+            }
+        })
+    })
 }

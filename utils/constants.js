@@ -19,6 +19,11 @@ module.exports = {
             url : 'https://www.leagueoflegends.com/en-us/news/game-updates/',
             title : 'League of Legends',
             logo : 'https://pentagram-production.imgix.net/cc7fa9e7-bf44-4438-a132-6df2b9664660/EMO_LOL_02.jpg?rect=0%2C0%2C1440%2C1512&w=640&crop=1&fm=jpg&q=70&auto=format&fit=crop&h=672'
+        },
+        cycle : {
+            url : 'https://thecycle.game/news-and-media',
+            title : 'The Cycle: Frontier',
+            logo : 'https://yt3.ggpht.com/CJ4b0OKg5izpM6wl0LxIOcZ9cixUtOM0ZO6_-4B8lQnAJTjkzb3Th6pXVneSV1wPFcSo_B3bl8o=s900-c-k-c0x00ffffff-no-rj'
         }
     }
 }
