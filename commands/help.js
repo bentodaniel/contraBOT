@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const dev_id = '422462317498728448'
+
 module.exports = {
     name: 'help',
     short_name: 'h',
@@ -7,6 +9,7 @@ module.exports = {
     arguments: '',
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
+        const dev_user = client.users.fetch(dev_id)
         message.channel.send({
             'content' : ' ',
             'tts': false,
@@ -16,7 +19,8 @@ module.exports = {
                 'color' : 0x00FFFF,
                 'description': get_commands(),
                 'footer' : {
-                    'text' : 'Developed by agolf'
+                    'text' : `Developed by ${dev_user.username}`,
+                    'icon_url': `${dev_user.avatarURL()}`
                 }
             }]
         });
