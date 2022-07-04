@@ -19,6 +19,7 @@ async function handle_news(client, db) {
         if (error) {
             // No need to tell the users
             console.log(`ERROR :: failed to get last patches`)
+            console.log(error.message)
         }
         else {
             for (const [ key, value ] of Object.entries(constants.games)) {
@@ -93,6 +94,7 @@ function handle_news_messaging(client, db, game, news_data, game_data) {
         if (error) {
             // No need to tell the users
             console.log(`ERROR :: failed to get update channels for game '${game}'`)
+            console.log(error.message)
         }
         else {
             send_news_messages(results, client, news_data, game_data)

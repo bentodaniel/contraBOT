@@ -8,6 +8,7 @@ module.exports = (Discord, client, db, guild) => {
         );
     } catch (err) {
         console.log('ERROR :: failed to insert guild into db', guild.name, guild.id)
+        console.log(err.message)
     }
 }
 

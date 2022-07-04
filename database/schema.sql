@@ -18,7 +18,7 @@ ALTER TABLE `UpdatesChannels` ADD UNIQUE `unique_index`(`gameID`, `guildID`);
 
 CREATE TABLE LastUpdates (
     gameID VARCHAR(50) NOT NULL PRIMARY KEY,
-    updateLink VARCHAR(100) NOT NULL
+    updateLink VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE WishList (

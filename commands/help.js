@@ -9,21 +9,22 @@ module.exports = {
     arguments: '',
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
-        const dev_user = client.users.fetch(dev_id)
-        message.channel.send({
-            'content' : ' ',
-            'tts': false,
-            'embeds' : [{
-                'type' : 'rich',
-                'title': 'Available commands',
-                'color' : 0x00FFFF,
-                'description': get_commands(),
-                'footer' : {
-                    'text' : `Developed by ${dev_user.username}`,
-                    'icon_url': `${dev_user.avatarURL()}`
-                }
-            }]
-        });
+        client.users.fetch(dev_id).then(dev_user => {
+            message.channel.send({
+                'content' : ' ',
+                'tts': false,
+                'embeds' : [{
+                    'type' : 'rich',
+                    'title': 'Available commands',
+                    'color' : 0x00FFFF,
+                    'description': get_commands(),
+                    'footer' : {
+                        'text' : `Developed by ${dev_user.username}`,
+                        'icon_url': `${dev_user.avatarURL()}`
+                    }
+                }]
+            });
+        })
     }
 }
 
