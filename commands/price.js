@@ -1,262 +1,94 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const xhr_req = require('xhr-request');
-
-const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-const PAGE_LIMIT = 5;
+const utils = require('../utils/utils')
 
 module.exports = {
     name: 'price',
     short_name: 'p',
-    description: 'This checks the price of a game in allkeyshop',
+    description: 'Check the price of a game in allkeyshop',
     arguments: '<game to search>',
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
-        //args = args.split(/\s*\|\s*/);
-
-        var embeds_list = []
-        var buttons_list = [];
-
-        message.channel.send("Searching for results...").then(msg => {
-
-            scrape_search(args, msg).then((ret) => {
-
-                embeds_list = ret[0]
-                buttons_list = ret[1]
-                
-                // check if the user is the owner of the request and if the interaction is in the same message
-                const filter = (click) => click.user.id === message.author.id && click.message.id == msg.id
-                const collector = message.channel.createMessageComponentCollector({
-                    max: 1, // The number of times a user can click on the button
-                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-                    filter // Add the filter
-                });
-
-                collector.on("collect", async interaction => {
-                    msg.edit({
-                        "components": []
-                    })
-        
-                    var i = find_index_of_button(buttons_list, interaction['customId'])
-        
-                    //interaction.reply('Not implemented yet :>')
-
-                    interaction.reply({ content: `Searching for info on '**${embeds_list[i]['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
-                        scrape_buy(embeds_list[i], response_msg);
-                    })
-                });
-        
-                collector.on("end", (collected) => {
-                    // Disable all buttons if time runs out
-                    msg.edit({
-                        "components": []
-                    })
-                });
-            }).catch(e => {
-                console.log(`ERROR :: trying to search for '${args}'`)
+        const handle_reply_to_game_selection = function(interaction, embed) {
+            interaction.reply({ content: `Searching offers for '**${embed['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
+                scrape_buy(embed, response_msg).then(games_list => {
+                    if (games_list === undefined) {
+                        utils.send_error_message(response_msg, 'Failed to get the data')
+                    }
+                    else if (games_list.length === 0){
+                        utils.send_error_message(response_msg, 'There are no offers for this product')
+                    }
+                    else {
+                        handle_reply(games_list, response_msg, embed['title'].slice(6));
+                    }
+                })
+                .catch(err => {
+                    console.log(`ERROR :: trying to search for '${game_search}'`)
+                })
             })
-        });
-    }
-}
-
-function find_index_of_button(buttons_list, id) {
-    for (let i = 0; i < buttons_list.length; i++) {
-        if (buttons_list[i]['custom_id'] === id){
-            return i;
         }
+
+        utils.message_search_games_list('allkeyshop', args, message, handle_reply_to_game_selection)
     }
-    return -1;
 }
 
-async function scrape_search(search_val, message) {
-    const res = new Promise((success, failure) => {
-        request(`https://www.allkeyshop.com/blog/catalogue/search-${search_val}/`, function (error, response, body) {
+async function scrape_buy(embed, msg) {
+    return new Promise((success, failure) => {
+        request(embed['url'], function (error, response, body) {
             if (error || !body){
                 console.log(error);
-                failure ([[], []])
+                failure()
             }
             else {
                 var json_data = [];
                 const $ = cheerio.load(body);
 
-                // Loop through each of the link results
-                $('.search-results-row-link').each(function(i, link_child){
-                    var data = {}
-
-                    var link_url = $(link_child).attr('href')
-                    data['link'] = link_url;
-                    
-                    // Loop through the children
-                    for (child of $(link_child).children()) {
-                        var cName = $(child).attr('class')
-
-                        if (cName === 'search-results-row-image') {
-                            var image_div_url = $(child).children()[0].attribs['style']
-                            image_div_url = image_div_url.replace(/.*url\(/g, '').slice(0, -1) // keep only the link
-                            data['image_link'] = image_div_url;
-                        }
-                        else if (cName === 'search-results-row-game') {
-                            for (gamec of $(child).children()) {
-                                if ($(gamec).attr('class') === 'search-results-row-game-title') {
-                                    data['title'] = $(gamec).text();
-                                }
-                                else if ($(gamec).attr('class') === 'search-results-row-game-infos') {
-                                    data['infos'] = $(gamec).text();
-                                }
-                            }
-                        }
-                        else if (cName === 'search-results-row-price') {
-                            data['price'] = $(child).text().trim().replace(/(\r\n|\n|\r)/gm, "");
-                        }
-                    }
-                    json_data.push(data)
-                });
-                if (check_good_data(json_data, message)) {
-                    success(reply_search(json_data, message))
-                }
-                else {
-                    failure([[],[]])
-                }
-            }
-        });
-    })
-    return res
-}
-
-function check_good_data(json_data, message) {
-    if (json_data === undefined || json_data.length === 0) {
-        message.edit({
-            'content' : ' ',
-            'embeds' : [{
-                'type' : 'rich',
-                'title': 'Could not get the data',
-                'color' : 0xff0000,
-            }]
-        });
-        return false
-    }
-    return true
-}
-
-async function reply_search(json_data, message) {
-    var embeds = generate_embeds_search(json_data);
-    var buttons = generate_buttons(embeds);
-
-    message.edit({
-        "content": `Here are the first results:`,
-        "tts": false,
-        "embeds": embeds,
-        "components": [
-            {
-                'type' : 1,
-                'components' : buttons
-            }
-        ]
-    });
-    return [embeds, buttons]
-}
-
-function generate_embeds_search(json_data) {
-    var embeds = [];
-    var count = 0;
-
-    for (game of json_data) {
-        var new_embed = {}
-
-        new_embed['type'] = 'rich';
-        new_embed['title'] =  emoji_numbers[count] + ' - ' + game['title'];
-        new_embed['description'] = game['price'];
-        new_embed['color'] = 0x6fff00,
-        new_embed['thumbnail'] = {
-            'url' : game['image_link'],
-            'height' : 0,
-            'width' : 0
-        };
-        new_embed['footer'] = {
-            'text' : game['infos']
-        }
-        new_embed['url'] = game['link'];
-
-        embeds.push(new_embed)
-
-        count += 1;
-
-        if (count >= PAGE_LIMIT) break;
-    }
-    return embeds;
-}
-
-function generate_buttons(embeds) {
-    var btns = []
-    for (let i = 0; i < embeds.length; i++) {
-        var new_button = {
-            "style": 1,
-            "label": `${i+1}`,
-            "custom_id": `row_0_button_${i}`,
-            "disabled": false,
-            "type": 2
-        }
-        btns.push(new_button)
-    }
-    return btns
-}
-
-async function scrape_buy(embed, msg) {
-    request(embed['url'], function (error, response, body) {
-        if (error || !body){
-            console.log(error);
-        }
-        else {
-            var json_data = [];
-            const $ = cheerio.load(body);
-
-            const game_id = $('footer').next().text().replace('var game_id=','').replaceAll('\"', '')
-            
-            // TODO - could also get with other currencies - accepted:  \"eur\", \"gbp\", \"usd\"
-            const currency = 'eur'
-
-            xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${game_id}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
-                json: true
-            }, function (err, req_data) {
-                if (err) {
-                    console.log(err)
-                }
-                else {
+                const game_id = $('footer').next().text().replace('var game_id=','').replaceAll('\"', '')
                 
-                    // the JSON result
-                    //console.log(req_data)
+                // TODO - could also get with other currencies - accepted:  \"eur\", \"gbp\", \"usd\"
+                const currency = 'eur'
 
-                    Object.entries(req_data['offers']).forEach(([key, value]) => {
-                        var data = {}
-                        //console.log(key , value); // key ,value
+                xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${game_id}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
+                    json: true
+                }, function (err, req_data) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                    
+                        // the JSON result
+                        //console.log(req_data)
 
-                        data['buy_link'] = value.affiliateUrl
-                        data['market'] = req_data['merchants'][value.merchant].name
-                        data['region'] = req_data['regions'][value.region].filterName
-                        data['edition'] = req_data['editions'][value.edition].name
+                        Object.entries(req_data['offers']).forEach(([key, value]) => {
+                            var data = {}
+                            //console.log(key , value); // key ,value
 
-                        var price_data = value.price[currency]
+                            data['buy_link'] = value.affiliateUrl
+                            data['market'] = req_data['merchants'][value.merchant].name
+                            data['region'] = req_data['regions'][value.region].filterName
+                            data['edition'] = req_data['editions'][value.edition].name
 
-                        data['og_price'] = price_data.priceWithoutCoupon
-                        data['price'] = price_data.price
+                            var price_data = value.price[currency]
 
-                        var coupon_data = price_data.bestCoupon
-                        if (coupon_data === null || coupon_data === undefined) {
-                            data['coupon_value'] = 'N/A'
-                            data['coupon_code'] = 'No coupon'
-                        }
-                        else {
-                            data['coupon_code'] = coupon_data.code
-                        }
-                        json_data.push(data)
-                    });
+                            data['og_price'] = price_data.priceWithoutCoupon
+                            data['price'] = price_data.price
 
-                    if (check_good_data(json_data, msg)) {
-                        handle_reply(json_data, msg, embed['title'].slice(6));
-                    }                    
-                }
-            })
-        }
+                            var coupon_data = price_data.bestCoupon
+                            if (coupon_data === null || coupon_data === undefined) {
+                                data['coupon_value'] = 'N/A'
+                                data['coupon_code'] = 'No coupon'
+                            }
+                            else {
+                                data['coupon_code'] = coupon_data.code
+                            }
+                            json_data.push(data)
+                        });
+                        success(json_data)                   
+                    }
+                })
+            }
+        })
     })
 }
 
