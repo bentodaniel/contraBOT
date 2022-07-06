@@ -10,9 +10,9 @@ module.exports = {
     arguments: '<game to search>',
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
-        const handle_reply_to_game_selection = function(interaction, embed) {
-            interaction.reply({ content: `Searching offers for '**${embed['title'].slice(6)}**'`, fetchReply: true }).then((response_msg) => {
-                scrape_buy(embed, response_msg).then(games_list => {
+        const handle_reply_to_game_selection = function(interaction, game_json) {
+            interaction.reply({ content: `Searching offers for '**${game_json['title']}**'`, fetchReply: true }).then((response_msg) => {
+                scrape_buy(game_json).then(games_list => {
                     if (games_list === undefined) {
                         utils.send_error_message(response_msg, 'Failed to get the data')
                     }
@@ -20,7 +20,7 @@ module.exports = {
                         utils.send_error_message(response_msg, 'There are no offers for this product')
                     }
                     else {
-                        handle_reply(games_list, response_msg, embed['title'].slice(6));
+                        handle_reply(games_list, response_msg, game_json['title']);
                     }
                 })
                 .catch(err => {
@@ -33,60 +33,44 @@ module.exports = {
     }
 }
 
-async function scrape_buy(embed, msg) {
+async function scrape_buy(game_json) {
     return new Promise((success, failure) => {
-        request(embed['url'], function (error, response, body) {
-            if (error || !body){
-                console.log(error);
-                failure()
+        var json_data = [];
+                
+        // TODO - could also get with other currencies - accepted:  \"eur\", \"gbp\", \"usd\"
+        const currency = 'eur'
+
+        xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${game_json['productID']}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
+            json: true
+        }, function (err, req_data) {
+            if (err) {
+                console.log(err)
             }
             else {
-                var json_data = [];
-                const $ = cheerio.load(body);
+                Object.entries(req_data['offers']).forEach(([key, value]) => {
+                    var data = {}
 
-                const game_id = $('footer').next().text().replace('var game_id=','').replaceAll('\"', '')
-                
-                // TODO - could also get with other currencies - accepted:  \"eur\", \"gbp\", \"usd\"
-                const currency = 'eur'
+                    data['buy_link'] = value.affiliateUrl
+                    data['market'] = req_data['merchants'][value.merchant].name
+                    data['region'] = req_data['regions'][value.region].filterName
+                    data['edition'] = req_data['editions'][value.edition].name
 
-                xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${game_id}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
-                    json: true
-                }, function (err, req_data) {
-                    if (err) {
-                        console.log(err)
+                    var price_data = value.price[currency]
+
+                    data['og_price'] = price_data.priceWithoutCoupon
+                    data['price'] = price_data.price
+
+                    var coupon_data = price_data.bestCoupon
+                    if (coupon_data === null || coupon_data === undefined) {
+                        data['coupon_value'] = 'N/A'
+                        data['coupon_code'] = 'No coupon'
                     }
                     else {
-                    
-                        // the JSON result
-                        //console.log(req_data)
-
-                        Object.entries(req_data['offers']).forEach(([key, value]) => {
-                            var data = {}
-                            //console.log(key , value); // key ,value
-
-                            data['buy_link'] = value.affiliateUrl
-                            data['market'] = req_data['merchants'][value.merchant].name
-                            data['region'] = req_data['regions'][value.region].filterName
-                            data['edition'] = req_data['editions'][value.edition].name
-
-                            var price_data = value.price[currency]
-
-                            data['og_price'] = price_data.priceWithoutCoupon
-                            data['price'] = price_data.price
-
-                            var coupon_data = price_data.bestCoupon
-                            if (coupon_data === null || coupon_data === undefined) {
-                                data['coupon_value'] = 'N/A'
-                                data['coupon_code'] = 'No coupon'
-                            }
-                            else {
-                                data['coupon_code'] = coupon_data.code
-                            }
-                            json_data.push(data)
-                        });
-                        success(json_data)                   
+                        data['coupon_code'] = coupon_data.code
                     }
-                })
+                    json_data.push(data)
+                });
+                success(json_data)                   
             }
         })
     })
