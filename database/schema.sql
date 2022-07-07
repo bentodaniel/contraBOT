@@ -25,7 +25,8 @@ CREATE TABLE WishList (
     userID VARCHAR(100) NOT NULL,
     gameID VARCHAR(100) NOT NULL,
     gameProductID VARCHAR(50) NOT NULL,
-    receiveNotifications BOOLEAN NOT NULL
+    price FLOAT NOT NULL,
+    receiveNotifications BOOLEAN NOT NULL DEFAULT true
 );
 
 ALTER TABLE `WishList` ADD UNIQUE `unique_index`(`userID`, `gameProductID`);

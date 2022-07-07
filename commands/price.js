@@ -14,10 +14,10 @@ module.exports = {
             interaction.reply({ content: `Searching offers for '**${game_json['title']}**'`, fetchReply: true }).then((response_msg) => {
                 scrape_buy(game_json).then(games_list => {
                     if (games_list === undefined) {
-                        utils.send_error_message(response_msg, 'Failed to get the data')
+                        utils.send_error_message(response_msg, 'Failed to get the data', 'edit')
                     }
                     else if (games_list.length === 0){
-                        utils.send_error_message(response_msg, 'There are no offers for this product')
+                        utils.send_error_message(response_msg, 'There are no offers for this product', 'edit')
                     }
                     else {
                         handle_reply(games_list, response_msg, game_json['title']);

@@ -7,7 +7,8 @@ const PAGE_LIMIT = 5;
 
 module.exports = {
     message_search_games_list,
-    send_error_message
+    send_error_message,
+    send_success_message
 }
 
 /**
@@ -21,10 +22,10 @@ function message_search_games_list(store, game_search, user_message, callback) {
     user_message.channel.send("Searching for results...").then(msg => {
         get_games_list(store, game_search).then(games_list => {
             if (games_list === undefined) {
-                send_error_message(msg, 'Failed to get the data')
+                send_error_message(msg, 'Failed to get the data', 'edit')
             }
             else if (games_list.length === 0){
-                send_error_message(msg, 'No results were found')
+                send_error_message(msg, 'No results were found', 'edit')
             }
             else {
                 reply_search(games_list, msg).then(() => {
@@ -41,9 +42,9 @@ function message_search_games_list(store, game_search, user_message, callback) {
                             "components": []
                         })
 
-                        const target_embed = interaction.message.embeds[parseInt(interaction.customId)]
+                        const target_game = games_list[parseInt(interaction.customId)]
 
-                        callback(interaction, target_embed);
+                        callback(interaction, target_game);
                     });
             
                     collector.on("end", (collected) => {
@@ -114,6 +115,11 @@ function get_allkeyshop_games_list(game_search) {
                                     data['infos'] = $(gamec).text();
                                 }
                             }
+                        }
+                        else if (cName === 'metacritic d-none d-xl-block') {
+                            const metacriticChild = $(child).children()[0]
+                            var productId = $(metacriticChild).attr('data-product-id')
+                            data['productID'] = parseInt(productId)
                         }
                         else if (cName === 'search-results-row-price') {
                             data['price'] = $(child).text().trim().replace(/(\r\n|\n|\r)/gm, "");
@@ -204,13 +210,48 @@ function generate_buttons(size) {
     return btns
 }
 
-function send_error_message(message, error_msg) {
-    message.edit({
-        'content' : ' ',
-        'embeds' : [{
-            'type' : 'rich',
-            'title': error_msg,
-            'color' : 0xff0000,
-        }]
-    });
+function send_error_message(message, error_msg, type) {
+    if (type === 'edit') {
+        message.edit({
+            'content' : ' ',
+            'embeds' : [{
+                'type' : 'rich',
+                'title': error_msg,
+                'color' : 0xff0000,
+            }]
+        });
+    }
+    else if (type === 'send') {
+        message.channel.send({
+            'content' : ' ',
+            'embeds' : [{
+                'type' : 'rich',
+                'title': error_msg,
+                'color' : 0xff0000,
+            }]
+        });
+    }
+}
+
+function send_success_message(message, success_msg, type) {
+    if (type === 'edit') {
+        message.edit({
+            'content' : ' ',
+            'embeds' : [{
+                'type' : 'rich',
+                'title': success_msg,
+                'color' : 0x6fff00,
+            }]
+        });
+    }
+    else if (type === 'send') {
+        message.channel.send({
+            'content' : ' ',
+            'embeds' : [{
+                'type' : 'rich',
+                'title': success_msg,
+                'color' : 0x6fff00,
+            }]
+        });
+    }
 }
