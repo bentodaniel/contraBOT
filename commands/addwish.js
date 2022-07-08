@@ -29,7 +29,7 @@ module.exports = {
                 // handle adding to db
 
                 if (isNaN(price)) {
-                    price = game_json['price']
+                    price = parseFloat(game_json['price'])
                 }
 
                 const q = `REPLACE INTO WishList (userID, gameID, gameProductID, price) VALUES('${message.author.id}', '${game_json['title']}', '${game_json['productID']}', ${price})`

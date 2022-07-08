@@ -8,7 +8,8 @@ const PAGE_LIMIT = 5;
 module.exports = {
     message_search_games_list,
     send_error_message,
-    send_success_message
+    send_success_message,
+    get_user_wishlist
 }
 
 /**
@@ -57,7 +58,7 @@ function message_search_games_list(store, game_search, user_message, callback) {
             }
         })
         .catch(err => {
-            console.log(`ERROR :: trying to search for '${game_search}'`)
+            send_error_message(msg, 'Failed to get the data', 'edit')
         })
     })
     
@@ -83,7 +84,7 @@ function get_allkeyshop_games_list(game_search) {
     return new Promise((success, failure) => {
         request(`https://www.allkeyshop.com/blog/catalogue/search-${game_search}/`, function (error, response, body) {
             if (error || !body){
-                console.log(error);
+                console.log(`ERROR :: trying to search for '${game_search}'\n `, error.message);
                 failure()
             }
             else {
@@ -254,4 +255,20 @@ function send_success_message(message, success_msg, type) {
             }]
         });
     }
+}
+
+function get_user_wishlist(db, userID) {
+    return new Promise((success, failure) => {
+        const wishlist_query = `SELECT gameID, gameProductID, price, receiveNotifications FROM WishList WHERE userID = '${userID}'`
+        
+        db.query(wishlist_query, async (error, results) => {
+            if (error) {
+                console.log(`ERROR :: failed to get wishlist for user '${userID}'\n `, error.message)
+                failure()
+            }
+            else {
+                success(results)
+            }
+        });
+    })
 }
