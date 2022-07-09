@@ -8,6 +8,7 @@ const PAGE_LIMIT = 5;
 module.exports = {
     message_search_games_list,
     send_error_message,
+    reply_error_interaction,
     send_success_message,
     get_user_wishlist
 }
@@ -29,34 +30,31 @@ function message_search_games_list(store, game_search, user_message, callback) {
                 send_error_message(msg, 'No results were found', 'edit')
             }
             else {
-                //reply_search(games_list, msg)
-                reply_search_selection(games_list, msg, game_search)//.then(() => {
+                reply_search_selection(games_list, msg, game_search)
 
-                    // check if the interaction is in the same message
-                    const filter = (click) => click.message.id == msg.id
-                    const collector = user_message.channel.createMessageComponentCollector({
-                        max: 30, // The number of times a user can click on the button
-                        time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-                        filter // Add the filter
-                    });
+                // check if the interaction is in the same message
+                const filter = (click) => click.message.id == msg.id
+                const collector = user_message.channel.createMessageComponentCollector({
+                    max: 30, // The number of times a user can click on the button
+                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
+                    filter // Add the filter
+                });
 
-                    collector.on("collect", async interaction => {
-                        const target_game = find_productID_data(games_list, interaction.values[0])
+                collector.on("collect", async interaction => {
+                    const target_game = find_productID_data(games_list, interaction.values[0])
 
-                        callback(interaction, target_game, interaction.user);
-                    });
+                    callback(interaction, target_game, interaction.user);
+                });
             
-                    collector.on("end", (collected) => {
-                        send_error_message(msg, 'Time is over', 'edit', msg['content'])
-                    });
-                //})
+                collector.on("end", (collected) => {
+                    send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                });
             }
         })
         .catch(err => {
             send_error_message(msg, 'Failed to get the data', 'edit')
         })
     })
-    
 }
 
 /**
@@ -196,6 +194,21 @@ function send_error_message(message, error_msg, type, content) {
             'components': []
         });
     }
+}
+
+function reply_error_interaction(interaction, error_msg, content) {
+    interaction.reply({ 
+        content: content, 
+        embeds: [
+            {
+                'type' : 'rich', 
+                'title': error_msg, 
+                'color' : 0xff0000,
+            }
+        ], 
+        components: [], 
+        fetchReply: true 
+    })
 }
 
 function send_success_message(message, success_msg, type, content) {

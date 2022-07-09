@@ -2,6 +2,7 @@ const request = require('request');
 const cheerio = require('cheerio');
 const xhr_req = require('xhr-request');
 const utils = require('../utils/utils')
+const paginationEmbed = require('discordjs-button-pagination');
 
 module.exports = {
     name: 'price',
@@ -11,24 +12,27 @@ module.exports = {
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
         const handle_reply_to_game_selection = function(interaction, game_json, user) {
-            interaction.reply({ content: `Searching offers for '**${game_json['title']}**'`, fetchReply: true }).then((response_msg) => {
-                scrape_buy(game_json).then(games_list => {
-                    if (games_list === undefined) {
-                        utils.send_error_message(response_msg, 'Failed to get the data', 'edit')
-                    }
-                    else if (games_list.length === 0){
-                        utils.send_error_message(response_msg, 'There are no offers for this product', 'edit')
-                    }
-                    else {
-                        handle_reply(games_list, response_msg, game_json['title'], user);
-                    }
-                })
-                .catch(err => {
-                    console.log(`ERROR :: trying to search for '${game_search}'`)
-                })
+            scrape_buy(game_json).then(games_list => {
+                if (games_list === undefined) {
+                    utils.reply_error_interaction(interaction, 'Failed to get the data', user.toString())
+                }
+                else if (games_list.length === 0){
+                    utils.reply_error_interaction(interaction, 'There are no offers for this product', user.toString())
+                }
+                else {
+                    const embeds = generate_embeds_buy(games_list, Discord)
+                    const buttons = get_pagination_buttons(Discord)
+
+                    paginationEmbed(interaction, embeds, buttons, 120000).then(paginated_msg => {
+                        paginated_msg.edit({'content': `${user.toString()}, here are the results for '**${game_json['title']}**'`})
+                    })
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                utils.reply_error_interaction(interaction, 'Failed to get the data', user.toString())
             })
         }
-
         utils.message_search_games_list('allkeyshop', args, message, handle_reply_to_game_selection)
     }
 }
@@ -44,7 +48,8 @@ async function scrape_buy(game_json) {
             json: true
         }, function (err, req_data) {
             if (err) {
-                console.log(err)
+                console.log(`ERROR :: failed to get xhr data for product ${game_json['productID']}\n `, err.message)
+                failure()
             }
             else {
                 Object.entries(req_data['offers']).forEach(([key, value]) => {
@@ -76,61 +81,61 @@ async function scrape_buy(game_json) {
     })
 }
 
-async function handle_reply(json_data, message, game_title, user) {
-    var embeds = generate_embeds_buy(json_data);
+function get_pagination_buttons(Discord) {
+    const button1 = new Discord.MessageButton()
+        .setCustomId('previousbtn')
+        .setLabel('Previous')
+        .setStyle('SECONDARY');
 
-    message.edit({
-        "content": `${user.toString()}, here are the top results for '**${game_title}**':`,
-        "tts": false,
-        "embeds": embeds,
-    });
+    const button2 = new Discord.MessageButton()
+        .setCustomId('nextbtn')
+        .setLabel('Next')
+        .setStyle('SECONDARY');
+
+    return [button1, button2]
 }
 
-function generate_embeds_buy(json_data) {
+function generate_embeds_buy(json_data, Discord) {
     var embeds = [];
     var count = 1;
     for (game of json_data) {
-        var new_embed = {}
-
-        new_embed['type'] = 'rich';
-        new_embed['title'] =  game['market'] + ' - BUY';
-        new_embed['description'] = '';
-        new_embed['color'] = 0x6fff00,
-        new_embed['fields'] = [
-            {
-                "name": `Region`,
-                "value": `${game['region']}`,
-                "inline": true
-            },
-            {
-                "name": `Edition`,
-                "value": `${game['edition']}`,
-                "inline": true
-            },
-            {
-                'name': '\u200B',
-                'value': '\u200B',
-                'inline': true
-            },
-            {
-                "name": `Old Price`,
-                "value": `${game['og_price'] === '' ? 'N/A' : game['og_price']}€`, // Note that it could not be eur
-                "inline": true
-            },
-            {
-                "name": `Coupon`,
-                "value": `*${game['coupon_code']}*`,
-                "inline": true
-            },
-            {
-                "name": `Price`,
-                "value": `${game['price']}€`, // Note that it could not be eur
-                "inline": true
-            }
-        ]
-        new_embed['url'] = game['buy_link'];
-
-        embeds.push(new_embed)
+        var embed = new Discord.MessageEmbed()
+            .setTitle(game['market'] + ' - BUY')
+            .setURL(game['buy_link'])
+            .setColor('#6fff00')
+            .addFields(
+                {
+                    "name": `Region`,
+                    "value": `${game['region']}`,
+                    "inline": true
+                },
+                {
+                    "name": `Edition`,
+                    "value": `${game['edition']}`,
+                    "inline": true
+                },
+                {
+                    'name': '\u200B',
+                    'value': '\u200B',
+                    'inline': true
+                },
+                {
+                    "name": `Old Price`,
+                    "value": `${game['og_price'] === '' ? 'N/A' : game['og_price']}€`, // Note that it could not be eur
+                    "inline": true
+                },
+                {
+                    "name": `Coupon`,
+                    "value": `*${game['coupon_code']}*`,
+                    "inline": true
+                },
+                {
+                    "name": `Price`,
+                    "value": `${game['price']}€`, // Note that it could not be eur
+                    "inline": true
+                }
+            );
+        embeds.push(embed)
 
         count += 1
         if (count > 10) break
