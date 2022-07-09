@@ -20,7 +20,7 @@ module.exports = {
  * @param {*} callback A function callback. Must take 2 arguments: the interaction instance and the embed corresponding to the game selected
  */
 function message_search_games_list(store, game_search, user_message, callback) {
-    user_message.channel.send("Searching for results...").then(msg => {
+    user_message.channel.send(`Searching for results on ${game_search}...`).then(msg => {
         get_games_list(store, game_search).then(games_list => {
             if (games_list === undefined) {
                 send_error_message(msg, 'Failed to get the data', 'edit')
@@ -29,32 +29,27 @@ function message_search_games_list(store, game_search, user_message, callback) {
                 send_error_message(msg, 'No results were found', 'edit')
             }
             else {
-                reply_search(games_list, msg).then(() => {
-                    // check if the user is the owner of the request and if the interaction is in the same message
-                    const filter = (click) => click.user.id === user_message.author.id && click.message.id == msg.id
+                //reply_search(games_list, msg)
+                reply_search_selection(games_list, msg, game_search)//.then(() => {
+
+                    // check if the interaction is in the same message
+                    const filter = (click) => click.message.id == msg.id
                     const collector = user_message.channel.createMessageComponentCollector({
-                        max: 1, // The number of times a user can click on the button
+                        max: 30, // The number of times a user can click on the button
                         time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
                         filter // Add the filter
                     });
 
                     collector.on("collect", async interaction => {
-                        msg.edit({
-                            "components": []
-                        })
+                        const target_game = find_productID_data(games_list, interaction.values[0])
 
-                        const target_game = games_list[parseInt(interaction.customId)]
-
-                        callback(interaction, target_game);
+                        callback(interaction, target_game, interaction.user);
                     });
             
                     collector.on("end", (collected) => {
-                        // Disable all buttons if time runs out
-                        msg.edit({
-                            "components": []
-                        })
+                        send_error_message(msg, 'Time is over', 'edit', msg['content'])
                     });
-                })
+                //})
             }
         })
         .catch(err => {
@@ -134,125 +129,97 @@ function get_allkeyshop_games_list(game_search) {
     })
 }
 
-/**
- * Sends a message containing all the search data
- * @param {*} json_data A list containing json game objects
- * @param {*} message The original message we want to edit
- */
-async function reply_search(json_data, message) {
-    var embeds = generate_search_embeds(json_data);
-    var buttons = generate_buttons(embeds.length);
-
+function reply_search_selection(json_data, message, game_search) {
     message.edit({
-        "content": `Here are the first results:`,
-        "tts": false,
-        "embeds": embeds,
-        "components": [
+        'content': `Here is the list of search results for '**${game_search}**'`,
+        'components': [
             {
-                'type' : 1,
-                'components' : buttons
+                'type': 1,
+                'components': [
+                    {
+                    "custom_id": `search_selection`,
+                    "placeholder": `Select an item to get more info on prices`,
+                    "options": parse_json_data(json_data),
+                    "min_values": 1,
+                    "max_values": 1,
+                    "type": 3
+                    }
+                ]
             }
         ]
-    });
+    })
 }
 
-/**
- * Generates the embeds for a list of json game objects
- * @param {*} json_data A list containing json game objects (image_link, title, infos, price)
- * @returns A list containing all the generated embeds
- */
-function generate_search_embeds(json_data) {
-    var embeds = [];
-    var count = 0;
-
+function parse_json_data(json_data) {
+    res = []
     for (game of json_data) {
-        var new_embed = {}
-
-        new_embed['type'] = 'rich';
-        new_embed['title'] =  emoji_numbers[count] + ' - ' + game['title'];
-        new_embed['description'] = game['price'];
-        new_embed['color'] = 0x6fff00,
-        new_embed['thumbnail'] = {
-            'url' : game['image_link'],
-            'height' : 0,
-            'width' : 0
-        };
-        new_embed['footer'] = {
-            'text' : game['infos']
-        }
-        new_embed['url'] = game['link'];
-
-        embeds.push(new_embed)
-
-        count += 1;
-
-        if (count >= PAGE_LIMIT) break;
+        res.push({
+            'label': `${game['title']}\u1CBC|\u1CBC${game['price']}`,
+            'description': `${game['infos']}`,
+            'value': '' + game['productID'],
+            'default': false
+        })
     }
-    return embeds;
+    return res
 }
 
-/**
- * Generates a number of buttons
- * @param {*} size The max ammount of buttons
- * @returns A list containing the generated buttons
- */
-function generate_buttons(size) {
-    var btns = []
-    for (let i = 0; i < size; i++) {
-        var new_button = {
-            "style": 1,
-            "label": `${i+1}`,
-            "custom_id": i,
-            "disabled": false,
-            "type": 2
+function find_productID_data(json_data, productID) {
+    for(game of json_data) {
+        if (game['productID'] === parseInt(productID)) {
+            return game
         }
-        btns.push(new_button)
     }
-    return btns
+    return undefined
 }
 
-function send_error_message(message, error_msg, type) {
+function send_error_message(message, error_msg, type, content) {
+    content = typeof content  !== 'undefined' ? content : ' ';
     if (type === 'edit') {
         message.edit({
-            'content' : ' ',
+            'content' : content,
             'embeds' : [{
                 'type' : 'rich',
                 'title': error_msg,
                 'color' : 0xff0000,
-            }]
+            }],
+            'components': []
         });
     }
     else if (type === 'send') {
         message.channel.send({
-            'content' : ' ',
+            'content' : content,
             'embeds' : [{
                 'type' : 'rich',
                 'title': error_msg,
                 'color' : 0xff0000,
-            }]
+            }],
+            'components': []
         });
     }
 }
 
-function send_success_message(message, success_msg, type) {
+function send_success_message(message, success_msg, type, content) {
+    content = typeof content  !== 'undefined' ? content : ' ';
     if (type === 'edit') {
         message.edit({
-            'content' : ' ',
+            'content' : content,
             'embeds' : [{
                 'type' : 'rich',
                 'title': success_msg,
                 'color' : 0x6fff00,
-            }]
+            }],
+            'components': []
         });
     }
     else if (type === 'send') {
         message.channel.send({
-            'content' : ' ',
+            'content' : content,
             'embeds' : [{
                 'type' : 'rich',
                 'title': success_msg,
                 'color' : 0x6fff00,
-            }]
+            }],
+            'components': []
         });
     }
 }

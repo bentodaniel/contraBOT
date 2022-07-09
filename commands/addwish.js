@@ -24,7 +24,7 @@ module.exports = {
         // join the remaining into a string
         const game = args_list.join(' ')
 
-        const handle_reply_to_game_selection = function(interaction, game_json) {
+        const handle_reply_to_game_selection = function(interaction, game_json, user) {
             interaction.reply({ content: `Adding '**${game_json['title']}**' to your wishlist`, fetchReply: true }).then((response_msg) => {
                 // handle adding to db
 
@@ -32,15 +32,15 @@ module.exports = {
                     price = parseFloat(game_json['price'])
                 }
 
-                const q = `REPLACE INTO WishList (userID, gameID, gameProductID, price) VALUES('${message.author.id}', '${game_json['title']}', '${game_json['productID']}', ${price})`
+                const q = `REPLACE INTO WishList (userID, gameID, gameProductID, price) VALUES('${user.id}', '${game_json['title']}', '${game_json['productID']}', ${price})`
                 
                 db.query(q, async (error, results) => {
                     if (error) {
-                        utils.send_error_message(message, `Failed to add the game '${game_json['title']}' to your wishlist`, 'send')
-                        console.log(`ERROR :: could not add the game '${game_json['title']}' to user '${message.author.id}' wishlist\n `, error.message)
+                        utils.send_error_message(response_msg, `Failed to add the game '${game_json['title']}' to your wishlist`, 'edit')
+                        console.log(`ERROR :: could not add the game '${game_json['title']}' to user '${user.id}' wishlist\n `, error.message)
                     }
                     else {
-                        utils.send_success_message(message, `Game '${game_json['title']}' has been added to your wishlist`, 'send')
+                        utils.send_success_message(response_msg, `Game '${game_json['title']}' has been added to your wishlist`, 'edit', user.toString())
                     }
                 });
             })

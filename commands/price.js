@@ -10,7 +10,7 @@ module.exports = {
     arguments: '<game to search>',
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
-        const handle_reply_to_game_selection = function(interaction, game_json) {
+        const handle_reply_to_game_selection = function(interaction, game_json, user) {
             interaction.reply({ content: `Searching offers for '**${game_json['title']}**'`, fetchReply: true }).then((response_msg) => {
                 scrape_buy(game_json).then(games_list => {
                     if (games_list === undefined) {
@@ -20,7 +20,7 @@ module.exports = {
                         utils.send_error_message(response_msg, 'There are no offers for this product', 'edit')
                     }
                     else {
-                        handle_reply(games_list, response_msg, game_json['title']);
+                        handle_reply(games_list, response_msg, game_json['title'], user);
                     }
                 })
                 .catch(err => {
@@ -76,11 +76,11 @@ async function scrape_buy(game_json) {
     })
 }
 
-async function handle_reply(json_data, message, game_title) {
+async function handle_reply(json_data, message, game_title, user) {
     var embeds = generate_embeds_buy(json_data);
 
     message.edit({
-        "content": `Here are the top results for '**${game_title}**':`,
+        "content": `${user.toString()}, here are the top results for '**${game_title}**':`,
         "tts": false,
         "embeds": embeds,
     });
