@@ -33,7 +33,7 @@ function message_search_games_list(store, game_search, user_message, callback) {
                 reply_search_selection(games_list, msg, game_search)
 
                 // check if the interaction is in the same message
-                const filter = (click) => click.message.id == msg.id
+                const filter = (click) => click.message.id === msg.id
                 const collector = user_message.channel.createMessageComponentCollector({
                     max: 30, // The number of times a user can click on the button
                     time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,

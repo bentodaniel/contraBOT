@@ -1,8 +1,8 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const xhr_req = require('xhr-request');
-const utils = require('../utils/utils')
 const paginationEmbed = require('discordjs-button-pagination');
+const utils = require('../utils/utils');
 
 module.exports = {
     name: 'price',
