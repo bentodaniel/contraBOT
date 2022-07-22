@@ -52,5 +52,5 @@ function get_commands() {
             continue;
         }
     }
-    return `__General__\n${general}\n\n__Admin__\n${admin}`
+    return `__General__\n${general}\n\n__Admin Only__\n${admin}`
 }
