@@ -48,16 +48,20 @@ module.exports = {
                             fetchReply: true 
                         })
                         .then(reply_msg => {
+                            let allow_time_fail = true
+
                             const channel_filter = (click) => click.user.id === message.author.id && click.user.id === message.guild.ownerId && click.message.id === reply_msg.id
                             const channel_collector = message.channel.createMessageComponentCollector({
-                                max: 2, // The number of times a user can click on the button
+                                max: 1, // The number of times a user can click on the button
                                 time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
                                 channel_filter // Add the filter
                             });
             
                             channel_collector.on("collect", async interaction => {
+                                allow_time_fail = false
+
                                 const channelID = interaction.values[0]
-            
+
                                 const channel = await client.channels.fetch(channelID)
 
                                 const q = `REPLACE INTO UpdatesChannels (gameID, channelID, guildID) VALUES('${gameID}', ${channel.id}, ${message.guild.id})`
@@ -73,7 +77,9 @@ module.exports = {
                             });
                     
                             channel_collector.on("end", (collected) => {
-                                utils.send_error_message(reply_msg, 'Channel selection time is over', 'edit', msg['content'])
+                                if (allow_time_fail) {
+                                    utils.send_error_message(reply_msg, 'Channel selection time is over', 'edit', msg['content'])
+                                }
                             });
                         })
                     })
