@@ -42,7 +42,7 @@ function message_search_games_list(store, game_search, user_message, callback, s
                 const filter = (click) => click.message.id === msg.id
                 const collector = user_message.channel.createMessageComponentCollector({
                     max: limit_clicks, // The number of times a user can click on the button
-                    time: 1000 * 5, // The amount of time the collector is valid for in milliseconds,
+                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
                     filter // Add the filter
                 });
 

@@ -20,73 +20,73 @@ module.exports = {
                     });
                 }
                 else {
-                    send_selection_message(json_data, msg, message.author)
+                    send_selection_message(json_data, msg, message.author).then(select_msg => {
+                        // check if the user is the owner of the request and if the interaction is in the same message
+                        const filter = (click) => click.user.id === message.author.id && click.message.id == select_msg.id
+                        const collector = message.channel.createMessageComponentCollector({
+                            max: 1, // The number of times a user can click on the button
+                            time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
+                            filter // Add the filter
+                        });
 
-                    // check if the user is the owner of the request and if the interaction is in the same message
-                    const filter = (click) => click.user.id === message.author.id && click.message.id == msg.id
-                    const collector = message.channel.createMessageComponentCollector({
-                        max: 1, // The number of times a user can click on the button
-                        time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-                        filter // Add the filter
-                    });
+                        collector.on("collect", async interaction => {
+                            if (interaction.componentType === 'SELECT_MENU') {
+                                
+                                console.log(interaction)
 
-                    collector.on("collect", async interaction => {
-                        if (interaction.componentType === 'SELECT_MENU') {
-                            
-                            console.log(interaction)
+                                
+                                
 
-                            
-                            
-
-                            /*
-                            const q = `DELETE FROM UpdatesChannels WHERE gameID = '${game}' AND guildID = ${message.guild.id}`
-                            
-                            db.query(q, async (error, results) => {
-                                if (error) {
-                                    message.channel.send({
-                                        'content' : ' ',
-                                        'tts': false,
-                                        'embeds' : [{
-                                            'type' : 'rich',
-                                            'title': 'Error',
-                                            'color' : 0xff0000,
-                                            'description': `Failed to remove the game '${game}' from the updates list`
-                                        }]
-                                    });
-                                }
-                                else {
-                                    message.channel.send({
-                                        'content' : ' ',
-                                        'tts': false,
-                                        'embeds' : [{
-                                            'type' : 'rich',
-                                            'title': 'Game updates have been set',
-                                            'color' : 0x6fff00,
-                                            'description': `Game '${game}' has been removed from the updates list`
-                                        }]
-                                    });
-                                }
-                            });
-                            */
-
+                                /*
+                                const q = `DELETE FROM UpdatesChannels WHERE gameID = '${game}' AND guildID = ${message.guild.id}`
+                                
+                                db.query(q, async (error, results) => {
+                                    if (error) {
+                                        message.channel.send({
+                                            'content' : ' ',
+                                            'tts': false,
+                                            'embeds' : [{
+                                                'type' : 'rich',
+                                                'title': 'Error',
+                                                'color' : 0xff0000,
+                                                'description': `Failed to remove the game '${game}' from the updates list`
+                                            }]
+                                        });
+                                    }
+                                    else {
+                                        message.channel.send({
+                                            'content' : ' ',
+                                            'tts': false,
+                                            'embeds' : [{
+                                                'type' : 'rich',
+                                                'title': 'Game updates have been set',
+                                                'color' : 0x6fff00,
+                                                'description': `Game '${game}' has been removed from the updates list`
+                                            }]
+                                        });
+                                    }
+                                });
+                                */
 
 
 
 
 
 
-                        }
-                    });
-            
-                    collector.on("end", (collected) => {
-                        //utils.send_error_message(msg, 'Time is over', 'edit', msg['content'])
-                        const component = msg.components[0]
-                        component.components[0].disabled = true
 
-                        msg.edit({
-                            components: [component]
-                        })
-                    });
+                            }
+                        });
+                
+                        collector.on("end", (collected) => {
+                            //utils.send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                            const component = msg.components[0]
+                            component.components[0].disabled = true
+
+                            msg.edit({
+                                components: [component]
+                            })
+                        });
+                    })
                 }
             })
             .catch(err => {
@@ -98,7 +98,7 @@ module.exports = {
 }
 
 function send_selection_message(json_data, message, user) {
-    message.edit({
+    return message.edit({
         'content': `${user.toString()} select the items you would like to remove from your wishlist`,
         'components': [
             {

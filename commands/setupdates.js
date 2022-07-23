@@ -78,7 +78,13 @@ module.exports = {
                     
                             channel_collector.on("end", (collected) => {
                                 if (allow_time_fail) {
-                                    utils.send_error_message(reply_msg, 'Channel selection time is over', 'edit', msg['content'])
+                                    //utils.send_error_message(reply_msg, 'Channel selection time is over', 'edit', msg['content'])
+                                    const component = reply_msg.components[0]
+                                    component.components[0].disabled = true
+
+                                    reply_msg.edit({
+                                        components: [component]
+                                    })
                                 }
                             });
                         })
@@ -86,7 +92,13 @@ module.exports = {
                 });
         
                 game_collector.on("end", (collected) => {
-                    utils.send_error_message(msg, 'Game selection time is over', 'edit', msg['content'])
+                    //utils.send_error_message(msg, 'Game selection time is over', 'edit', msg['content'])
+                    const component = msg.components[0]
+                    component.components[0].disabled = true
+
+                    msg.edit({
+                        components: [component]
+                    })
                 });
             })
         }

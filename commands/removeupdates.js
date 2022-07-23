@@ -68,7 +68,13 @@ module.exports = {
                         
                             collector.on("end", (collected) => {
                                 if (allow_time_fail) {
-                                    utils.send_error_message(select_msg, 'Game selection time is over', 'edit', select_msg['content'])
+                                    //utils.send_error_message(select_msg, 'Game selection time is over', 'edit', select_msg['content'])
+                                    const component = select_msg.components[0]
+                                    component.components[0].disabled = true
+
+                                    select_msg.edit({
+                                        components: [component]
+                                    })
                                 }
                             });
                         })
