@@ -3,9 +3,9 @@ const utils = require('../utils/utils')
 module.exports = {
     name: 'stopwish',
     short_name: 'sw',
-    description: 'Remove a game from your wish list.',
+    description: 'Remove games from your wish list.',
     arguments: '',
-    showOnHelp: false,
+    showOnHelp: true,
     async execute(client, message, args, Discord, db) {
         message.channel.send(`Getting wishlist data...`).then(msg => {
             utils.get_user_wishlist(db, message.author.id).then(json_data => {
@@ -30,61 +30,36 @@ module.exports = {
                         });
 
                         collector.on("collect", async interaction => {
-                            if (interaction.componentType === 'SELECT_MENU') {
-                                
-                                console.log(interaction)
+                            allow_time_fail = false
 
-                                
-                                
-
-                                /*
-                                const q = `DELETE FROM UpdatesChannels WHERE gameID = '${game}' AND guildID = ${message.guild.id}`
-                                
-                                db.query(q, async (error, results) => {
-                                    if (error) {
-                                        message.channel.send({
-                                            'content' : ' ',
-                                            'tts': false,
-                                            'embeds' : [{
-                                                'type' : 'rich',
-                                                'title': 'Error',
-                                                'color' : 0xff0000,
-                                                'description': `Failed to remove the game '${game}' from the updates list`
-                                            }]
-                                        });
-                                    }
-                                    else {
-                                        message.channel.send({
-                                            'content' : ' ',
-                                            'tts': false,
-                                            'embeds' : [{
-                                                'type' : 'rich',
-                                                'title': 'Game updates have been set',
-                                                'color' : 0x6fff00,
-                                                'description': `Game '${game}' has been removed from the updates list`
-                                            }]
-                                        });
-                                    }
-                                });
-                                */
-
-
-
-
-
-
-
+                            let gamesProductIDs = ''
+                            for (gameProductID of interaction.values) {
+                                gamesProductIDs += `'${gameProductID}', `
                             }
+                            gamesProductIDs = gamesProductIDs.slice(0, -2)
+
+                            const q = `DELETE FROM WishList WHERE userID = ${message.author.id} AND gameProductID IN (${gamesProductIDs})`
+
+                            db.query(q, async (error, results) => {
+                                if (error) {
+                                    utils.send_error_message(select_msg, `Failed to remove one or more games from your wishlist`, 'edit')
+                                }
+                                else {
+                                    utils.send_success_message(select_msg, `All selected games have been removed from your wishlist`, 'edit')
+                                }
+                            });
                         });
                 
                         collector.on("end", (collected) => {
-                            //utils.send_error_message(msg, 'Time is over', 'edit', msg['content'])
-                            const component = msg.components[0]
-                            component.components[0].disabled = true
+                            if (allow_time_fail) {
+                                //utils.send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                                const component = msg.components[0]
+                                component.components[0].disabled = true
 
-                            msg.edit({
-                                components: [component]
-                            })
+                                msg.edit({
+                                    components: [component]
+                                })
+                            }
                         });
                     })
                 }

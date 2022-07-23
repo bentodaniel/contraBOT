@@ -5,7 +5,7 @@ module.exports = {
     short_name: 'wl',
     description: 'Displays your wish list',
     arguments: '',
-    showOnHelp: false,
+    showOnHelp: true,
     async execute(client, message, args, Discord, db) {
         var user = message.mentions.users.first()
         if (user === undefined) {

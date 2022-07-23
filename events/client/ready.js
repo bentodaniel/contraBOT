@@ -6,6 +6,11 @@ const updates = require('../../utils/updates')
 module.exports = (Discord, client, db, message) => {
     console.log('IM ONLINE');
 
+    client.user.setActivity(' out for games\' data', {
+        type: 'WATCHING' //PLAYING: WATCHING: LISTENING: STREAMING:
+    });
+    client.user.setStatus("online");
+
     // Execute and then only execute once in a while
     handle_news(client, db)
     setInterval( function() { handle_news(client, db); }, 3600000 * 6 ); // 1 hour * 6  (3600000 * 12)
