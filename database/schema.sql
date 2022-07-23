@@ -30,3 +30,7 @@ CREATE TABLE WishList (
 );
 
 ALTER TABLE `WishList` ADD UNIQUE `unique_index`(`userID`, `gameProductID`);
+
+CREATE TABLE PremiumUsers (
+    userID VARCHAR(100) NOT NULL PRIMARY KEY,
+);

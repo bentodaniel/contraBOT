@@ -21,7 +21,7 @@ module.exports = {
  * @param {*} user_message 
  * @param {*} callback A function callback. Must take 2 arguments: the interaction instance and the embed corresponding to the game selected
  */
-function message_search_games_list(store, game_search, user_message, callback) {
+function message_search_games_list(store, game_search, user_message, callback, selection_msg_content) {
     user_message.channel.send(`Searching for results on ${game_search}...`).then(msg => {
         get_games_list(store, game_search).then(games_list => {
             if (games_list === undefined) {
@@ -31,7 +31,7 @@ function message_search_games_list(store, game_search, user_message, callback) {
                 send_error_message(msg, 'No results were found', 'edit')
             }
             else {
-                reply_search_selection(games_list, msg, game_search)
+                reply_search_selection(games_list, msg, game_search, selection_msg_content)
 
                 // check if the interaction is in the same message
                 const filter = (click) => click.message.id === msg.id
@@ -128,9 +128,13 @@ function get_allkeyshop_games_list(game_search) {
     })
 }
 
-function reply_search_selection(json_data, message, game_search) {
+function reply_search_selection(json_data, message, game_search, selection_msg_extra_content) {
+    if (selection_msg_extra_content === undefined) {
+        selection_msg_extra_content = ''
+    }
+
     message.edit({
-        'content': `Here is the list of search results for '**${game_search}**'`,
+        'content': `Here is the list of search results for '**${game_search}**'` + selection_msg_extra_content,
         'components': [
             {
                 'type': 1,
