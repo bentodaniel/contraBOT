@@ -25,7 +25,7 @@ module.exports = {
                     // check if the user is the owner of the request and if the interaction is in the same message
                     const filter = (click) => click.user.id === message.author.id && click.message.id == msg.id
                     const collector = message.channel.createMessageComponentCollector({
-                        max: 10, // The number of times a user can click on the button
+                        max: 1, // The number of times a user can click on the button
                         time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
                         filter // Add the filter
                     });
@@ -79,7 +79,13 @@ module.exports = {
                     });
             
                     collector.on("end", (collected) => {
-                        utils.send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                        //utils.send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                        const component = msg.components[0]
+                        component.components[0].disabled = true
+
+                        msg.edit({
+                            components: [component]
+                        })
                     });
                 }
             })

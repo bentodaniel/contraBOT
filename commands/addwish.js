@@ -6,7 +6,7 @@ module.exports = {
     description: 'Add a game to your wish list. I will notify you when the game drops under a specified price (in €).',
     arguments: '[price] <game>',
     arguments_help: 'If [price] is not provided, the current price will be used',
-    showOnHelp: false,
+    showOnHelp: true,
     async execute(client, message, args, Discord, db) {
         // Parse arguments and get price
         const args_list = args.split(' ')
@@ -73,7 +73,7 @@ module.exports = {
                 });
             })
         }
-        utils.message_search_games_list('allkeyshop', game, message, handle_reply_to_game_selection, '\nSelect a game you want to add to your wishlist')
+        utils.message_search_games_list('allkeyshop', game, message, handle_reply_to_game_selection, '\nSelect a game you want to add to your wishlist', 1)
     }
 }
 

@@ -21,7 +21,7 @@ module.exports = {
  * @param {*} user_message 
  * @param {*} callback A function callback. Must take 2 arguments: the interaction instance and the embed corresponding to the game selected
  */
-function message_search_games_list(store, game_search, user_message, callback, selection_msg_content) {
+function message_search_games_list(store, game_search, user_message, callback, selection_msg_content, selection_limit) {
     user_message.channel.send(`Searching for results on ${game_search}...`).then(msg => {
         get_games_list(store, game_search).then(games_list => {
             if (games_list === undefined) {
@@ -33,11 +33,16 @@ function message_search_games_list(store, game_search, user_message, callback, s
             else {
                 reply_search_selection(games_list, msg, game_search, selection_msg_content)
 
+                limit_clicks = 30
+                if (selection_limit !== undefined) {
+                    limit_clicks = selection_limit
+                } 
+
                 // check if the interaction is in the same message
                 const filter = (click) => click.message.id === msg.id
                 const collector = user_message.channel.createMessageComponentCollector({
-                    max: 30, // The number of times a user can click on the button
-                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
+                    max: limit_clicks, // The number of times a user can click on the button
+                    time: 1000 * 5, // The amount of time the collector is valid for in milliseconds,
                     filter // Add the filter
                 });
 
@@ -48,7 +53,13 @@ function message_search_games_list(store, game_search, user_message, callback, s
                 });
             
                 collector.on("end", (collected) => {
-                    send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                    //send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                    const component = msg.components[0]
+                    component.components[0].disabled = true
+
+                    msg.edit({
+                        components: [component]
+                    })
                 });
             }
         })
