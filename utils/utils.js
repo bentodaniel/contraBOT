@@ -255,7 +255,7 @@ function send_success_message(message, success_msg, type, content) {
 
 function get_user_wishlist(db, userID) {
     return new Promise((success, failure) => {
-        const wishlist_query = `SELECT gameID, gameProductID, price, receiveNotifications FROM WishList WHERE userID = '${userID}'`
+        const wishlist_query = `SELECT gameID, gameProductID, gameLink, price, receiveNotifications, store FROM WishList WHERE userID = '${userID}'`
         
         db.query(wishlist_query, async (error, results) => {
             if (error) {

@@ -3,8 +3,9 @@ const utils = require('../utils/utils')
 module.exports = {
     name: 'wishlist',
     short_name: 'wl',
-    description: 'Displays your wish list',
-    arguments: '',
+    description: 'Displays a user\'s wish list',
+    arguments: '<@user>',
+    arguments_help: 'If no user is provided, this will display your wishlist',
     showOnHelp: true,
     async execute(client, message, args, Discord, db) {
         var user = message.mentions.users.first()
@@ -26,43 +27,49 @@ module.exports = {
                     });
                 }
                 else {
+                    embed = new Discord.MessageEmbed()
+                        .setTitle(`${user.username}'s wishlist`)
+                        .setColor('#6fff00')
+                    
+                    embed = get_fields(json_data, embed)
+
                     msg.edit({
                         'content' : ' ',
-                        'embeds' : [{
-                            'type' : 'rich',
-                            'title': `${user.username}'s wishlist`,
-                            'color' : 0x6fff00,
-                            'fields': get_fields(json_data)
-                        }]
+                        'embeds' : [embed]
                     });
                 }
             })
             .catch(err => {
+                console.log('ERROR :: failed to get wishlist\n ', err.message)
                 utils.send_error_message(msg, 'Failed to get wishlist data', 'edit')
             })
         })
     }
 }
 
-function get_fields(json_data) {
+function get_fields(json_data, embed) {
     var games = ''
     var prices = ''
 
     for (data of json_data) {
-        games += `${data['gameID']}\n`
+        games += `[${data['gameID']}](${data['gameLink']})\n`
         prices += `${data['price']}€\n`
     }
 
-    return [
+    embed.addFields(
         {
-          "name": `Game Title`,
-          "value": games,
-          "inline": true
+            "name": `Game Title`,
+            "value": games,
+            "inline": true
         },
         {
-          "name": `Desired Price`,
-          "value": prices,
-          "inline": true
+            "name": `Desired Price`,
+            "value": prices,
+            "inline": true
         }
-    ]
+    )
+
+    // TODO - in the future, could also display the store, if steam is integrated
+    
+    return embed
 }
