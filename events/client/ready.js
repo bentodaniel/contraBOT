@@ -2,6 +2,7 @@ const request = require('request');
 const xhr_req = require('xhr-request');
 const constants = require('../../utils/constants')
 const updates = require('../../utils/updates')
+const utils = require('../../utils/utils')
 
 module.exports = (Discord, client, db, message) => {
     console.log('IM ONLINE');
@@ -15,7 +16,13 @@ module.exports = (Discord, client, db, message) => {
     handle_news(client, db)
     setInterval( function() { handle_news(client, db); }, 3600000 * 6 ); // 1 hour * 6  (3600000 * 12)
     
+    handle_wishlist(client, db)
+    // todo - repeat every.. something
 }
+
+/********************************************
+ *      NEWS UPDATES FUNCTIONS
+ ********************************************/
 
 async function handle_news(client, db) {
     console.log('Starting news update...')
@@ -159,6 +166,90 @@ function record_into_db(db, game, news_data) {
         })
     }
 }
+
+/********************************************
+ *      WISHLIST UPDATES FUNCTIONS
+ ********************************************/
+
+function handle_wishlist(client, db) {
+    console.log('Starting wishlist update...')
+    const games_query = `SELECT DISTINCT gameProductID FROM WishList`
+    db.query(games_query, async (games_error, games_results) => {
+        if (games_error) {
+            // No need to tell the users
+            console.log(`ERROR :: failed to get the games from wishlist for update\n `, games_error.message)
+        }
+        else {
+            // execute for each game
+            for(game of games_results) {
+                const gameProductID = game['gameProductID']
+
+                // get the offers for this game
+                utils.get_game_offers(gameProductID, 'eur', 10).then(game_offers_list => {
+                    // find what users have this game in their wishlist
+                    const users_query = `SELECT userID, gameID, gameLink, price, receiveNotifications FROM WishList WHERE gameProductID = ${gameProductID}`
+                    db.query(users_query, async (users_error, users_results) => {
+                        if (users_error) {
+                            // No need to tell the users
+                            console.log(`ERROR :: failed to get the users with game ${gameProductID} on their wishlist\n `, users_error.message)
+                        }
+                        else {
+                            console.log(users_results)
+
+                            // now we have to loop through each user and check if there are offers that are ok with his price
+                            // if so, we then need to notify the user
+                            for (user_data of users_results) {
+                                if (user_data['receiveNotifications'] === 0 || user_data['receiveNotifications'] === false){
+                                    continue
+                                }
+
+                                // Create a list containing the offers with an equal or lower price than requested
+                                var offers = []
+                                for (offer of game_offers_list) {
+                                    if (offer['price'] <= user_data['price']) {
+                                        offers.push(offer)
+                                    }
+                                }
+
+                                // Send a notification to the user if the list is not empty
+                                if (offers.length > 0) {
+
+                                    // TODO - send correct msg
+                                    client.users.fetch(user_data['userID'], false).then((user) => {
+                                        user.send({
+                                            'content' : ' ',
+                                            'embeds' : [{
+                                                'type' : 'rich',
+                                                'title': 'there are games that satisfy something in your wishlist',
+                                                'color' : 0x6fff00,
+                                            }],
+                                            'components': []
+                                        });
+                                    })
+                                    .catch(fetch_error => {
+                                        console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, fetch_error.message)
+                                    
+                                        // TODO - update all wishlist table to not receive notifications
+                                    });;
+                                }
+                            }
+                        }
+                    })
+                })
+            }
+            
+            
+            
+            
+        }
+    })
+}
+
+
+
+
+
+
 
 
 
