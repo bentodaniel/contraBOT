@@ -12,15 +12,15 @@ module.exports = {
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
         const handle_reply_to_game_selection = function(interaction, game_json, user) {
-            scrape_buy(game_json).then(games_list => {
-                if (games_list === undefined) {
+            utils.get_game_offers(game_json['productID'], 'eur', 10).then(game_offers_list => {
+                if (game_offers_list === undefined) {
                     utils.reply_error_interaction(interaction, 'Failed to get the data', user.toString())
                 }
-                else if (games_list.length === 0){
+                else if (game_offers_list.length === 0){
                     utils.reply_error_interaction(interaction, 'There are no offers for this product', user.toString())
                 }
                 else {
-                    const embeds = generate_embeds_buy(games_list, Discord)
+                    const embeds = generate_embeds_buy(game_offers_list, Discord)
                     const buttons = get_pagination_buttons(Discord)
 
                     paginationEmbed(interaction, embeds, buttons, 120000).then(paginated_msg => {
@@ -35,50 +35,6 @@ module.exports = {
         }
         utils.message_search_games_list('allkeyshop', args, message, handle_reply_to_game_selection)
     }
-}
-
-async function scrape_buy(game_json) {
-    return new Promise((success, failure) => {
-        var json_data = [];
-                
-        // TODO - could also get with other currencies - accepted:  \"eur\", \"gbp\", \"usd\"
-        const currency = 'eur'
-
-        xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${game_json['productID']}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
-            json: true
-        }, function (err, req_data) {
-            if (err) {
-                console.log(`ERROR :: failed to get xhr data for product ${game_json['productID']}\n `, err.message)
-                failure()
-            }
-            else {
-                Object.entries(req_data['offers']).forEach(([key, value]) => {
-                    var data = {}
-
-                    data['buy_link'] = value.affiliateUrl
-                    data['market'] = req_data['merchants'][value.merchant].name
-                    data['region'] = req_data['regions'][value.region].filterName
-                    data['edition'] = req_data['editions'][value.edition].name
-
-                    var price_data = value.price[currency]
-
-                    data['og_price'] = price_data.priceWithoutCoupon
-                    data['price'] = price_data.price
-
-                    var coupon_data = price_data.bestCoupon
-                    if (coupon_data === null || coupon_data === undefined) {
-                        data['coupon_value'] = 'N/A'
-                        data['coupon_code'] = 'No coupon'
-                    }
-                    else {
-                        data['coupon_code'] = coupon_data.code
-                    }
-                    json_data.push(data)
-                });
-                success(json_data)                   
-            }
-        })
-    })
 }
 
 function get_pagination_buttons(Discord) {
@@ -97,7 +53,6 @@ function get_pagination_buttons(Discord) {
 
 function generate_embeds_buy(json_data, Discord) {
     var embeds = [];
-    var count = 1;
     for (game of json_data) {
         var embed = new Discord.MessageEmbed()
             .setTitle(game['market'] + ' - BUY')
@@ -136,9 +91,6 @@ function generate_embeds_buy(json_data, Discord) {
                 }
             );
         embeds.push(embed)
-
-        count += 1
-        if (count > 10) break
     }
     return embeds;
 }

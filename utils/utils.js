@@ -6,6 +6,7 @@ const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6
 const PAGE_LIMIT = 5;
 
 module.exports = {
+    get_game_offers,
     message_search_games_list,
     send_error_message,
     reply_error_interaction,
@@ -136,6 +137,50 @@ function get_allkeyshop_games_list(game_search) {
                 success(json_data)
             }
         });
+    })
+}
+
+// currencies - accepted:  \"eur\", \"gbp\", \"usd\"
+async function get_game_offers(gameProductID, currency, limit) {
+    return new Promise((success, failure) => {
+        var json_data = [];
+
+        xhr_req(`https://www.allkeyshop.com/blog/wp-admin/admin-ajax.php?action=get_offers&product=${gameProductID}&currency=${currency}&region=&edition=&moreq=&use_beta_offers_display=1`, {
+            json: true
+        }, function (err, req_data) {
+            if (err) {
+                console.log(`ERROR :: failed to get xhr data for product ${gameProductID}\n `, err.message)
+                failure()
+            }
+            else {
+                Object.entries(req_data['offers']).some(([key, value]) => {
+                    var data = {}
+
+                    data['buy_link'] = value.affiliateUrl
+                    data['market'] = req_data['merchants'][value.merchant].name
+                    data['region'] = req_data['regions'][value.region].filterName
+                    data['edition'] = req_data['editions'][value.edition].name
+
+                    var price_data = value.price[currency]
+
+                    data['og_price'] = price_data.priceWithoutCoupon
+                    data['price'] = price_data.price
+
+                    var coupon_data = price_data.bestCoupon
+                    if (coupon_data === null || coupon_data === undefined) {
+                        data['coupon_value'] = 'N/A'
+                        data['coupon_code'] = 'No coupon'
+                    }
+                    else {
+                        data['coupon_code'] = coupon_data.code
+                    }
+                    json_data.push(data)
+
+                    return json_data.length >= limit
+                });
+                success(json_data)                   
+            }
+        })
     })
 }
 
