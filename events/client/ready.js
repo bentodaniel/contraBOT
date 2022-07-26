@@ -187,7 +187,7 @@ function handle_wishlist(client, db) {
                 // get the offers for this game
                 utils.get_game_offers(gameProductID, 'eur', 10).then(game_offers_list => {
                     // find what users have this game in their wishlist
-                    const users_query = `SELECT userID, gameID, gameLink, price, receiveNotifications FROM WishList WHERE gameProductID = ${gameProductID}`
+                    const users_query = `SELECT userID, gameID, gameLink, price FROM WishList WHERE gameProductID = ${gameProductID} AND receiveNotifications = 1`
                     db.query(users_query, async (users_error, users_results) => {
                         if (users_error) {
                             // No need to tell the users
@@ -199,10 +199,6 @@ function handle_wishlist(client, db) {
                             // now we have to loop through each user and check if there are offers that are ok with his price
                             // if so, we then need to notify the user
                             for (user_data of users_results) {
-                                if (user_data['receiveNotifications'] === 0 || user_data['receiveNotifications'] === false){
-                                    continue
-                                }
-
                                 // Create a list containing the offers with an equal or lower price than requested
                                 var offers = []
                                 for (offer of game_offers_list) {
@@ -226,10 +222,12 @@ function handle_wishlist(client, db) {
                                             'components': []
                                         });
                                     })
-                                    .catch(fetch_error => {
-                                        console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, fetch_error.message)
+                                    .catch(user_fetch_error => {
+                                        //console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, user_fetch_error.message)
                                     
                                         // TODO - update all wishlist table to not receive notifications
+
+                                        // for now, just dont do enything, but with increasing rows, we should disable notifications
                                     });;
                                 }
                             }

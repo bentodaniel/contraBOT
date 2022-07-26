@@ -1,8 +1,5 @@
-const request = require('request');
-const cheerio = require('cheerio');
-const xhr_req = require('xhr-request');
-const paginationEmbed = require('discordjs-button-pagination');
 const utils = require('../utils/utils');
+const embedPpagination = require('../utils/embedPagination');
 
 module.exports = {
     name: 'price',
@@ -21,9 +18,10 @@ module.exports = {
                 }
                 else {
                     const embeds = generate_embeds_buy(game_offers_list, Discord)
-                    const buttons = get_pagination_buttons(Discord)
 
-                    paginationEmbed(interaction, embeds, buttons, 120000).then(paginated_msg => {
+                    embedPpagination(Discord, interaction, embeds, 120000).then(paginated_msg => {
+                        // todo - possibly could also add a 'add to wishlist' button
+
                         paginated_msg.edit({'content': `${user.toString()}, here are the results for '**${game_json['title']}**'`})
                     })
                 }
@@ -35,20 +33,6 @@ module.exports = {
         }
         utils.message_search_games_list('allkeyshop', args, message, handle_reply_to_game_selection)
     }
-}
-
-function get_pagination_buttons(Discord) {
-    const button1 = new Discord.MessageButton()
-        .setCustomId('previousbtn')
-        .setLabel('Previous')
-        .setStyle('SECONDARY');
-
-    const button2 = new Discord.MessageButton()
-        .setCustomId('nextbtn')
-        .setLabel('Next')
-        .setStyle('SECONDARY');
-
-    return [button1, button2]
 }
 
 function generate_embeds_buy(json_data, Discord) {
