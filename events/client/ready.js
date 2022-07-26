@@ -3,6 +3,7 @@ const xhr_req = require('xhr-request');
 const constants = require('../../utils/constants')
 const updates = require('../../utils/updates')
 const utils = require('../../utils/utils')
+const embedPpagination = require('../../utils/embedPagination');
 
 module.exports = (Discord, client, db, message) => {
     console.log('IM ONLINE');
@@ -16,7 +17,7 @@ module.exports = (Discord, client, db, message) => {
     handle_news(client, db)
     setInterval( function() { handle_news(client, db); }, 3600000 * 6 ); // 1 hour * 6  (3600000 * 12)
     
-    handle_wishlist(client, db)
+    handle_wishlist(Discord, client, db)
     // todo - repeat every.. something
 }
 
@@ -171,7 +172,7 @@ function record_into_db(db, game, news_data) {
  *      WISHLIST UPDATES FUNCTIONS
  ********************************************/
 
-function handle_wishlist(client, db) {
+function handle_wishlist(Discord, client, db) {
     console.log('Starting wishlist update...')
     const games_query = `SELECT DISTINCT gameProductID FROM WishList`
     db.query(games_query, async (games_error, games_results) => {
@@ -194,8 +195,6 @@ function handle_wishlist(client, db) {
                             console.log(`ERROR :: failed to get the users with game ${gameProductID} on their wishlist\n `, users_error.message)
                         }
                         else {
-                            console.log(users_results)
-
                             // now we have to loop through each user and check if there are offers that are ok with his price
                             // if so, we then need to notify the user
                             for (user_data of users_results) {
@@ -213,13 +212,12 @@ function handle_wishlist(client, db) {
                                     // TODO - send correct msg
                                     client.users.fetch(user_data['userID'], false).then((user) => {
                                         user.send({
-                                            'content' : ' ',
-                                            'embeds' : [{
-                                                'type' : 'rich',
-                                                'title': 'there are games that satisfy something in your wishlist',
-                                                'color' : 0x6fff00,
-                                            }],
-                                            'components': []
+                                            'content' : `There are available offers for a game in your wishlist\nGame: '**${user_data['gameID']}**'\nTarget price: ${user_data['price']}€`,
+                                        })
+                                        .then(user_msg => {
+                                            const embeds = generate_game_notification_embeds(offers, Discord)
+
+                                            embedPpagination(Discord, user_msg, embeds, 120000)
                                         });
                                     })
                                     .catch(user_fetch_error => {
@@ -235,15 +233,53 @@ function handle_wishlist(client, db) {
                     })
                 })
             }
-            
-            
-            
-            
         }
     })
 }
 
-
+function generate_game_notification_embeds(json_data, Discord) {
+    var embeds = [];
+    for (game of json_data) {
+        var embed = new Discord.MessageEmbed()
+            .setTitle(game['market'] + ' - BUY')
+            .setURL(game['buy_link'])
+            .setColor('#6fff00')
+            .addFields(
+                {
+                    "name": `Region`,
+                    "value": `${game['region']}`,
+                    "inline": true
+                },
+                {
+                    "name": `Edition`,
+                    "value": `${game['edition']}`,
+                    "inline": true
+                },
+                {
+                    'name': '\u200B',
+                    'value': '\u200B',
+                    'inline': true
+                },
+                {
+                    "name": `Old Price`,
+                    "value": `${game['og_price'] === '' ? 'N/A' : game['og_price']}€`, // Note that it could not be eur
+                    "inline": true
+                },
+                {
+                    "name": `Coupon`,
+                    "value": `*${game['coupon_code']}*`,
+                    "inline": true
+                },
+                {
+                    "name": `Price`,
+                    "value": `${game['price']}€`, // Note that it could not be eur
+                    "inline": true
+                }
+            );
+        embeds.push(embed)
+    }
+    return embeds;
+}
 
 
 

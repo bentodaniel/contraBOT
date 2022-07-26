@@ -13,7 +13,7 @@
  * @param {number} timeout
  * @returns
  */
-const embedPpagination = async (Discord, interaction, pages, timeout = 120000) => {
+const embedPpagination = async (Discord, message, pages, timeout = 120000) => {
     if (!pages) throw new Error("Pages are not given.");
   
     let page = 0;
@@ -40,11 +40,17 @@ const embedPpagination = async (Discord, interaction, pages, timeout = 120000) =
     const row = new Discord.MessageActionRow().addComponents(buttonList);
   
     //has the interaction already been deferred? If not, defer the reply.
-    if (interaction.deferred == false) {
-        await interaction.deferReply();
-    }
+    //if (interaction.deferred == false) {
+    //    await interaction.deferReply();
+    //}
   
-    const curPage = await interaction.editReply({
+    //const curPage = await interaction.editReply({
+    //    embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
+    //    components: [row],
+    //    fetchReply: true,
+    //});
+
+    const curPage = await message.edit({
         embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
         components: [row],
         fetchReply: true,

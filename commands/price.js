@@ -19,10 +19,12 @@ module.exports = {
                 else {
                     const embeds = generate_embeds_buy(game_offers_list, Discord)
 
-                    embedPpagination(Discord, interaction, embeds, 120000).then(paginated_msg => {
-                        // todo - possibly could also add a 'add to wishlist' button
-
-                        paginated_msg.edit({'content': `${user.toString()}, here are the results for '**${game_json['title']}**'`})
+                    interaction.reply({content: `Getting offers  for '**${game_json['title']}**'...`, fetchReply: true }).then(reply_msg => {
+                        embedPpagination(Discord, reply_msg, embeds, 120000).then(paginated_msg => {
+                            // todo - possibly could also add a 'add to wishlist' button
+    
+                            paginated_msg.edit({'content': `${user.toString()}, here are the results for '**${game_json['title']}**'`})
+                        })
                     })
                 }
             })
