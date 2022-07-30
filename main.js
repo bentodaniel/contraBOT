@@ -8,8 +8,9 @@ const db = require('./database/db')
 
 const allIntents = { 
     intents: [
-        "GUILDS",
-        "GUILD_MESSAGES",
+        Discord.Intents.FLAGS.GUILDS,
+        Discord.Intents.FLAGS.GUILD_MESSAGES,
+        Discord.Intents.FLAGS.DIRECT_MESSAGES,
     ] 
 };
 

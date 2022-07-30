@@ -23,6 +23,8 @@ module.exports = (Discord, client, db, message) => {
         handle_wishlist(Discord, client, db)
         setInterval( function() { handle_wishlist(Discord, client, db); }, 3600000 * 2 ); // 1 hour * 3  (3600000 * 12)
     }, 3600000 * 1)
+
+    handle_wishlist(Discord, client, db)
 }
 
 /********************************************
@@ -231,6 +233,9 @@ function notify_user(client, Discord, user_data, game_offers_list) {
                 const embeds = generate_game_notification_embeds(Discord, offers, user_data)
 
                 embedPpagination(Discord, user_msg, embeds, 120000)
+            })
+            .catch(msg_error => {
+                console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error.message)
             });
         }
     })
