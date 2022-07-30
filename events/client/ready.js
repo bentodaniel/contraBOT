@@ -17,8 +17,12 @@ module.exports = (Discord, client, db, message) => {
     handle_news(client, db)
     setInterval( function() { handle_news(client, db); }, 3600000 * 6 ); // 1 hour * 6  (3600000 * 12)
     
-    handle_wishlist(Discord, client, db)
-    // todo - repeat every.. something
+    // Wait and then execute every so often
+    setTimeout(function() {
+        // Execute and then only execute once in a while
+        handle_wishlist(Discord, client, db)
+        setInterval( function() { handle_wishlist(Discord, client, db); }, 3600000 * 2 ); // 1 hour * 3  (3600000 * 12)
+    }, 3600000 * 1)
 }
 
 /********************************************
