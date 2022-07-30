@@ -188,7 +188,7 @@ function handle_wishlist(Discord, client, db) {
                 // get the offers for this game
                 utils.get_game_offers(gameProductID, 'eur', 10).then(game_offers_list => {
                     // find what users have this game in their wishlist
-                    const users_query = `SELECT userID, gameID, gameLink, price FROM WishList WHERE gameProductID = ${gameProductID} AND receiveNotifications = 1`
+                    const users_query = `SELECT userID, gameID, gameLink, gameImageLink, price FROM WishList WHERE gameProductID = ${gameProductID} AND receiveNotifications = 1`
                     db.query(users_query, async (users_error, users_results) => {
                         if (users_error) {
                             // No need to tell the users
@@ -250,6 +250,7 @@ function generate_game_notification_embeds(Discord, offers, user_data) {
             .setURL(user_data['gameLink'])
             .setDescription(`Target price: ${user_data['price']}€\n\n[${game['market']} - BUY](${game['buy_link']})\n`)
             .setColor('#6fff00')
+            .setThumbnail(user_data['gameImageLink'])
             .addFields(
                 {
                     "name": `Region`,

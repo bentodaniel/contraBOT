@@ -26,6 +26,7 @@ CREATE TABLE WishList (
     gameID VARCHAR(100) NOT NULL,
     gameProductID VARCHAR(50) NOT NULL,
     gameLink VARCHAR(255) NOT NULL,
+    gameImageLink VARCHAR(255) NOT NULL,
     price FLOAT NOT NULL,
     receiveNotifications BOOLEAN NOT NULL DEFAULT true,
     store VARCHAR(50) NOT NULL DEFAULT 'allkeyshop'

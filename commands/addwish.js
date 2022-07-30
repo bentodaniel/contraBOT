@@ -56,7 +56,7 @@ module.exports = {
                                 utils.send_error_message(response_msg, `You can not have more than ${entry_limit} games in your wishlist`, 'edit')
                             }
                             else {
-                                const replace_q = `REPLACE INTO WishList (userID, gameID, gameProductID, gameLink, price) VALUES('${user.id}', '${game_json['title']}', '${game_json['productID']}', '${game_json['link']}', ${price})`
+                                const replace_q = `REPLACE INTO WishList (userID, gameID, gameProductID, gameLink, gameImageLink, price) VALUES('${user.id}', '${game_json['title']}', '${game_json['productID']}', '${game_json['link']}', '${game_json['image_link']}', ${price})`
                     
                                 db.query(replace_q, async (error, results) => {
                                     if (error) {
