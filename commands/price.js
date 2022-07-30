@@ -17,7 +17,7 @@ module.exports = {
                     utils.reply_error_interaction(interaction, 'There are no offers for this product', user.toString())
                 }
                 else {
-                    const embeds = generate_embeds_buy(game_offers_list, Discord)
+                    const embeds = generate_embeds_buy(game_offers_list, Discord, game_json)
 
                     interaction.reply({content: `Getting offers  for '**${game_json['title']}**'...`, fetchReply: true }).then(reply_msg => {
                         embedPpagination(Discord, reply_msg, embeds, 120000).then(paginated_msg => {
@@ -37,13 +37,14 @@ module.exports = {
     }
 }
 
-function generate_embeds_buy(json_data, Discord) {
+function generate_embeds_buy(game_offers_list, Discord, game_json) {
     var embeds = [];
-    for (game of json_data) {
+    for (game of game_offers_list) {
         var embed = new Discord.MessageEmbed()
             .setTitle(game['market'] + ' - BUY')
             .setURL(game['buy_link'])
             .setColor('#6fff00')
+            .setThumbnail(game_json['image_link'])
             .addFields(
                 {
                     "name": `Region`,
