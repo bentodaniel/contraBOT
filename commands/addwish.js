@@ -5,7 +5,7 @@ module.exports = {
     short_name: 'aw',
     description: 'Add a game to your wish list. I will notify you when the game drops under a specified price (in €).',
     arguments: '[price] <game>',
-    arguments_help: 'If [price] is not provided, the current price will be used',
+    arguments_help: 'If [price] is not provided, the current lowest price will be used',
     showOnHelp: true,
     async execute(client, message, args, Discord, db) {
         const BASE_USER_WISHLIST_LIMIT = 10;

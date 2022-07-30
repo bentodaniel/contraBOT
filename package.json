@@ -1,25 +1,29 @@
 {
-  "name": "price_checker_bot",
+  "name": "contraBOT",
   "version": "1.0.0",
-  "description": "A Discord bot that checkes the price of games",
+  "description": "A Discord bot that checkes the price of games and notifies users/servers of wishlisted games and game updates",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm run development",
+    "development": "cross-env NODE_ENV=development node main.js",
+    "prod": "npm run production",
+    "production": "cross-env NODE_ENV=production node main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bentodaniel/discord_voice_manager.git"
+    "url": "git+https://github.com/bentodaniel/contraBOT.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bentodaniel/discord_voice_manager/issues"
+    "url": "https://github.com/bentodaniel/contraBOT/issues"
   },
-  "homepage": "https://github.com/bentodaniel/discord_voice_manager#readme",
+  "homepage": "https://github.com/bentodaniel/contraBOT#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.11",
     "console-stamp": "^3.0.6",
+    "cross-env": "^7.0.3",
     "discord.js": "^13.8.0",
     "dotenv": "^16.0.1",
     "mysql2": "^2.3.3",

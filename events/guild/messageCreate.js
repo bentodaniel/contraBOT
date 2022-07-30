@@ -1,10 +1,5 @@
-require('dotenv').config();
-
 module.exports = (Discord, client, db, message) => {
-    var prefix = '$'; // Default to prod
-    if (process.env.ENV_TYPE === 'test') {
-        prefix = process.env.TEST_MSG_PREFIX;
-    }
+    var prefix = process.env.MSG_PREFIX
     
     if (!message.content.startsWith(prefix) || message.author.bot)
         return;
