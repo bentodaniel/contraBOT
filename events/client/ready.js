@@ -198,36 +198,7 @@ function handle_wishlist(Discord, client, db) {
                             // now we have to loop through each user and check if there are offers that are ok with his price
                             // if so, we then need to notify the user
                             for (user_data of users_results) {
-                                // Create a list containing the offers with an equal or lower price than requested
-                                var offers = []
-                                for (offer of game_offers_list) {
-                                    if (offer['price'] <= user_data['price']) {
-                                        offers.push(offer)
-                                    }
-                                }
-
-                                // Send a notification to the user if the list is not empty
-                                if (offers.length > 0) {
-
-                                    // TODO - send correct msg
-                                    client.users.fetch(user_data['userID'], false).then((user) => {
-                                        user.send({
-                                            'content' : `There are available offers for a game in your wishlist\nGame: '**${user_data['gameID']}**'\nTarget price: ${user_data['price']}€`,
-                                        })
-                                        .then(user_msg => {
-                                            const embeds = generate_game_notification_embeds(offers, Discord)
-
-                                            embedPpagination(Discord, user_msg, embeds, 120000)
-                                        });
-                                    })
-                                    .catch(user_fetch_error => {
-                                        //console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, user_fetch_error.message)
-                                    
-                                        // TODO - update all wishlist table to not receive notifications
-
-                                        // for now, just dont do enything, but with increasing rows, we should disable notifications
-                                    });;
-                                }
+                                notify_user(client, Discord, user_data, game_offers_list)
                             }
                         }
                     })
@@ -237,12 +208,47 @@ function handle_wishlist(Discord, client, db) {
     })
 }
 
-function generate_game_notification_embeds(json_data, Discord) {
+function notify_user(client, Discord, user_data, game_offers_list) {
+    client.users.fetch(user_data['userID'], false).then((user) => {
+        // Create a list containing the offers with an equal or lower price than requested
+        var offers = []
+        for (offer of game_offers_list) {
+            if (offer['price'] <= user_data['price']) {
+                offers.push(offer)
+            }
+        }
+
+        // Send a notification to the user if the list is not empty
+        if (offers.length > 0) {
+            user.send({
+                'content' : `There are available offers for a game in your wishlist`,
+            })
+            .then(user_msg => {
+                const embeds = generate_game_notification_embeds(Discord, offers, user_data)
+
+                embedPpagination(Discord, user_msg, embeds, 120000)
+            });
+        }
+    })
+    .catch(user_fetch_error => {
+
+        console.log(user_fetch_error)
+
+        //console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, user_fetch_error.message)
+    
+        // TODO - update all wishlist table to not receive notifications
+
+        // for now, just dont do enything, but with increasing rows, we should disable notifications
+    });;
+}
+
+function generate_game_notification_embeds(Discord, offers, user_data) {
     var embeds = [];
-    for (game of json_data) {
+    for (game of offers) {
         var embed = new Discord.MessageEmbed()
-            .setTitle(game['market'] + ' - BUY')
-            .setURL(game['buy_link'])
+            .setTitle(user_data['gameID'])
+            .setURL(user_data['gameLink'])
+            .setDescription(`Target price: ${user_data['price']}€\n\n[${game['market']} - BUY](${game['buy_link']})\n`)
             .setColor('#6fff00')
             .addFields(
                 {
