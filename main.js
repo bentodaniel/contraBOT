@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
 require('dotenv').config();
+require('console-stamp')(console, { 
+    format: ':date(yyyy/mm/dd HH:MM:ss)' 
+});
 
 const db = require('./database/db')
 
