@@ -8,6 +8,9 @@ module.exports = {
     arguments_help: 'If [price] is not provided, the current price will be used',
     showOnHelp: true,
     async execute(client, message, args, Discord, db) {
+        const BASE_USER_WISHLIST_LIMIT = 10;
+        const PREMIUM_USER_WISHLIST_LIMIT = 50;
+
         // Parse arguments and get price
         const args_list = args.split(' ')
         if (args_list.length === 0) {
@@ -41,14 +44,14 @@ module.exports = {
                         console.log(`ERROR :: could not get wishlist data for user '${user.id}'\n `, select_error.message)
                     }
                     else {
-                        let entry_limit = 5
+                        let entry_limit = BASE_USER_WISHLIST_LIMIT
 
                         const premium_q = `SELECT 1 FROM PremiumUsers WHERE userID = ${message.author.id} LIMIT 1`
 
                         db.query(premium_q, async (premium_error, premium_results) => {
                             if (!premium_error) {
                                 if (premium_results.length > 0) {
-                                    entry_limit = 20
+                                    entry_limit = PREMIUM_USER_WISHLIST_LIMIT
                                 }
                             }
 
