@@ -23,6 +23,9 @@ module.exports = {
                         'icon_url': `${dev_user.avatarURL()}`
                     }
                 }]
+            })
+            .catch(msg_error => {
+                console.log(`ERROR :: could not send 'help' message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
             });
         })
     }

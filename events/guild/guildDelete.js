@@ -1,14 +1,13 @@
 module.exports = (Discord, client, db, guild) => {
     
-    console.log("Left a guild: " + guild.name);
+    console.log(`Left guild ${guild.name}, id ${guild.id}`);
 
     try {
         db.query(
             `DELETE FROM Guilds WHERE guildID = ${guild.id}`
         );
     } catch (err) {
-        console.log('ERROR :: failed to insert guild into db', guild.name, guild.id)
-        console.log(err.message)
+        console.log(`ERROR :: failed to delete guild ${guild.name} with id ${guild.id} into db\n `, err)
     }
 }
 

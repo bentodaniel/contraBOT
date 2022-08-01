@@ -25,6 +25,9 @@ module.exports = (Discord, client, db, message) => {
                 'color' : 0xff0000,
                 'description': 'I don\'t recognize that command.\nTry using \'**$help**\''
             }]
+        })
+        .catch(msg_error => {
+            console.log(`ERROR :: could not send 'wrong command' message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
     }
 }

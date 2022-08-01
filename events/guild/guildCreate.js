@@ -1,7 +1,10 @@
 module.exports = (Discord, client, db, guild) => {
     
-    console.log("Joined a new guild: " + guild.name);
-    guild.systemChannel.send({
+    console.log(`Joined guild ${guild.name}, id ${guild.id}`);
+    
+    const channel = guild.channels.cache.find(channel => channel.type === 'GUILD_TEXT' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'))
+
+    channel.send({
         'content' : ' ',
         'tts': false,
         'embeds' : [{
@@ -11,13 +14,15 @@ module.exports = (Discord, client, db, guild) => {
             'description': 'Get a list of all my commands with **$help**',
         }]
     })
+    .catch(msg_error => {
+        console.log(`ERROR :: could not send 'just arrived' message to channel ${channel.id} in guild ${guild.id}\n `, msg_error)
+    });
 
     try {
         db.query(
             `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId})`
         );
     } catch (err) {
-        console.log('ERROR :: failed to insert guild into db', guild.name, guild.id)
-        console.log(err.message)
+        console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db\n `, err)
     }
 }

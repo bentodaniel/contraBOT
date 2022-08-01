@@ -8,7 +8,7 @@ const embedPpagination = require('../../utils/embedPagination');
 module.exports = (Discord, client, db, message) => {
     console.log('IM ONLINE');
 
-    client.user.setActivity(' out for games\' data', {
+    client.user.setActivity(` out for games\' data\n\n\n\nPrefix: ${process.env.MSG_PREFIX}`, {
         type: 'WATCHING' //PLAYING: WATCHING: LISTENING: STREAMING:
     });
     client.user.setStatus("online");
@@ -37,8 +37,7 @@ async function handle_news(client, db) {
     db.query(patch_query, async (error, recorded_results) => {
         if (error) {
             // No need to tell the users
-            console.log(`ERROR :: failed to get last patches`)
-            console.log(error.message)
+            console.log(`ERROR :: failed to get last patches`, error)
         }
         else {
             for (const [ key, value ] of Object.entries(constants.games)) {
@@ -112,8 +111,7 @@ function handle_news_messaging(client, db, game, news_data, game_data) {
     db.query(channels_query, async (error, results) => {
         if (error) {
             // No need to tell the users
-            console.log(`ERROR :: failed to get update channels for game '${game}'`)
-            console.log(error.message)
+            console.log(`ERROR :: failed to get update channels for game '${game}'\n `, error)
         }
         else {
             send_news_messages(results, client, news_data, game_data)
@@ -153,6 +151,9 @@ async function send_news_messages(db_data, client, data, value) {
                         'width': 0
                       }
                 }]
+            })
+            .catch(msg_error => {
+                console.log(`ERROR :: could not send news message to channel ${channel.id}\n `, msg_error)
             });
         }
     }
@@ -165,7 +166,7 @@ function record_into_db(db, game, news_data) {
 
         db.query(q, async (error, results) => {
             if (error) {
-                console.log(`ERROR :: Coundn't record last news into db for game ${game}\n`, error.message)
+                console.log(`ERROR :: Coundn't record last news into db for game ${game}\n`, error)
             }
             else {
                 console.log(`Recorded '${url}' as last news into db for game ${game}`)
@@ -184,7 +185,7 @@ function handle_wishlist(Discord, client, db) {
     db.query(games_query, async (games_error, games_results) => {
         if (games_error) {
             // No need to tell the users
-            console.log(`ERROR :: failed to get the games from wishlist for update\n `, games_error.message)
+            console.log(`ERROR :: failed to get the games from wishlist for update\n `, games_error)
         }
         else {
             // execute for each game
@@ -198,7 +199,7 @@ function handle_wishlist(Discord, client, db) {
                     db.query(users_query, async (users_error, users_results) => {
                         if (users_error) {
                             // No need to tell the users
-                            console.log(`ERROR :: failed to get the users with game ${gameProductID} on their wishlist\n `, users_error.message)
+                            console.log(`ERROR :: failed to get the users with game ${gameProductID} on their wishlist\n `, users_error)
                         }
                         else {
                             // now we have to loop through each user and check if there are offers that are ok with his price
@@ -208,6 +209,9 @@ function handle_wishlist(Discord, client, db) {
                             }
                         }
                     })
+                })
+                .catch(err => {
+                    // No need to do anything
                 })
             }
         }
@@ -232,10 +236,10 @@ function notify_user(client, Discord, user_data, game_offers_list) {
             .then(user_msg => {
                 const embeds = generate_game_notification_embeds(Discord, offers, user_data)
 
-                embedPpagination(Discord, user_msg, embeds, 120000)
+                embedPpagination(Discord, user_msg, embeds, 120000, ' ')
             })
             .catch(msg_error => {
-                console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error.message)
+                console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error)
             });
         }
     })
@@ -243,7 +247,7 @@ function notify_user(client, Discord, user_data, game_offers_list) {
 
         console.log(user_fetch_error)
 
-        //console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, user_fetch_error.message)
+        //console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, user_fetch_error)
     
         // TODO - update all wishlist table to not receive notifications
 

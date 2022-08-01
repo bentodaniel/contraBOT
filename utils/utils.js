@@ -2,9 +2,6 @@ const request = require('request');
 const cheerio = require('cheerio');
 const xhr_req = require('xhr-request');
 
-const emoji_numbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-const PAGE_LIMIT = 5;
-
 module.exports = {
     get_game_offers,
     message_search_games_list,
@@ -61,6 +58,9 @@ function message_search_games_list(store, game_search, user_message, callback, s
                     msg.edit({
                         components: [component]
                     })
+                    .catch(msg_error => {
+                        console.log(`ERROR :: could not edit message_search_games_list message to disable selection to channel ${msg.channelId} in guild ${msg.guildId}\n `, msg_error)
+                    });
                 });
             }
         })
@@ -68,6 +68,9 @@ function message_search_games_list(store, game_search, user_message, callback, s
             send_error_message(msg, 'Failed to get the data', 'edit')
         })
     })
+    .catch(msg_error => {
+        console.log(`ERROR :: could not send placeholder message on message_search_games_list to channel ${user_message.channelId} in guild ${user_message.guildId}\n `, msg_error)
+    });
 }
 
 /**
@@ -90,7 +93,7 @@ function get_allkeyshop_games_list(game_search) {
     return new Promise((success, failure) => {
         request(`https://www.allkeyshop.com/blog/catalogue/search-${game_search}/`, function (error, response, body) {
             if (error || !body){
-                console.log(`ERROR :: trying to search for '${game_search}'\n `, error.message);
+                console.log(`ERROR :: trying to search for '${game_search}'\n `, error);
                 failure()
             }
             else {
@@ -149,7 +152,7 @@ async function get_game_offers(gameProductID, currency, limit) {
             json: true
         }, function (err, req_data) {
             if (err) {
-                console.log(`ERROR :: failed to get xhr data for product ${gameProductID}\n `, err.message)
+                console.log(`ERROR :: failed to get xhr data for product ${gameProductID}\n `, err)
                 failure()
             }
             else {
@@ -207,6 +210,9 @@ function reply_search_selection(json_data, message, game_search, selection_msg_e
             }
         ]
     })
+    .catch(msg_error => {
+        console.log(`ERROR :: could not send selection message on reply_search_selection to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+    });
 }
 
 function parse_json_data(json_data) {
@@ -242,6 +248,9 @@ function send_error_message(message, error_msg, type, content) {
                 'color' : 0xff0000,
             }],
             'components': []
+        })
+        .catch(msg_error => {
+            console.log(`ERROR :: failed to edit message on send_error_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
     }
     else if (type === 'send') {
@@ -253,6 +262,9 @@ function send_error_message(message, error_msg, type, content) {
                 'color' : 0xff0000,
             }],
             'components': []
+        })
+        .catch(msg_error => {
+            console.log(`ERROR :: failed to send message on send_error_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
     }
 }
@@ -270,6 +282,9 @@ function reply_error_interaction(interaction, error_msg, content) {
         components: [], 
         fetchReply: true 
     })
+    .catch(msg_error => {
+        console.log(`ERROR :: failed to reply to interaction on reply_error_interaction to channel ${interaction.channelId} in guild ${interaction.guildId}\n `, msg_error)
+    });
 }
 
 function send_success_message(message, success_msg, type, content) {
@@ -283,6 +298,9 @@ function send_success_message(message, success_msg, type, content) {
                 'color' : 0x6fff00,
             }],
             'components': []
+        })
+        .catch(msg_error => {
+            console.log(`ERROR :: failed to edit message on send_success_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
     }
     else if (type === 'send') {
@@ -294,6 +312,9 @@ function send_success_message(message, success_msg, type, content) {
                 'color' : 0x6fff00,
             }],
             'components': []
+        })
+        .catch(msg_error => {
+            console.log(`ERROR :: failed to send message on send_success_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
     }
 }
@@ -304,7 +325,7 @@ function get_user_wishlist(db, userID) {
         
         db.query(wishlist_query, async (error, results) => {
             if (error) {
-                console.log(`ERROR :: failed to get wishlist for user '${userID}'\n `, error.message)
+                console.log(`ERROR :: failed to get wishlist for user '${userID}'\n `, error)
                 failure()
             }
             else {
@@ -320,7 +341,7 @@ function get_guild_updates(db, guildID) {
 
         db.query(updateslist_query, async (error, results) => {
             if (error) {
-                console.log(`ERROR :: failed to get updates list for guild '${guildID}'\n `, error.message)
+                console.log(`ERROR :: failed to get updates list for guild '${guildID}'\n `, error)
                 failure()
             }
             else {

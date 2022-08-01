@@ -17,10 +17,31 @@ module.exports = {
                             'title': `${message.author.username}'s wishlist is empty`,
                             'color' : 0x6fff00
                         }]
+                    })
+                    .catch(msg_error => {
+                        console.log(`ERROR :: could not send 'nothing in wishlist' message on stopwish to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
                     });
                 }
                 else {
-                    send_selection_message(json_data, msg, message.author).then(select_msg => {
+                    msg.edit({
+                        'content': `${message.author.toString()} select the items you would like to remove from your wishlist`,
+                        'components': [
+                            {
+                                'type': 1,
+                                'components': [
+                                    {
+                                    "custom_id": `row_0_select_0`,
+                                    "placeholder": `Select items to remove from wishlist`,
+                                    "options": parse_json_data(json_data),
+                                    "min_values": 1,
+                                    "max_values": json_data.length,
+                                    "type": 3
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                    .then(select_msg => {
                         // check if the user is the owner of the request and if the interaction is in the same message
                         const filter = (click) => click.user.id === message.author.id && click.message.id == select_msg.id
                         const collector = message.channel.createMessageComponentCollector({
@@ -59,38 +80,26 @@ module.exports = {
                                 msg.edit({
                                     components: [component]
                                 })
+                                .catch(msg_error => {
+                                    console.log(`ERROR :: could not edit stopwish message to disable game selection to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                                });
                             }
                         });
                     })
+                    .catch(msg_error => {
+                        console.log(`ERROR :: could not send list of wishlisted games on stopwish to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                    });
                 }
             })
             .catch(err => {
-                console.log(err)
+                //console.log(`ERROR :: failed to get wishlist data for user ${message.author.id}\n `, err) // already logged when executing function
                 utils.send_error_message(msg, 'Failed to get wishlist data', 'edit')
             })
         })
+        .catch(msg_error => {
+            console.log(`ERROR :: could not send placeholder message on stopwish to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+        });
     }
-}
-
-function send_selection_message(json_data, message, user) {
-    return message.edit({
-        'content': `${user.toString()} select the items you would like to remove from your wishlist`,
-        'components': [
-            {
-                'type': 1,
-                'components': [
-                    {
-                    "custom_id": `row_0_select_0`,
-                    "placeholder": `Select items to remove from wishlist`,
-                    "options": parse_json_data(json_data),
-                    "min_values": 1,
-                    "max_values": json_data.length,
-                    "type": 3
-                    }
-                ]
-            }
-        ]
-    })
 }
 
 function parse_json_data(json_data) {

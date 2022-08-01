@@ -14,7 +14,24 @@ module.exports = {
             utils.send_error_message(message, 'You do not have permissions to use that command', 'send')
         }
         else {
-            send_selection_message(constants.games, message).then((msg) => {
+            message.channel.send({
+                'content': `Select the game you would like to set up for news and the channel where these news should show up`,
+                'components': [
+                    {
+                        'type': 1,
+                        'components': [
+                            {
+                                "custom_id": `game_select`,
+                                "placeholder": `Select game`,
+                                "options": parse_game_data(constants.games),
+                                "min_values": 1,
+                                "max_values": 1,
+                                "type": 3
+                            }
+                        ]
+                    }
+                ]
+            }).then((msg) => {
                 // check if the user is the owner of the request, if it is the owner of the guild and if the interaction is in the same message
                 const game_filter = (click) => click.user.id === message.author.id && click.user.id === message.guild.ownerId && click.message.id === msg.id
                 const game_collector = message.channel.createMessageComponentCollector({
@@ -26,6 +43,9 @@ module.exports = {
                 game_collector.on("collect", async interaction => {
                     if (interaction.message.id !== msg.id) return
                     const gameID = interaction.values[0]
+
+
+                    // TODO vvvv - only show channels that the bot can see and message
 
                     message.guild.channels.fetch().then(channels => {
                         interaction.reply({ 
@@ -85,6 +105,9 @@ module.exports = {
                                     reply_msg.edit({
                                         components: [component]
                                     })
+                                    .catch(msg_error => {
+                                        console.log(`ERROR :: could not edit setupdates message to disable channel selection to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                                    });
                                 }
                             });
                         })
@@ -99,31 +122,16 @@ module.exports = {
                     msg.edit({
                         components: [component]
                     })
+                    .catch(msg_error => {
+                        console.log(`ERROR :: could not edit setupdates message to disable game selection to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                    });
                 });
             })
+            .catch(msg_error => {
+                console.log(`ERROR :: could not send 'game selection' message on setupdates to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+            });
         }
     }
-}
-
-async function send_selection_message(games, message) {
-    return message.channel.send({
-        'content': `Select the game you would like to set up for news and the channel where these news should show up`,
-        'components': [
-            {
-                'type': 1,
-                'components': [
-                    {
-                        "custom_id": `game_select`,
-                        "placeholder": `Select game`,
-                        "options": parse_game_data(games),
-                        "min_values": 1,
-                        "max_values": 1,
-                        "type": 3
-                    }
-                ]
-            }
-        ]
-    })
 }
 
 function parse_game_data(games) {

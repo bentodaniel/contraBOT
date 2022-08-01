@@ -24,6 +24,9 @@ module.exports = {
                             'title': `${user.username}'s wishlist is empty`,
                             'color' : 0x6fff00
                         }]
+                    })
+                    .catch(msg_error => {
+                        console.log(`ERROR :: could not send 'empty wishlist' message on wishlist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
                     });
                 }
                 else {
@@ -36,14 +39,20 @@ module.exports = {
                     msg.edit({
                         'content' : ' ',
                         'embeds' : [embed]
+                    })
+                    .catch(msg_error => {
+                        console.log(`ERROR :: could not send 'wishlist' message on wishlist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
                     });
                 }
             })
             .catch(err => {
-                console.log('ERROR :: failed to get wishlist\n ', err.message)
+                //console.log('ERROR :: failed to get wishlist\n ', err) // already logged when executing function
                 utils.send_error_message(msg, 'Failed to get wishlist data', 'edit')
             })
         })
+        .catch(msg_error => {
+            console.log(`ERROR :: could not send placeholder message on wishlist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+        });
     }
 }
 

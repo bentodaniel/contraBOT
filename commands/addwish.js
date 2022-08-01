@@ -41,7 +41,7 @@ module.exports = {
                 db.query(select_q, async (select_error, select_results) => {
                     if (select_error) {
                         utils.send_error_message(response_msg, `Failed to get wishlist data`, 'edit')
-                        console.log(`ERROR :: could not get wishlist data for user '${user.id}'\n `, select_error.message)
+                        console.log(`ERROR :: could not get wishlist data for user '${user.id}'\n `, select_error)
                     }
                     else {
                         let entry_limit = BASE_USER_WISHLIST_LIMIT
@@ -64,7 +64,7 @@ module.exports = {
                                 db.query(replace_q, async (error, results) => {
                                     if (error) {
                                         utils.send_error_message(response_msg, `Failed to add the game '${game_json['title']}' to your wishlist`, 'edit')
-                                        console.log(`ERROR :: could not add the game '${game_json['title']}' to user '${user.id}' wishlist\n `, error.message)
+                                        console.log(`ERROR :: could not add the game '${game_json['title']}' to user '${user.id}' wishlist\n `, error)
                                     }
                                     else {
                                         utils.send_success_message(response_msg, `Game '${game_json['title']}' has been added to your wishlist`, 'edit', user.toString())

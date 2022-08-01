@@ -20,16 +20,16 @@ module.exports = {
                     const embeds = generate_embeds_buy(game_offers_list, Discord, game_json)
 
                     interaction.reply({content: `Getting offers  for '**${game_json['title']}**'...`, fetchReply: true }).then(reply_msg => {
-                        embedPpagination(Discord, reply_msg, embeds, 120000).then(paginated_msg => {
-                            // todo - possibly could also add a 'add to wishlist' button
-    
-                            paginated_msg.edit({'content': `${user.toString()}, here are the results for '**${game_json['title']}**'`})
+                        embedPpagination(
+                            Discord, reply_msg, embeds, 120000, `${user.toString()}, here are the results for '**${game_json['title']}**'`
+                        )
+                        .catch(paginate_error => {
+
                         })
                     })
                 }
             })
             .catch(err => {
-                console.log(err)
                 utils.reply_error_interaction(interaction, 'Failed to get the data', user.toString())
             })
         }

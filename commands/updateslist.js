@@ -26,8 +26,18 @@ module.exports = {
                         }
                     ]
                 })
+                .catch(msg_error => {
+                    console.log(`ERROR :: could not edit message on updateslist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                });
+            })
+            .catch(err => {
+                //console.log('ERROR :: failed to get wishlist\n ', err) // already logged when executing function
+                utils.send_error_message(msg, 'Failed to get updateslist data', 'edit')
             })
         })
+        .catch(msg_error => {
+            console.log(`ERROR :: could not send placeholder message on updateslist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+        });
     }
 }
 

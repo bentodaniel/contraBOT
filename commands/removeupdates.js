@@ -19,6 +19,9 @@ module.exports = {
                     'color' : 0xff0000,
                 }]
             })
+            .catch(msg_error => {
+                console.log(`ERROR :: could not send 'not author' error message on removeupdates to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+            });
         }
         else {
             message.channel.send(`Getting updates list data...`).then(msg => {
@@ -31,10 +34,31 @@ module.exports = {
                                 'title': `${message.guild.name} has no game updates setup`,
                                 'color' : 0x6fff00
                             }]
+                        })
+                        .catch(msg_error => {
+                            console.log(`ERROR :: could not send 'no updates' error message on removeupdates to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
                         });
                     }
                     else {
-                        send_selection_message(json_data, msg, client).then(select_msg => {
+                        msg.edit({
+                            'content': `Select the games you want to stop receiving news about`,
+                            'components': [
+                                {
+                                    'type': 1,
+                                    'components': [
+                                        {
+                                        "custom_id": `row_0_select_0`,
+                                        "placeholder": `Select games to remove from updates list`,
+                                        "options": parse_json_data(json_data, client),
+                                        "min_values": 1,
+                                        "max_values": json_data.length,
+                                        "type": 3
+                                        }
+                                    ]
+                                }
+                            ]
+                        })
+                        .then(select_msg => {
                             let allow_time_fail = true
 
                             // check if the interaction is in the same message
@@ -75,35 +99,27 @@ module.exports = {
                                     select_msg.edit({
                                         components: [component]
                                     })
+                                    .catch(msg_error => {
+                                        console.log(`ERROR :: could not edit removeupdates message to disable selection to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                                    });
                                 }
                             });
                         })
+                        .catch(msg_error => {
+                            console.log(`ERROR :: could not send list of set up games on removeupdates to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                        });
                     }
                 })
+                .catch(err => {
+                    //console.log('ERROR :: failed to get wishlist\n ', err) // already logged when executing function
+                    utils.send_error_message(msg, 'Failed to get updateslist data', 'edit')
+                })
             })
+            .catch(msg_error => {
+                console.log(`ERROR :: could not send 'getting updates' message on removeupdates to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+            });
         }
     }
-}
-
-function send_selection_message(json_data, message, client) {
-    return message.edit({
-        'content': `Select the games you want to stop receiving news about`,
-        'components': [
-            {
-                'type': 1,
-                'components': [
-                    {
-                    "custom_id": `row_0_select_0`,
-                    "placeholder": `Select games to remove from updates list`,
-                    "options": parse_json_data(json_data, client),
-                    "min_values": 1,
-                    "max_values": json_data.length,
-                    "type": 3
-                    }
-                ]
-            }
-        ]
-    })
 }
 
 function parse_json_data(json_data, client) {

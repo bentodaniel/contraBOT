@@ -5,3 +5,14 @@
 --5. add a link collumn on wishlist, so when displaying it, linking the game to the page--
 6. manage wishlist according to if a user is conneced to a server with this bot or not
 7. add more games for updates...
+8. add to wishlist button on price/offers embeds using input field for price
+
+
+
+check the promises. when returning a failure, a catch is necessary (example, utils.get_guild_updates)
+
+
+shuld only be able to set updates on channels that the bot can see and message (setupdates)
+
+
+what happens if bot enters a guild, then the guild is deleted from database, and then we setup updates on this guild (guildcreate)
