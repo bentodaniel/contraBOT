@@ -2,7 +2,14 @@ module.exports = (Discord, client, db, guild) => {
     
     console.log(`Joined guild ${guild.name}, id ${guild.id}`);
     
-    const channel = guild.channels.cache.find(channel => channel.type === 'GUILD_TEXT' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'))
+    const channel = guild.channels.cache.find(channel => 
+        channel.type === 'GUILD_TEXT' && 
+        channel.permissionsFor(guild.me).has('VIEW_CHANNEL') &&
+        channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
+        channel.permissionsFor(guild.me).has('EMBED_LINKS')
+    )
+
+    console.log(channel.name)
 
     channel.send({
         'content' : ' ',

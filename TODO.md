@@ -9,10 +9,7 @@
 
 
 
-check the promises. when returning a failure, a catch is necessary (example, utils.get_guild_updates)
 
-
-shuld only be able to set updates on channels that the bot can see and message (setupdates)
 
 
 what happens if bot enters a guild, then the guild is deleted from database, and then we setup updates on this guild (guildcreate)

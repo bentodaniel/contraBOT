@@ -49,7 +49,7 @@ module.exports = {
 
                     message.guild.channels.fetch().then(channels => {
                         interaction.reply({ 
-                            content:  `${interaction.user.toString()}, setting up updates for '**${constants.games[gameID].title}**'`,
+                            content:  `${interaction.user.toString()}, setting up updates for '**${constants.games[gameID].title}**'\nI can not see channels marked with ❌`,
                             components: [
                                 {
                                     'type': 1,
@@ -57,7 +57,7 @@ module.exports = {
                                         {
                                             "custom_id": `channel_select`,
                                             "placeholder": `Select channel`,
-                                            "options": parse_channels(channels),
+                                            "options": parse_channels(channels, message.guild),
                                             "min_values": 1,
                                             "max_values": 1,
                                             "type": 3
@@ -146,16 +146,41 @@ function parse_game_data(games) {
     return res
 }
 
-function parse_channels(channels) {
+function parse_channels(channels, guild) {
+    //const emojis = ['❌ ', '✔️ '] // ✅ 
+
     res = []
-    channels.forEach(element => {
-        if (element.type === 'GUILD_TEXT') {
-            res.push({
-                'label': element.name,
-                'description': element.parent.name,
-                'value': '' + element.id,
-                'default': false
-            })
+    channels.forEach(channel => {
+
+        const has_permissions = channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
+                                channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
+                                channel.permissionsFor(guild.me).has('EMBED_LINKS')
+
+        if (channel.type === 'GUILD_TEXT') {
+            if (has_permissions) {
+                res.push({
+                    'label': channel.name,
+                    'emoji': {
+                        'id': null,
+                        'name': `✅`,
+                    },
+                    'description': channel.parent.name,
+                    'value': '' + channel.id,
+                    'default': false
+                })
+            }
+            else {
+                res.push({
+                    'label': channel.name,
+                    'emoji': {
+                        'id': null,
+                        'name': `❌`,
+                    },
+                    'description': channel.parent.name,
+                    'value': '' + channel.id,
+                    'default': false
+                })
+            }
         }
     });
     return res
