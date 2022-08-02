@@ -19,7 +19,7 @@ module.exports = (Discord, client, db, guild) => {
             'type' : 'rich',
             'title': 'Just arrived',
             'color' : 0x00FFFF,
-            'description': 'Get a list of all my commands with **$help**',
+            'description': `Get a list of all my commands with **${process.env.MSG_PREFIX}help**`,
         }]
     })
     .catch(msg_error => {

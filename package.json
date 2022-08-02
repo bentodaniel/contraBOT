@@ -4,10 +4,11 @@
   "description": "A Discord bot that checkes the price of games and notifies users/servers of wishlisted games and game updates",
   "main": "main.js",
   "scripts": {
-    "dev": "npm run development",
-    "development": "cross-env NODE_ENV=development node main.js",
-    "prod": "npm run production",
-    "production": "cross-env NODE_ENV=production node main.js"
+    "dev": "cross-env NODE_ENV=development node main.js",
+    "prod": "cross-env NODE_ENV=production node main.js",
+
+    "dev:mon": "cross-env NODE_ENV=development nodemon main.js",
+    "prod:mon": "cross-env NODE_ENV=production nodemon main.js"
   },
   "repository": {
     "type": "git",
@@ -27,7 +28,12 @@
     "discord.js": "^13.8.0",
     "dotenv": "^16.0.1",
     "mysql2": "^2.3.3",
+    "nodemon": "^2.0.19",
     "request": "^2.88.2",
     "xhr-request": "^1.1.0"
+  },
+  "nodemonConfig" : {
+    "delay": 2000,
+    "ignore" : []
   }
 }

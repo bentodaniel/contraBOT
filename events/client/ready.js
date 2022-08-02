@@ -8,7 +8,7 @@ const embedPpagination = require('../../utils/embedPagination');
 module.exports = (Discord, client, db, message) => {
     console.log('IM ONLINE');
 
-    client.user.setActivity(` out for games\' data\n\n\n\nPrefix: ${process.env.MSG_PREFIX}`, {
+    client.user.setActivity(` out for games\' data`, {
         type: 'WATCHING' //PLAYING: WATCHING: LISTENING: STREAMING:
     });
     client.user.setStatus("online");
