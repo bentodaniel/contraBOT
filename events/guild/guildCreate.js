@@ -9,7 +9,8 @@ module.exports = (Discord, client, db, guild) => {
         channel.permissionsFor(guild.me).has('EMBED_LINKS')
     )
 
-    console.log(channel.name)
+    // TODO - add a selection menu for default channel for bot patch news
+    const default_channel = null
 
     channel.send({
         'content' : ' ',
@@ -27,7 +28,7 @@ module.exports = (Discord, client, db, guild) => {
 
     try {
         db.query(
-            `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId})`
+            `INSERT INTO Guilds VALUES (${guild.id}, ${default_channel})`
         );
     } catch (err) {
         console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db\n `, err)

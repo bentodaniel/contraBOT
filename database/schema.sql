@@ -2,7 +2,7 @@
 
 CREATE TABLE Guilds (
     guildID VARCHAR(50) NOT NULL PRIMARY KEY,
-    guildOwnerID VARCHAR(50) NOT NULL
+    defaultChannelID VARCHAR(50) DEFAULT NULL
 );
 
 CREATE TABLE UpdatesChannels (
