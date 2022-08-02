@@ -44,9 +44,6 @@ module.exports = {
                     if (interaction.message.id !== msg.id) return
                     const gameID = interaction.values[0]
 
-
-                    // TODO vvvv - only show channels that the bot can see and message
-
                     message.guild.channels.fetch().then(channels => {
                         interaction.reply({ 
                             content:  `${interaction.user.toString()}, setting up updates for '**${constants.games[gameID].title}**'\nI can not see channels marked with ❌`,
@@ -82,17 +79,35 @@ module.exports = {
 
                                 const channelID = interaction.values[0]
 
-                                const channel = await client.channels.fetch(channelID)
+                                // check if the guild is in guilds table, if not, then try to add it
+                                const guilds_query = `SELECT * FROM Guilds WHERE guildID = ${message.guildId} LIMIT 1`
+                                db.query(guilds_query, async (guilds_error, guilds_results) => {
+                                    // if there are results, and the list is empty, we need to insert it
+                                    if (!guilds_error && guilds_results.length === 0) {
+                                        // add to table Guilds
+                                        try {
+                                            db.query(
+                                                `INSERT INTO Guilds VALUES (${message.guildId}, ${message.guild.ownerId}, ${null})`
+                                            );
+                                        } catch (err) {
+                                            console.log(`ERROR :: failed to insert guild ${message.guild.name} with id ${message.guildId} into db during setupdates\n `, err)
+                                        }
+                                    }
 
-                                const q = `REPLACE INTO UpdatesChannels (gameID, channelID, guildID) VALUES('${gameID}', ${channel.id}, ${message.guild.id})`
-                                
-                                db.query(q, async (error, results) => {
-                                    if (error) {
-                                        utils.send_error_message(reply_msg, `Failed to set the channel '${channel.name}' as default for '${constants.games[gameID].title}' updates`, 'edit')
-                                    }
-                                    else {
-                                        utils.send_success_message(reply_msg, `Channel '${channel.name}' has been set as default for '${constants.games[gameID].title}' updates`, 'edit', channel.toString())
-                                    }
+                                    // then, try to add to UpdatesChannels
+                                    //  - there was an error getting the guild from table or the guild is in table (doesnt matter)
+                                    const channel = await client.channels.fetch(channelID)
+
+                                    const insert_updates_query = `REPLACE INTO UpdatesChannels (gameID, channelID, guildID) VALUES('${gameID}', ${channel.id}, ${message.guild.id})`
+                                    
+                                    db.query(insert_updates_query, async (error, results) => {
+                                        if (error) {
+                                            utils.send_error_message(reply_msg, `Failed to set the channel '${channel.name}' as default for '${constants.games[gameID].title}' updates`, 'edit')
+                                        }
+                                        else {
+                                            utils.send_success_message(reply_msg, `Channel '${channel.name}' has been set as default for '${constants.games[gameID].title}' updates`, 'edit', channel.toString())
+                                        }
+                                    });
                                 });
                             });
                     
