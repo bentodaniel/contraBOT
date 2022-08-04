@@ -24,7 +24,8 @@ module.exports = (Discord, client, db, message) => {
         setInterval( function() { handle_wishlist(Discord, client, db); }, 3600000 * 2 ); // 1 hour * 3  (3600000 * 12)
     }, 3600000 * 1)
 
-    handle_wishlist(Discord, client, db)
+    // Send patch notes messages
+    handle_patch_notes(client, Discord, db)
 }
 
 /********************************************
@@ -301,16 +302,58 @@ function generate_game_notification_embeds(Discord, offers, user_data) {
     return embeds;
 }
 
+/********************************************
+ *      PATCH NOTES FUNCTIONS
+ ********************************************/
 
+function handle_patch_notes(client, Discord, db) {
+    // Get all guilds that have set a default channel
+    const q = `SELECT * FROM Guilds WHERE defaultChannelID IS NOT NULL`
+    db.query(q, async (error, results) => {
+        if (error) {
+            // No need to inform any user
+            console.log(`ERROR :: failed to get guilds with set default channel`)
+        }
+        else {
+            var fs = require('fs');
+            var obj = JSON.parse(fs.readFileSync('patch-notes.json', 'utf8'));
 
+            // This wont be a problem, as I know there is at least one
+            const last = obj[obj.length-1]
 
+            // If it is not a shaddow patch, then notify the servers
+            if (last.display) {
+                // Loop through each server's data
+                for (guild_data of results) {
+                    notify_server(client, Discord, guild_data, last)
+                }
+            }
 
+        }
+    })
+}
 
+function notify_server(client, Discord, guild_data, patch_data) {
+    client.channels.fetch(guild_data['defaultChannelID']).then(channel => {
+        const embed = new Discord.MessageEmbed()
+                        .setColor(0xFFFFFF)
+                        .setTitle(patch_data.title)
+                        .setDescription(patch_data.description)
+                        .setThumbnail('attachment://contraLOGO.png')
+                        .setTimestamp()
+                        .setFooter({ text: 'contraBOT'})
+        
+        channel.send({
+            embeds: [embed],
+            files: ['./images/contraLOGO.png']
+        })
+        .catch(msg_error => {
+            console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error)
+        });
+    })
+    .catch(channel_fetch_error => {
+        console.log(channel_fetch_error)
 
-
-// checks https://www.indiegamebundles.com/category/free/
-// https://gg.deals/deals/?maxPrice=0
-// https://www.epicbundle.com/category/article/for-free/
-function checkFreeDeals() {
-    console.log('its time')
+        //no need to notify anyone (?)
+    });;
 }

@@ -54,7 +54,7 @@ module.exports = {
                                         {
                                             "custom_id": `channel_select`,
                                             "placeholder": `Select channel`,
-                                            "options": parse_channels(channels, message.guild),
+                                            "options": utils.parse_channels_to_select_options(channels, message.guild),
                                             "min_values": 1,
                                             "max_values": 1,
                                             "type": 3
@@ -126,6 +126,9 @@ module.exports = {
                                 }
                             });
                         })
+                        .catch(msg_error => {
+                            console.log(`ERROR :: could not send 'channel selection' message on setupdates to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                        });
                     })
                 });
         
@@ -158,45 +161,5 @@ function parse_game_data(games) {
             'default': false
         })
     }
-    return res
-}
-
-function parse_channels(channels, guild) {
-    //const emojis = ['❌ ', '✔️ '] // ✅ 
-
-    res = []
-    channels.forEach(channel => {
-
-        const has_permissions = channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
-                                channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
-                                channel.permissionsFor(guild.me).has('EMBED_LINKS')
-
-        if (channel.type === 'GUILD_TEXT') {
-            if (has_permissions) {
-                res.push({
-                    'label': channel.name,
-                    'emoji': {
-                        'id': null,
-                        'name': `✅`,
-                    },
-                    'description': channel.parent.name,
-                    'value': '' + channel.id,
-                    'default': false
-                })
-            }
-            else {
-                res.push({
-                    'label': channel.name,
-                    'emoji': {
-                        'id': null,
-                        'name': `❌`,
-                    },
-                    'description': channel.parent.name,
-                    'value': '' + channel.id,
-                    'default': false
-                })
-            }
-        }
-    });
     return res
 }

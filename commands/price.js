@@ -26,6 +26,8 @@ module.exports = {
                         .catch(paginate_error => {
 
                         })
+
+                        // TODO ^^ handle generation of a button to add to wishlist
                     })
                 }
             })

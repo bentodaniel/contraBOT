@@ -1,0 +1,9 @@
+[
+    {
+        "display": true,
+        "operation" : "release",
+        "date" : "2022/08/02",
+        "title" : "Official release",
+        "description" : "ContraBOT notifies your server of game changes on four different games and also notifies you of current free game deals.\nContraBOT can check the price of any given game on AllKeyShop. You can also add any game to your wishlist and contraBOT will notify you if that game reaches your wanted price on AllKeyShop."
+    }
+]

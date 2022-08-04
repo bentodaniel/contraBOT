@@ -32,6 +32,3 @@ module.exports = {
         }
     }
 }
-
-// cycle
-// https://thecycle.game/news-and-media

@@ -9,7 +9,8 @@ module.exports = {
     reply_error_interaction,
     send_success_message,
     get_user_wishlist,
-    get_guild_updates
+    get_guild_updates,
+    parse_channels_to_select_options
 }
 
 /**
@@ -349,4 +350,44 @@ function get_guild_updates(db, guildID) {
             }
         });
     })
+}
+
+function parse_channels_to_select_options(channels, guild) {
+    //const emojis = ['❌ ', '✔️ '] // ✅ 
+
+    res = []
+    channels.forEach(channel => {
+
+        const has_permissions = channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
+                                channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
+                                channel.permissionsFor(guild.me).has('EMBED_LINKS')
+
+        if (channel.type === 'GUILD_TEXT') {
+            if (has_permissions) {
+                res.push({
+                    'label': channel.name,
+                    'emoji': {
+                        'id': null,
+                        'name': `✅`,
+                    },
+                    'description': channel.parent.name,
+                    'value': '' + channel.id,
+                    'default': false
+                })
+            }
+            else {
+                res.push({
+                    'label': channel.name,
+                    'emoji': {
+                        'id': null,
+                        'name': `❌`,
+                    },
+                    'description': channel.parent.name,
+                    'value': '' + channel.id,
+                    'default': false
+                })
+            }
+        }
+    });
+    return res
 }

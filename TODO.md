@@ -7,3 +7,5 @@
 7. add more games for updates...
 8. add to wishlist button on price/offers embeds using input field for price
 9. add bot patch notes and default channel usability
+
+10. possibly create a website for the bot
