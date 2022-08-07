@@ -9,32 +9,35 @@
  * @param {Discord} Discord
  * @param {Interaction} interaction
  * @param {MessageEmbed[]} pages
- * @param {MessageButton[]} buttonList
  * @param {number} timeout
  * @returns
  */
-const embedPpagination = async (Discord, message, pages, timeout = 120000, content_text=' ') => {
+const embedPpagination = async (Discord, message, pages, timeout = 120000, content_text=' ', extra_btn) => {
     return new Promise((success, failure) => {
         let page = 0;
 
-        buttonList = [
+        var buttonList = [
             new Discord.MessageButton()
                 .setCustomId('firstbtn')
-                .setLabel('First')
+                .setLabel('⏮')
                 .setStyle('SECONDARY'),
             new Discord.MessageButton()
                 .setCustomId('previousbtn')
-                .setLabel('Previous')
+                .setLabel('◀')
                 .setStyle('SECONDARY'),
             new Discord.MessageButton()
                 .setCustomId('nextbtn')
-                .setLabel('Next')
+                .setLabel('▶')
                 .setStyle('SECONDARY'),
             new Discord.MessageButton()
                 .setCustomId('lastbtn')
-                .setLabel('Last')
+                .setLabel('⏭')
                 .setStyle('SECONDARY')
         ]
+
+        if (extra_btn !== undefined) {
+            buttonList.push(extra_btn)
+        }
     
         const row = new Discord.MessageActionRow().addComponents(buttonList);
     
@@ -106,7 +109,8 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
                         buttonList[0].setDisabled(true),
                         buttonList[1].setDisabled(true),
                         buttonList[2].setDisabled(true),
-                        buttonList[3].setDisabled(true)
+                        buttonList[3].setDisabled(true),
+                        buttonList[buttonList.length - 1].setDisabled(true) // If there is no 'add to wishlist' btn, it will just disable 3 again
                     );
                     curPage.edit({
                         embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
