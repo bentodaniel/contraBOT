@@ -131,6 +131,9 @@ async function send_news_messages(db_data, client, data, value) {
     for (entry_point of db_data) {
         const channel = await client.channels.fetch(entry_point['channelID'])
 
+        // TODO vvvv - this should only send if the date is at max 1 day difference
+        // this is because of downtime, to prevent spam of old news
+
         // Loop in reverse to print oldest first
         for (var i = data.length - 1; i >= 0; i--) {
             var d = data[i]

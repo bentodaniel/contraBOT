@@ -34,7 +34,7 @@ module.exports = {
                     }]
                 })
                 .then(select_msg => {
-                    this.handleSelectDefault(client, db, message.guild, select_msg)
+                    handleSelectDefault(client, db, message.guild, select_msg)
                 })
                 .catch(msg_error => {
                     console.log(`ERROR :: could not send 'channel selection' message on setdefault to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
@@ -42,50 +42,50 @@ module.exports = {
             })
         }
     },
-    async handleSelectDefault(client, db, guild, select_msg) {
-        let allow_time_fail = true
-
-        const channel_filter = (click) => click.user.id === guild.ownerId && click.message.id === select_msg.id
-        const channel_collector = select_msg.createMessageComponentCollector({
-            max: 1, // The number of times a user can click on the button
-            time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-            channel_filter // Add the filter
-        });
-    
-        channel_collector.on("collect", async interaction => {
-            allow_time_fail = false
-
-            const channelID = interaction.values[0]
-
-            const channel = await client.channels.fetch(channelID)
-
-            // check if the guild is in guilds table, if not, then try to add it
-            const q = `REPLACE INTO Guilds (guildID, guildOwnerID, defaultChannelID) VALUES(${guild.id}, ${guild.ownerId}, ${channel.id})`
-            db.query(q, async (error, results) => {
-                if (error) {
-                    utils.send_error_message(select_msg, `Failed to set the channel '${channel.name}' as default`, 'edit')
-                }
-                else {
-                    utils.send_success_message(select_msg, `Channel '${channel.name}' has been set as default`, 'edit', channel.toString())
-                }
-            });
-        });
-            
-        channel_collector.on("end", (collected) => {
-            if (allow_time_fail) {
-                //utils.send_error_message(select_msg, 'Channel selection time is over', 'edit', msg['content'])
-                const component = select_msg.components[0]
-                component.components[0].disabled = true
-
-                select_msg.edit({
-                    components: [component]
-                })
-                .catch(msg_error => {
-                    console.log(`ERROR :: could not edit setupdates message to disable channel selection to channel ${select_msg.channelId} in guild ${guild.id}\n `, msg_error)
-                });
-            }
-        });
-    }
+    handleSelectDefault
 }
 
+async function handleSelectDefault(client, db, guild, select_msg) {
+    let allow_time_fail = true
 
+    const channel_filter = (click) => click.user.id === guild.ownerId && click.message.id === select_msg.id
+    const channel_collector = select_msg.createMessageComponentCollector({
+        max: 1, // The number of times a user can click on the button
+        time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
+        channel_filter // Add the filter
+    });
+
+    channel_collector.on("collect", async interaction => {
+        allow_time_fail = false
+
+        const channelID = interaction.values[0]
+
+        const channel = await client.channels.fetch(channelID)
+
+        // check if the guild is in guilds table, if not, then try to add it
+        const q = `REPLACE INTO Guilds (guildID, guildOwnerID, defaultChannelID) VALUES(${guild.id}, ${guild.ownerId}, ${channel.id})`
+        db.query(q, async (error, results) => {
+            if (error) {
+                utils.send_error_message(select_msg, `Failed to set the channel '${channel.name}' as default`, 'edit')
+            }
+            else {
+                utils.send_success_message(select_msg, `Channel '${channel.name}' has been set as default`, 'edit', channel.toString())
+            }
+        });
+    });
+        
+    channel_collector.on("end", (collected) => {
+        if (allow_time_fail) {
+            //utils.send_error_message(select_msg, 'Channel selection time is over', 'edit', msg['content'])
+            const component = select_msg.components[0]
+            component.components[0].disabled = true
+
+            select_msg.edit({
+                components: [component]
+            })
+            .catch(msg_error => {
+                console.log(`ERROR :: could not edit setupdates message to disable channel selection to channel ${select_msg.channelId} in guild ${guild.id}\n `, msg_error)
+            });
+        }
+    });
+}

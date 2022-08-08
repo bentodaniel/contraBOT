@@ -9,7 +9,14 @@
     {
         "display": false,
         "operation" : "update",
-        "date" : "2022/08/05",
+        "date" : "2022/08/06",
+        "title" : "Patch notes",
+        "description" : "contraBOT now is able to notify servers of its patch notes"
+    },
+    {
+        "display": false,
+        "operation" : "update",
+        "date" : "2022/08/08",
         "title" : "Add to wishlist when checking a game's price",
         "description" : "You can now directly add a game to your wishlist when cheking its price using a single click."
     }

@@ -20,7 +20,7 @@ module.exports = {
  * @param {*} user_message 
  * @param {*} callback A function callback. Must take 2 arguments: the interaction instance and the embed corresponding to the game selected
  */
-function message_search_games_list(store, game_search, user_message, callback, selection_msg_content, selection_limit) {
+function message_search_games_list(store, game_search, user_message, callback, shouldDefer, selection_msg_content='') {
     user_message.channel.send(`Searching for results on ${game_search}...`).then(msg => {
         get_games_list(store, game_search).then(games_list => {
             if (games_list === undefined) {
@@ -30,38 +30,58 @@ function message_search_games_list(store, game_search, user_message, callback, s
                 send_error_message(msg, 'No results were found', 'edit')
             }
             else {
-                reply_search_selection(games_list, msg, game_search, selection_msg_content)
-
-                limit_clicks = 30
-                if (selection_limit !== undefined) {
-                    limit_clicks = selection_limit
-                } 
-
-                // check if the interaction is in the same message
-                const filter = (click) => click.message.id === msg.id
-                const collector = user_message.channel.createMessageComponentCollector({
-                    max: limit_clicks, // The number of times a user can click on the button
-                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-                    filter // Add the filter
-                });
-
-                collector.on("collect", async interaction => {
-                    const target_game = find_productID_data(games_list, interaction.values[0])
-
-                    callback(interaction, target_game, interaction.user);
-                });
-            
-                collector.on("end", (collected) => {
-                    //send_error_message(msg, 'Time is over', 'edit', msg['content'])
-                    const component = msg.components[0]
-                    component.components[0].disabled = true
-
-                    msg.edit({
-                        components: [component]
-                    })
-                    .catch(msg_error => {
-                        console.log(`ERROR :: could not edit message_search_games_list message to disable selection to channel ${msg.channelId} in guild ${msg.guildId}\n `, msg_error)
+                msg.edit({
+                    'content': `Here is the list of search results for '**${game_search}**'` + selection_msg_content,
+                    'components': [{
+                        'type': 1,
+                        'components': [{
+                            "custom_id": `search_selection`,
+                            "placeholder": `Select an item to get more info on prices`,
+                            "options": parse_json_data(games_list),
+                            "min_values": 1,
+                            "max_values": 1,
+                            "type": 3
+                        }]
+                    }]
+                })
+                .then(select_msg => {
+                    // check if the interaction is in the same message
+                    const filter = (i) => i.message.id === msg.id && i.customId === 'search_selection'
+                    const collector = select_msg.createMessageComponentCollector({
+                        //max: undefined, // The number of times a user can click on the button
+                        time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
+                        filter // Add the filter
                     });
+
+                    collector.on("collect", async interaction => {
+                        if (shouldDefer) {
+                            interaction.deferUpdate()
+                        }
+                        const target_game = find_productID_data(games_list, interaction.values[0])
+
+                        callback(interaction, target_game);
+                    });
+                
+                    collector.on("end", (collected) => {
+                        const row = msg.components[0]
+
+                        // Check if it is still a selection message
+                        if (row !== undefined && row.components.length === 1 && row.components[0].customId === 'search_selection') {
+                            //send_error_message(msg, 'Time is over', 'edit', msg['content'])
+                            
+                            row.components[0].disabled = true
+
+                            msg.edit({
+                                components: [row]
+                            })
+                            .catch(msg_error => {
+                                console.log(`ERROR :: could not edit message_search_games_list message to disable selection to channel ${msg.channelId} in guild ${msg.guildId}\n `, msg_error)
+                            });
+                        }
+                    });
+                })
+                .catch(msg_error => {
+                    console.log(`ERROR :: could not send selection message on reply_search_selection to channel ${msg.channelId} in guild ${msg.guildId}\n `, msg_error)
                 });
             }
         })
@@ -188,34 +208,6 @@ async function get_game_offers(gameProductID, currency, limit) {
     })
 }
 
-function reply_search_selection(json_data, message, game_search, selection_msg_extra_content) {
-    if (selection_msg_extra_content === undefined) {
-        selection_msg_extra_content = ''
-    }
-
-    message.edit({
-        'content': `Here is the list of search results for '**${game_search}**'` + selection_msg_extra_content,
-        'components': [
-            {
-                'type': 1,
-                'components': [
-                    {
-                    "custom_id": `search_selection`,
-                    "placeholder": `Select an item to get more info on prices`,
-                    "options": parse_json_data(json_data),
-                    "min_values": 1,
-                    "max_values": 1,
-                    "type": 3
-                    }
-                ]
-            }
-        ]
-    })
-    .catch(msg_error => {
-        console.log(`ERROR :: could not send selection message on reply_search_selection to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-    });
-}
-
 function parse_json_data(json_data) {
     res = []
     for (game of json_data) {
@@ -268,24 +260,6 @@ function send_error_message(message, error_msg, type, content) {
             console.log(`ERROR :: failed to send message on send_error_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
     }
-}
-
-function reply_error_interaction(interaction, error_msg, content) {
-    interaction.reply({ 
-        content: content, 
-        embeds: [
-            {
-                'type' : 'rich', 
-                'title': error_msg, 
-                'color' : 0xff0000,
-            }
-        ], 
-        components: [], 
-        fetchReply: true 
-    })
-    .catch(msg_error => {
-        console.log(`ERROR :: failed to reply to interaction on reply_error_interaction to channel ${interaction.channelId} in guild ${interaction.guildId}\n `, msg_error)
-    });
 }
 
 function send_success_message(message, success_msg, type, content) {
