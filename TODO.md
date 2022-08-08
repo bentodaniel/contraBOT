@@ -13,21 +13,6 @@
 
 
 
-
-
-------------------------------------------------
-
-rework addwish.
-    - do not require price to be given
-    - show modal for price when a game is selected
-
-
-1 - finish the "add to wishlist" on price
-    - get value from modal
-    - make the function in "addwish" visible and usable and import into 'price'
-        - check the sql, should use count when cheking the ammount of rows for a user
-
-
 ----------------------------------------------------
 
 what if:
