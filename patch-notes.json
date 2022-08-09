@@ -19,5 +19,12 @@
         "date" : "2022/08/08",
         "title" : "Add to wishlist when checking a game's price",
         "description" : "You can now directly add a game to your wishlist when cheking its price using a single click."
+    },
+    {
+        "display": true,
+        "operation" : "update",
+        "date" : "2022/08/10",
+        "title" : "Complete contraBOT overhaul",
+        "description" : "Changed commands to be more intuitive. Commands 'price' and 'addwish' are now just 'search'. Commands 'setupdates', 'removeupdates' and 'updateslist' is now just 'updates'."
     }
 ]

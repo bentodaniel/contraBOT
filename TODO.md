@@ -12,6 +12,26 @@
 
 
 
+---------------------------------------------
+
+finish rework on price / addwish
+
+---------------------------------------------
+
+finish rework on removeupdates / setupdates / updateslist
+
+-------------------------------------------------
+
+
+
+
+
+--------------------------------------------------
+
+
+change constants.js to a json file
+
+
 
 ----------------------------------------------------
 
@@ -43,3 +63,8 @@ updateslist - nope
 wishlist - nope
 
 interaction.reply({content: 'hello', ephemeral: true})
+
+
+-----------------------------------------------------
+
+change search games message from select menu to paginated message

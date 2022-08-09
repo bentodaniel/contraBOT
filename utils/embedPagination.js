@@ -12,11 +12,11 @@
  * @param {number} timeout
  * @returns
  */
-const embedPpagination = async (Discord, message, pages, timeout = 120000, content_text=' ', extra_btn) => {
+const embedPpagination = async (Discord, message, pages, timeout = 120000, content_text=' ', extraBtns) => {
     return new Promise((success, failure) => {
         let page = 0;
 
-        var buttonList = [
+        const buttonList = [
             new Discord.MessageButton()
                 .setCustomId('firstbtn')
                 .setLabel('⏮')
@@ -34,29 +34,30 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
                 .setLabel('⏭')
                 .setStyle('SECONDARY')
         ]
+    
+        const topRow = new Discord.MessageActionRow().addComponents(buttonList);
 
-        if (extra_btn !== undefined) {
-            buttonList.push(extra_btn)
+        // The navidation buttons are always default
+        var rows = [topRow]
+
+        // Add extra buttons if there are any
+        if (extraBtns !== undefined) {            
+            // If its not an array, then its just one extra button
+            if (!Array.isArray(extraBtns)) {
+                rows[0].addComponents(extraBtns)
+            }
+            // If it is an array and has at least one obj, then its a new row
+            else if (extraBtns.length > 0) {
+                const lowRow = new Discord.MessageActionRow().addComponents(extraBtns);
+                rows.push(lowRow)
+            }
         }
-    
-        const row = new Discord.MessageActionRow().addComponents(buttonList);
-    
-        //has the interaction already been deferred? If not, defer the reply.
-        //if (interaction.deferred == false) {
-        //    await interaction.deferReply();
-        //}
-    
-        //const curPage = await interaction.editReply({
-        //    embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
-        //    components: [row],
-        //    fetchReply: true,
-        //});
 
         // Paginate the message
         message.edit({
             content: content_text,
             embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
-            components: [row],
+            components: rows,
             fetchReply: true,
         })
         .then(async function(curPage) {
@@ -95,7 +96,7 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
                 await i.deferUpdate();
                 await i.editReply({
                     embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
-                    components: [row],
+                    components: rows,
                 })
                 .catch(msg_error => {
                     console.log(`ERROR :: could not edit paginated message after collect\n `, msg_error) // No info of channel or guild because it could also be in dm
@@ -105,16 +106,28 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
         
             collector.on("end", (_, reason) => {
                 if (reason !== "messageDelete") {
-                    const disabledRow = new Discord.MessageActionRow().addComponents(
+                    const disabledTopRow = new Discord.MessageActionRow().addComponents(
                         buttonList[0].setDisabled(true),
                         buttonList[1].setDisabled(true),
                         buttonList[2].setDisabled(true),
-                        buttonList[3].setDisabled(true),
-                        buttonList[buttonList.length - 1].setDisabled(true) // If there is no 'add to wishlist' btn, it will just disable 3 again
+                        buttonList[3].setDisabled(true)
                     );
+
+                    var disabledRows = [disabledTopRow]
+
+                    // Disable the extra buttons if they are provided
+                    if (extraBtns !== undefined && extraBtns.length > 0) {
+                        const disabledLowRow = new Discord.MessageActionRow().addComponents(
+                            extraBtns.map(function(btn) {
+                                return btn.setDisabled(true)
+                            })
+                        );
+                        disabledRows.push(disabledLowRow)
+                    }
+
                     curPage.edit({
                         embeds: [pages[page].setFooter({ text: `Page ${page + 1} / ${pages.length}` })],
-                        components: [disabledRow],
+                        components: disabledRows,
                     })
                     .catch(msg_error => {
                         console.log(`ERROR :: could not edit paginated message end\n `, msg_error) // No info of channel or guild because it could also be in dm
