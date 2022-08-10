@@ -12,7 +12,6 @@ module.exports = (Discord, client, db, guild) => {
     )
 
     // Add to db.
-    // Default will be added when/if a channel is selected
     try {
         db.query(
             `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, ${null})`
@@ -34,36 +33,5 @@ module.exports = (Discord, client, db, guild) => {
         .catch(msg_error => {
             console.log(`ERROR :: could not send 'just arrived' message to channel ${channel.id} in guild ${guild.id}\n `, msg_error)
         });
-
-        // TODO
-        /*
-        channel.send({
-            content : ' ',
-            embeds : [{
-                'type' : 'rich',
-                'title': `Select the channel you would like to set as default if you wish to be notified regarding patch notes.\nI can not see channels marked with ❌`,
-                'color' : 0x00FFFF,
-            }],
-            components: [{
-                'type': 1,
-                'components': [{
-                    "custom_id": `channel_select`,
-                    "placeholder": `Select default channel`,
-                    "options": utils.parse_channels_to_select_options(channels, guild),
-                    "min_values": 1,
-                    "max_values": 1,
-                    "type": 3
-                }]
-            }]
-        })
-        .then(arrival_msg => {
-            const setdefault = require('../../commands/setdefault')
-
-            setdefault.handleSelectDefault(client, db, guild, arrival_msg)
-        })
-        .catch(msg_error => {
-            console.log(`ERROR :: could not send 'select default' message after 'greetings' to channel ${channel.id} in guild ${guild.id}\n `, msg_error)
-        });
-        */
     })
 }
