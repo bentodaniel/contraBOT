@@ -71,7 +71,7 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
     
             const collector = await curPage.createMessageComponentCollector({
                 filter,
-                time: 5000,
+                time: timeout,
             });
         
             collector.on("collect", async (i) => {

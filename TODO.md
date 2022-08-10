@@ -14,7 +14,8 @@
 
 ---------------------------------------------
 
-finish rework on price / addwish
+rework logging.
+Dont just log erros. try to add some info to them
 
 ---------------------------------------------
 

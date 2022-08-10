@@ -35,6 +35,8 @@ module.exports = (Discord, client, db, guild) => {
             console.log(`ERROR :: could not send 'just arrived' message to channel ${channel.id} in guild ${guild.id}\n `, msg_error)
         });
 
+        // TODO
+        /*
         channel.send({
             content : ' ',
             embeds : [{
@@ -62,5 +64,6 @@ module.exports = (Discord, client, db, guild) => {
         .catch(msg_error => {
             console.log(`ERROR :: could not send 'select default' message after 'greetings' to channel ${channel.id} in guild ${guild.id}\n `, msg_error)
         });
+        */
     })
 }

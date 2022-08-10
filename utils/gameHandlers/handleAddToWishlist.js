@@ -1,5 +1,3 @@
-const utils = require('../utils/utils')
-
 /**
  * Handles adding a game to a user's wishlist
  * @param {*} db The DB instance

@@ -143,7 +143,7 @@ function generateEmbeds(Discord, results_list) {
         var embed = new Discord.MessageEmbed()
             .setTitle(`${game['title']} [${game['productID']}]`)
             .setURL(game['link'])
-            .setColor('#6fff00')
+            .setColor('#ffffff')
             .setThumbnail(game['image_link'])
             .setDescription(game['infos'])
             .addFields(

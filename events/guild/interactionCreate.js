@@ -1,6 +1,6 @@
 const utils = require('../../utils/utils');
-const handleComparePrices = require('../../utils/handleComparePrices')
-const handleAddToWishlist = require('../../utils/handleAddToWishlist')
+const handleComparePrices = require('../../utils/gameHandlers/handleComparePrices')
+const handleAddToWishlist = require('../../utils/gameHandlers/handleAddToWishlist')
 
 module.exports = (Discord, client, db, interaction) => {
     switch (interaction.customId) {

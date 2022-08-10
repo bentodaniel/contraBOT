@@ -80,17 +80,55 @@ function send_message(channel, content, title, type) {
     }
 }
 
+/**
+ * Parses a list of channels in a guild into a select menu 'options' format
+ * Channels that can not be accessed are marked with ❌ and channels that can, with ✅
+ * @param {*} channels The list of channels to be used 
+ * @param {*} guild The guild
+ * @returns 
+ */
+ function parse_channels_to_select_options(channels, guild) {
+    res = []
+    channels.forEach(channel => {
+        const has_permissions = channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
+                                channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
+                                channel.permissionsFor(guild.me).has('EMBED_LINKS') &&
+                                channel.permissionsFor(guild.me).has('ATTACH_FILES')
+
+        if (channel.type === 'GUILD_TEXT') {
+            var emoji = '❌'
+            
+            if (has_permissions) {
+                emoji = '✅'
+            }
+
+            res.push({
+                'label': channel.name,
+                'emoji': {
+                    'id': null,
+                    'name': emoji,
+                },
+                'description': channel.parent.name,
+                'value': '' + channel.id,
+                'default': false
+            })
+        }
+    });
+    return res
+}
+
 module.exports = {
     MsgType,
     send_message,
     edit_message,
     embedToJson,
+    parse_channels_to_select_options,
 
     send_error_message,
     send_success_message,
     get_user_wishlist,
-    get_guild_updates,
-    parse_channels_to_select_options
+    get_guild_updates
+    
 }
 
 
@@ -205,42 +243,4 @@ function get_guild_updates(db, guildID) {
     })
 }
 
-function parse_channels_to_select_options(channels, guild) {
-    //const emojis = ['❌ ', '✔️ '] // ✅ 
 
-    res = []
-    channels.forEach(channel => {
-
-        const has_permissions = channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
-                                channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
-                                channel.permissionsFor(guild.me).has('EMBED_LINKS')
-
-        if (channel.type === 'GUILD_TEXT') {
-            if (has_permissions) {
-                res.push({
-                    'label': channel.name,
-                    'emoji': {
-                        'id': null,
-                        'name': `✅`,
-                    },
-                    'description': channel.parent.name,
-                    'value': '' + channel.id,
-                    'default': false
-                })
-            }
-            else {
-                res.push({
-                    'label': channel.name,
-                    'emoji': {
-                        'id': null,
-                        'name': `❌`,
-                    },
-                    'description': channel.parent.name,
-                    'value': '' + channel.id,
-                    'default': false
-                })
-            }
-        }
-    });
-    return res
-}

@@ -1,7 +1,6 @@
 const xhr_req = require('xhr-request');
 
-const utils = require('./utils');
-const embedPpagination = require('./embedPagination');
+const embedPpagination = require('../embedPagination');
 
 /**
  * Handle compare prices
@@ -115,7 +114,7 @@ function generate_compare_prices_embeds(Discord, game_offers_list, game_json) {
             .setTitle(`${game_json['title']} [${game_json['productID']}]`)
             .setURL(game_json['link'])
             .setDescription(`[${game_offer['market']} - BUY](${game_offer['buy_link']})\n`)
-            .setColor('#6fff00')
+            .setColor('#ffffff')
             .setThumbnail(game_json['image_link'])
             .addFields(
                 {
