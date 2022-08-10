@@ -351,7 +351,7 @@ function notify_server(client, Discord, guild_data, patch_data) {
             files: ['./images/contraLOGO.png']
         })
         .catch(msg_error => {
-            console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error)
+            console.log(`ERROR :: couldn\'t notify guild ${guild_data['guildID']} in channel ${guild_data['defaultChannelID']} about patch notes\n `, msg_error)
         });
     })
     .catch(channel_fetch_error => {
