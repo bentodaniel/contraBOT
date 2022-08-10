@@ -53,8 +53,7 @@ module.exports = {
         .catch(msg_error => {
             console.log(`ERROR :: could not send placeholder message on search to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
-    },
-    embedToJson
+    }
 }
 
 /**
@@ -148,39 +147,9 @@ function generateEmbeds(Discord, results_list) {
             .setThumbnail(game['image_link'])
             .setDescription(game['infos'])
             .addFields(
-                { name: `Price:`, value: `${game['price']}`, inline: true }
+                { name: `Price`, value: `${game['price']}`, inline: true }
             )
         embeds.push(embed)
     }
     return embeds;
-}
-
-/**
- * Parses a search results embed back into the json format { link, image_link, title, infos, productID, price }
- * @param {*} embed The embed to parse
- */
-function embedToJson(embed) {
-    try {
-        var game_json = {}
-
-        game_json['link'] = embed.url
-        game_json['image_link'] = embed.thumbnail.url
-
-        // Get the productID from the embed's title
-        const regex = new RegExp('(.*) \\[(\\w+)\\]$');
-        const result  = embed.title.match(regex);
-
-        if (result) {
-            game_json['title'] = result[1]
-            game_json['productID'] = parseInt(result[2])
-        }
-
-        game_json['infos'] = embed.description
-        game_json['price'] = embed.fields[0].value
-
-        return game_json
-    }
-    catch (err) {
-        return undefined
-    }
 }

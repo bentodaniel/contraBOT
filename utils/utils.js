@@ -47,10 +47,44 @@ function send_message(channel, content, title, type) {
     });
 }
 
+/**
+ * Parses a search results embed back into a json format { link, image_link, title, productID, price }
+ * @param {*} embed The embed to parse
+ */
+ function embedToJson(embed) {
+    try {
+        var game_json = {}
+
+        game_json['link'] = embed.url
+        game_json['image_link'] = embed.thumbnail.url
+
+        // Get the productID from the embed's title
+        const regex = new RegExp('(.*) \\[(\\w+)\\]$');
+        const result  = embed.title.match(regex);
+
+        if (result) {
+            game_json['title'] = result[1]
+            game_json['productID'] = parseInt(result[2])
+        }
+
+        for (field of embed.fields) {
+            if (field.name === 'Price'){
+                game_json['price'] = field.value
+            }
+        }
+
+        return game_json
+    }
+    catch (err) {
+        return undefined
+    }
+}
+
 module.exports = {
     MsgType,
     send_message,
     edit_message,
+    embedToJson,
 
     send_error_message,
     send_success_message,

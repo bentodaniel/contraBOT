@@ -6,10 +6,12 @@
 
 /**
  * Creates a pagination embed~
- * @param {Discord} Discord
- * @param {Interaction} interaction
- * @param {MessageEmbed[]} pages
- * @param {number} timeout
+ * @param {Discord} Discord The Discord instance
+ * @param {Message} message The message we will be editing
+ * @param {MessageEmbed[]} pages The embeds to paginate
+ * @param {number} timeout The time for the buttons to keep alive
+ * @param {*} content_text The text for the message content
+ * @param {*} extraBtns Extra buttons to use. If single button, will be displayed in the same row. If list, will be displayed in a new row
  * @returns
  */
 const embedPpagination = async (Discord, message, pages, timeout = 120000, content_text=' ', extraBtns) => {
@@ -69,7 +71,7 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
     
             const collector = await curPage.createMessageComponentCollector({
                 filter,
-                time: timeout,
+                time: 5000,
             });
         
             collector.on("collect", async (i) => {
@@ -115,14 +117,21 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
 
                     var disabledRows = [disabledTopRow]
 
-                    // Disable the extra buttons if they are provided
-                    if (extraBtns !== undefined && extraBtns.length > 0) {
-                        const disabledLowRow = new Discord.MessageActionRow().addComponents(
-                            extraBtns.map(function(btn) {
-                                return btn.setDisabled(true)
-                            })
-                        );
-                        disabledRows.push(disabledLowRow)
+                    // Disable extra buttons if there are any
+                    if (extraBtns !== undefined) {            
+                        // If its not an array, then its just one extra button
+                        if (!Array.isArray(extraBtns)) {
+                            disabledRows[0].addComponents(extraBtns.setDisabled(true))
+                        }
+                        // If it is an array and has at least one obj, then its a new row
+                        else if (extraBtns.length > 0) {
+                            const disabledLowRow = new Discord.MessageActionRow().addComponents(
+                                extraBtns.map(function(btn) {
+                                    return btn.setDisabled(true)
+                                })
+                            );
+                            disabledRows.push(disabledLowRow)
+                        }
                     }
 
                     curPage.edit({

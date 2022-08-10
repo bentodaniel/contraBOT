@@ -16,7 +16,7 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
     const selection_message = interaction.message
     const user = interaction.user
 
-    get_game_offers(game_json['productID'], 'eur', 10).then(game_offers_list => {
+    get_allkeyshop_game_offers(game_json['productID'], 'eur', 10).then(game_offers_list => {
         if (game_offers_list === undefined) {
             interaction.reply({ content: `Failed to get the data for '${game_json['title']}'.`, ephemeral: true }).catch(error => {})
         }
@@ -24,9 +24,7 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
             interaction.reply({ content: `There are no offers for '${game_json['title']}'.`, ephemeral: true }).catch(error => {})
         }
         else {
-            const embeds = generate_embeds_buy(game_offers_list, Discord, game_json)
-
-            console.log(embeds)
+            const embeds = generate_compare_prices_embeds(Discord, game_offers_list, game_json)
 
             interaction.reply({
                 content: `Getting offers  for '**${game_json['title']}**'...`,
@@ -52,8 +50,15 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
     })
 }
 
-// currencies - accepted:  \"eur\", \"gbp\", \"usd\"
-async function get_game_offers(gameProductID, currency, limit) {
+/**
+ * Gets a list of game offers in AllKeyShop
+ * Offers come in JSON formar { buy_link, market, region, edition, og_price, price, coupon_value, coupon_code }
+ * @param {*} gameProductID The allkeyshop product id
+ * @param {*} currency The currency to use. Can be \"eur\", \"gbp\", \"usd\"
+ * @param {*} limit The limit number of entries in the list
+ * @returns 
+ */
+async function get_allkeyshop_game_offers(gameProductID, currency, limit) {
     return new Promise((success, failure) => {
         var json_data = [];
 
@@ -96,23 +101,31 @@ async function get_game_offers(gameProductID, currency, limit) {
     })
 }
 
-function generate_embeds_buy(game_offers_list, Discord, game_json) {
+/**
+ * Generated the embeds for game offers
+ * @param {*} Discord The Discord instance
+ * @param {*} game_offers_list A list containing all offers for a game as { buy_link, market, region, edition, og_price, price, coupon_value, coupon_code }
+ * @param {*} game_json The JSON game we are searching { link, image_link, title, infos, productID, price }
+ * @returns 
+ */
+function generate_compare_prices_embeds(Discord, game_offers_list, game_json) {
     var embeds = [];
-    for (game of game_offers_list) {
-        var embed = new Discord.MessageEmbed()
-            .setTitle(game['market'] + ' - BUY')
-            .setURL(game['buy_link'])
+    for (game_offer of game_offers_list) {
+        const embed = new Discord.MessageEmbed()
+            .setTitle(`${game_json['title']} [${game_json['productID']}]`)
+            .setURL(game_json['link'])
+            .setDescription(`[${game_offer['market']} - BUY](${game_offer['buy_link']})\n`)
             .setColor('#6fff00')
             .setThumbnail(game_json['image_link'])
             .addFields(
                 {
                     "name": `Region`,
-                    "value": `${game['region']}`,
+                    "value": `${game_offer['region']}`,
                     "inline": true
                 },
                 {
                     "name": `Edition`,
-                    "value": `${game['edition']}`,
+                    "value": `${game_offer['edition']}`,
                     "inline": true
                 },
                 {
@@ -122,17 +135,17 @@ function generate_embeds_buy(game_offers_list, Discord, game_json) {
                 },
                 {
                     "name": `Old Price`,
-                    "value": `${game['og_price'] === '' ? 'N/A' : game['og_price']}€`, // Note that it could not be eur
+                    "value": `${game_offer['og_price'] === '' ? 'N/A' : game_offer['og_price']}€`, // Note that it could not be eur
                     "inline": true
                 },
                 {
                     "name": `Coupon`,
-                    "value": `*${game['coupon_code']}*`,
+                    "value": `*${game_offer['coupon_code']}*`,
                     "inline": true
                 },
                 {
                     "name": `Price`,
-                    "value": `${game['price']}€`, // Note that it could not be eur
+                    "value": `${game_offer['price']}€`, // Note that it could not be eur
                     "inline": true
                 }
             );

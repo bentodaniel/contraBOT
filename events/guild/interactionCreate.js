@@ -65,8 +65,8 @@ async function handleAddToWishlistButton(Discord, interaction) {
                     .setStyle('SHORT')
                     .setMinLength(1)
                     .setMaxLength(10)
-                    .setPlaceholder(game_json['price'])
-                    .setValue(game_json['price'])
+                    .setPlaceholder(`${game_json['price']}`)
+                    .setValue(`${game_json['price']}`)
                     .setRequired(true),
             ),
         ]);
@@ -103,10 +103,10 @@ function handleSubmitModal(db, interaction) {
  * @returns A game JSON { link, image_link, title, infos, productID, price } or undefined
  */
 function getSearchGameJSON(interaction) {
-    const search = require('../../commands/search')
+    const search = require('../../utils/utils')
 
     const message = interaction.message
     const embed = message.embeds[0]
 
-    return search.embedToJson(embed)
+    return utils.embedToJson(embed)
 }
