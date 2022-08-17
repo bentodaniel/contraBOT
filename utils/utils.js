@@ -126,8 +126,7 @@ module.exports = {
 
     send_error_message,
     send_success_message,
-    get_user_wishlist,
-    get_guild_updates
+    get_user_wishlist
     
 }
 
@@ -227,20 +226,6 @@ function get_user_wishlist(db, userID) {
     })
 }
 
-function get_guild_updates(db, guildID) {
-    return new Promise((success, failure) => {
-        const updateslist_query = `SELECT gameID, channelID FROM UpdatesChannels WHERE guildID = '${guildID}'`
 
-        db.query(updateslist_query, async (error, results) => {
-            if (error) {
-                console.log(`ERROR :: failed to get updates list for guild '${guildID}'\n `, error)
-                failure()
-            }
-            else {
-                success(results)
-            }
-        });
-    })
-}
 
 

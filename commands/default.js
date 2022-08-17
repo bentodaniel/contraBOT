@@ -3,7 +3,7 @@ const utils = require('../utils/utils');
 module.exports = {
     name: 'default',
     short_name: 'def',
-    description: `Gets info on this guild's default channel`,
+    description: `Check what channel is set as the guild's default channel. Set, modify or remove the default channel.`,
     arguments: '',
     adminOnly: false,
     showOnHelp: true,
@@ -105,6 +105,7 @@ module.exports = {
             })
         })
         .catch(error => {
+            //`There was an error while trying to get info of the default channel. Please try again.`
             console.log(error)
         })
     }
@@ -121,7 +122,7 @@ function getDefaultChannel(db, guild) {
         const q = `SELECT defaultChannelID FROM Guilds WHERE guildID = ${guild.id} AND defaultChannelID IS NOT NULL LIMIT 1`
         db.query(q, async (select_error, select_results) => {
             if (select_error) {
-                failure(`There was an error while trying to get info of the default channel. Please try again.`)
+                failure(select_error)
             }
             else {
                 success(select_results)
@@ -188,7 +189,7 @@ function handleSetDefaultChannel(client, Discord, db, interaction) {
             components: [{
                 'type': 1,
                 'components': [{
-                    "custom_id": `channel_select`,
+                    "custom_id": `default_channel_select`,
                     "placeholder": `Select default channel`,
                     "options": utils.parse_channels_to_select_options(channels, message.guild),
                     "min_values": 1,
@@ -198,7 +199,7 @@ function handleSetDefaultChannel(client, Discord, db, interaction) {
             }]
         })
         .then(select_msg => {
-            const filter = (i) => i.customId === 'channel_select'
+            const filter = (i) => i.customId === 'default_channel_select'
 
             const collector = select_msg.createMessageComponentCollector({
                 max: 1, // The number of times a user can click on the button
@@ -249,5 +250,8 @@ function handleSetDefaultChannel(client, Discord, db, interaction) {
         .catch(msg_error => {
             //console.log(`ERROR :: could not send 'channel selection' message on setdefault to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
         });
+    })
+    .catch(channel_fetch_error => {
+        
     })
 }

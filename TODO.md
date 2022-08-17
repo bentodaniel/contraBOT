@@ -11,6 +11,14 @@
 10. possibly create a website for the bot
 
 
+---------------------------------------------
+
+check the size of messages and titles on game updates
+they might be too long, causing the bot to crash
+
+- also test things like, 
+    - wishlist if u have 10 or 50 games in
+    - news - what if u have lots of set up games for updates?
 
 ---------------------------------------------
 
@@ -18,11 +26,6 @@ rework logging.
 Dont just log erros. try to add some info to them
 
 ---------------------------------------------
-
-finish rework on removeupdates / setupdates / updateslist
-
--------------------------------------------------
-
 
 
 

@@ -23,7 +23,7 @@ module.exports = (Discord, client, db, message) => {
                 'type' : 'rich',
                 'title': 'Bad command',
                 'color' : 0xff0000,
-                'description': 'I don\'t recognize that command.\nTry using \'**$help**\''
+                'description': `I don't recognize that command.\nTry using '**${process.env.MSG_PREFIX}help**'`
             }]
         })
         .catch(msg_error => {

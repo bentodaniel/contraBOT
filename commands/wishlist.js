@@ -8,6 +8,7 @@ module.exports = {
     arguments_help: 'If no user is provided, this will display your wishlist',
     showOnHelp: true,
     async execute(client, message, args, Discord, db) {
+        // Check if a user was mentioned. If not, then the author is the target
         var user = message.mentions.users.first()
         if (user === undefined) {
             user = message.author
@@ -15,7 +16,6 @@ module.exports = {
 
         message.channel.send(`Getting ${user.username}'s wishlist...`).then(msg => {
             utils.get_user_wishlist(db, user.id).then(json_data => {
-
                 if (json_data.length === 0) {
                     msg.edit({
                         'content' : ' ',

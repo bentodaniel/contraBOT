@@ -1,6 +1,6 @@
 const request = require('request');
 const xhr_req = require('xhr-request');
-const constants = require('../../utils/constants')
+const gamesConfig = require('../../utils/newsUpdatesHandlers/gamesConfig')
 const updates = require('../../utils/updates')
 const utils = require('../../utils/utils')
 const embedPpagination = require('../../utils/embedPagination');
@@ -41,7 +41,7 @@ async function handle_news(client, db) {
             console.log(`ERROR :: failed to get last patches`, error)
         }
         else {
-            for (const [ key, value ] of Object.entries(constants.games)) {
+            for (const [ key, value ] of Object.entries(gamesConfig)) {
                 new Promise(resolve => {
                     if (value.is_xhr) { // Get xhr data
                         xhr_req(value.url, {
