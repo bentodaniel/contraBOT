@@ -11,6 +11,11 @@
 10. possibly create a website for the bot
 
 
+---------------------------------------
+
+allow the use of links when checking out a game
+ - p.e., utilizar o link de um jogo na steam ou mesmo do allkey, para ver os preçoes no allkey (steam em allkey provavelmente nao e ussavel)
+
 ---------------------------------------------
 
 check the size of messages and titles on game updates
@@ -25,17 +30,6 @@ they might be too long, causing the bot to crash
 rework logging.
 Dont just log erros. try to add some info to them
 
----------------------------------------------
-
-
-
-
---------------------------------------------------
-
-
-change constants.js to a json file
-
-
 
 ----------------------------------------------------
 
@@ -45,30 +39,3 @@ what if:
     - premium ends
     - ?
 
-
--------------------------------------------------
-
-permissions on select menus... 
-    - setu, setdef, remu
-
-
-Something is wrong with the select menu's permissions
-
-addwish - everyone can use select menu - add to wishlist of whoever clicks? or just the author?
-help - nope
-price - everyone or author of request
- price, add to wishlit - anyone
-removedefault - only owner should be able (or admins)
-removeupdate - only owner or admins
-setdefault - only owner or admins
-setupdates - only owner or admins
-stopwish - only author
-updateslist - nope
-wishlist - nope
-
-interaction.reply({content: 'hello', ephemeral: true})
-
-
------------------------------------------------------
-
-change search games message from select menu to paginated message

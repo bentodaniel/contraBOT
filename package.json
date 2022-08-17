@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development node main.js",
     "prod": "cross-env NODE_ENV=production node main.js",
-
     "dev:mon": "cross-env NODE_ENV=development nodemon main.js",
     "prod:mon": "cross-env NODE_ENV=production nodemon main.js"
   },
@@ -28,12 +27,13 @@
     "discord.js": "^13.8.0",
     "dotenv": "^16.0.1",
     "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.8",
     "nodemon": "^2.0.19",
     "request": "^2.88.2",
     "xhr-request": "^1.1.0"
   },
-  "nodemonConfig" : {
+  "nodemonConfig": {
     "delay": 2000,
-    "ignore" : []
+    "ignore": []
   }
 }
