@@ -48,10 +48,6 @@ some buttons souldn't have a max usage probably
 
 - probably the correct way would be to disable AFTER execution
 
-----------------------
-
-lower the price target by 0.01 when no price is provided so the user is not notified about somthing that already existed
-
 ---------------------------------------
 
 allow the use of links when checking out a game

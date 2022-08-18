@@ -65,6 +65,9 @@ async function handleAddToWishlistButton(Discord, interaction) {
         title += '...'
     }
 
+    const currentPrice = parseFloat(game_json['price'])
+    const defaultPrice = (currentPrice - 0.01).toFixed(2); // round to 2 decimal places
+
     const modal = new Discord.Modal()
         .setCustomId('priceModal')
         .setTitle(title)
@@ -76,8 +79,8 @@ async function handleAddToWishlistButton(Discord, interaction) {
                     .setStyle('SHORT')
                     .setMinLength(1)
                     .setMaxLength(10)
-                    .setPlaceholder(`${game_json['price']}`)
-                    .setValue(`${game_json['price']}`)
+                    .setPlaceholder(`${defaultPrice}`)
+                    .setValue(`${defaultPrice}`)
                     .setRequired(true),
             ),
         ]);
