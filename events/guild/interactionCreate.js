@@ -3,7 +3,9 @@ const handleComparePrices = require('../../utils/gameHandlers/handleComparePrice
 const handleAddToWishlist = require('../../utils/gameHandlers/handleAddToWishlist')
 
 module.exports = (Discord, client, db, interaction) => {
-    switch (interaction.customId) {
+    const idTags = interaction.customId.split('-')
+    const interactionID = idTags[0]
+    switch (interactionID) {
         case 'pricebtn':
             handlePriceButton(Discord, interaction)
             break
@@ -21,7 +23,8 @@ module.exports = (Discord, client, db, interaction) => {
             break
 
         case 'contactModal':
-            handleSubmitContactModal(interaction)
+            const spamCheck = idTags[1]
+            handleSubmitContactModal(interaction, spamCheck)
             break
 
         default:
@@ -79,7 +82,9 @@ async function handleAddToWishlistButton(Discord, interaction) {
             ),
         ]);
 
-    await interaction.showModal(modal);
+    await interaction.showModal(modal).catch(err => {
+        
+    });
 }
 
 /**
@@ -119,12 +124,15 @@ function getSearchGameJSON(interaction) {
 
 /**
  * Handle click on 'contact' button 
- * @param {*} Discord 
- * @param {*} interaction 
+ * @param {*} Discord The Discord instance
+ * @param {*} interaction The interaction that started this execution
  */
 async function handleContactButton(Discord, interaction) {
+    const spamCheckLength = 7
+    const spamCheck = generateSpamCheck(spamCheckLength)
+    
     const modal = new Discord.Modal()
-        .setCustomId('contactModal')
+        .setCustomId(`contactModal-${spamCheck}`)
         .setTitle('Contact Us!')
         .addComponents([
             new Discord.MessageActionRow().addComponents(
@@ -157,15 +165,53 @@ async function handleContactButton(Discord, interaction) {
                     .setPlaceholder(`I am contacting you because...`)
                     .setRequired(true),
             ),
+            new Discord.MessageActionRow().addComponents(
+                new Discord.TextInputComponent()
+                    .setCustomId('contactCheckInput')
+                    .setLabel(`Are you a human? [ ${spamCheck} ]`)
+                    .setStyle('SHORT')
+                    .setMinLength(spamCheckLength)
+                    .setMaxLength(spamCheckLength)
+                    .setPlaceholder(`${spamCheck}`)
+                    .setRequired(true),
+            ),
         ]);
 
-    await interaction.showModal(modal);
+    await interaction.showModal(modal).catch(err => {
+        
+    });
 }
 
-function handleSubmitContactModal(interaction) {
+/**
+ * Generates a string containing random numbers and characters
+ * @param {*} length The length of the target string
+ * @returns 
+ */
+function generateSpamCheck(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?&%$#@';
+    var result = '';
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
+
+/**
+ * Handles sending the contact email
+ * @param {*} interaction The interaction that started this execution
+ * @param {*} spamCheckTarget The target spam check string. No email is sent if the input check does not match the target
+ * @returns 
+ */
+function handleSubmitContactModal(interaction, spamCheckTarget) {
     const email = interaction.fields.getTextInputValue('contactEmailInput')
     const subject = interaction.fields.getTextInputValue('contactSubjectInput')
     const content = interaction.fields.getTextInputValue('contactContentInput')
+    const check = interaction.fields.getTextInputValue('contactCheckInput')
+
+    if (check !== spamCheckTarget) {
+        interaction.reply({ content: `Failed spam check.`, ephemeral: true }).catch(error => {})
+        return
+    }
 
     const nodemailer = require('nodemailer');
 

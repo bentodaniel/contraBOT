@@ -11,11 +11,8 @@
 10. possibly create a website for the bot
 
 
----------------------------------------
 
-allow the use of links when checking out a game
- - p.e., utilizar o link de um jogo na steam ou mesmo do allkey, para ver os preçoes no allkey (steam em allkey provavelmente nao e ussavel)
-
+IMPORTANT !!!
 ---------------------------------------------
 
 check the size of messages and titles on game updates
@@ -27,11 +24,40 @@ they might be too long, causing the bot to crash
 
 ---------------------------------------------
 
-rework logging.
+rework logging in catches
 Dont just log erros. try to add some info to them
 
 
-----------------------------------------------------
+------------------------------------------
+
+finish wishlist with remove button
+
+--------------------------------------------------
+
+
+
+
+--------------------------------------------
+
+add a 'remove from wishlit' button when notifying users of a wishlisted item
+
+------------------------------------------------
+
+some buttons souldn't have a max usage probably
+- for example, wishlit (if any user, ever without permissions) clicks it, is instantly is disabled...
+
+- probably the correct way would be to disable AFTER execution
+
+----------------------
+
+lower the price target by 0.01 when no price is provided so the user is not notified about somthing that already existed
+
+---------------------------------------
+
+allow the use of links when checking out a game
+ - p.e., utilizar o link de um jogo na steam ou mesmo do allkey, para ver os preçoes no allkey (steam em allkey provavelmente nao e ussavel)
+
+---------------------------------------------
 
 what if:
     - a user pays premium (10 to 50 wishlist entries)
