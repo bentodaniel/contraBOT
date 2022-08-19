@@ -30,7 +30,8 @@ CREATE TABLE WishList (
     gameImageLink VARCHAR(255) NOT NULL,
     price FLOAT NOT NULL,
     receiveNotifications BOOLEAN NOT NULL DEFAULT true,
-    store VARCHAR(50) NOT NULL DEFAULT 'allkeyshop'
+    store VARCHAR(50) NOT NULL DEFAULT 'allkeyshop',
+    addDate DATE NOT NULL DEFAULT CURRENT_TIMESTAMP 
 );
 
 ALTER TABLE `WishList` ADD UNIQUE `unique_index`(`userID`, `gameProductID`);
