@@ -4,28 +4,6 @@ const MsgType = {
 }
 
 /**
- * Sends a message to a channel
- * @param {*} channel The channel where to send a message
- * @param {*} content The content of the message
- * @param {*} title The title of the embed
- * @param {MsgType} type The type of message
- */
-function send_message(channel, content, title, type) {
-    channel.send({
-        'content' : content,
-        'embeds' : [{
-            'type' : 'rich',
-            'title': title,
-            'color' : type,
-        }],
-        'components': []
-    })
-    .catch(msg_error => {
-        console.log(`ERROR :: failed to send message on utils.send_message to channel ${channel.id}\n `, msg_error)
-    });
-}
-
-/**
  * Edits a message
  * @param {*} message The message to edit
  * @param {*} content The content of the message
@@ -119,113 +97,7 @@ function send_message(channel, content, title, type) {
 
 module.exports = {
     MsgType,
-    send_message,
     edit_message,
     embedToJson,
-    parse_channels_to_select_options,
-
-    send_error_message,
-    send_success_message,
-    get_user_wishlist
-    
+    parse_channels_to_select_options
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function send_error_message(message, error_msg, type, content) {
-    content = typeof content  !== 'undefined' ? content : ' ';
-    if (type === 'edit') {
-        message.edit({
-            'content' : content,
-            'embeds' : [{
-                'type' : 'rich',
-                'title': error_msg,
-                'color' : 0xff0000,
-            }],
-            'components': []
-        })
-        .catch(msg_error => {
-            console.log(`ERROR :: failed to edit message on send_error_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-        });
-    }
-    else if (type === 'send') {
-        message.channel.send({
-            'content' : content,
-            'embeds' : [{
-                'type' : 'rich',
-                'title': error_msg,
-                'color' : 0xff0000,
-            }],
-            'components': []
-        })
-        .catch(msg_error => {
-            console.log(`ERROR :: failed to send message on send_error_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-        });
-    }
-}
-
-function send_success_message(message, success_msg, type, content) {
-    content = typeof content  !== 'undefined' ? content : ' ';
-    if (type === 'edit') {
-        message.edit({
-            'content' : content,
-            'embeds' : [{
-                'type' : 'rich',
-                'title': success_msg,
-                'color' : 0x6fff00,
-            }],
-            'components': []
-        })
-        .catch(msg_error => {
-            console.log(`ERROR :: failed to edit message on send_success_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-        });
-    }
-    else if (type === 'send') {
-        message.channel.send({
-            'content' : content,
-            'embeds' : [{
-                'type' : 'rich',
-                'title': success_msg,
-                'color' : 0x6fff00,
-            }],
-            'components': []
-        })
-        .catch(msg_error => {
-            console.log(`ERROR :: failed to send message on send_success_message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-        });
-    }
-}
-
-function get_user_wishlist(db, userID) {
-    return new Promise((success, failure) => {
-        const wishlist_query = `SELECT gameID, gameProductID, gameLink, price, receiveNotifications, store FROM WishList WHERE userID = '${userID}'`
-        
-        db.query(wishlist_query, async (error, results) => {
-            if (error) {
-                console.log(`ERROR :: failed to get wishlist for user '${userID}'\n `, error)
-                failure()
-            }
-            else {
-                success(results)
-            }
-        });
-    })
-}
-
-
-
-

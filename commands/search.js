@@ -2,7 +2,7 @@ const request = require('request');
 const cheerio = require('cheerio');
 
 const utils = require('../utils/utils');
-const embedPpagination = require('../utils/embedPagination');
+const embedPagination = require('../utils/embedPagination');
 
 module.exports = {
     name: 'search',
@@ -39,7 +39,7 @@ module.exports = {
                             .setStyle('PRIMARY')
                     ]
 
-                    embedPpagination(
+                    embedPagination(
                         Discord, placeholder_search_msg, embeds, 120000, `${message.author.toString()}, here are the results for '**${game}**'`, extraButtonList
                     )
                     .catch(paginate_error => {})

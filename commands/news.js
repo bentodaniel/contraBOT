@@ -1,6 +1,8 @@
 const gamesConfig = require('../utils/newsUpdatesHandlers/gamesConfig')
 const handleSetUpGameNews = require('../utils/newsUpdatesHandlers/handleSetUpGameNews')
 const handleRemoveGameNews = require('../utils/newsUpdatesHandlers/handleRemoveGameNews')
+const dbUtils = require('../database/utils')
+const embedPagination = require('../utils/embedPagination')
 
 module.exports = {
     name: 'news',
@@ -10,130 +12,81 @@ module.exports = {
     adminOnly: false,
     showOnHelp: true,
     async execute(client, message, args, Discord, db) {
-        // Get the updates that have been set up
-        get_guild_news_updates(db, message.guild.id).then(json_data => {
-            // Two default buttons
-            const setGameBtn = new Discord.MessageButton()
-                .setCustomId('setgamebtn')
-                .setLabel('Set Up Game')
-                .setStyle('PRIMARY')
-            
-            const removeGameBtn = new Discord.MessageButton()
-                .setCustomId('removegamebtn')
-                .setLabel('Remove Game')
-                .setStyle('DANGER')
-            
-            
-            // Create the embed and the component, which will serve as placeholders
-            const embed  = new Discord.MessageEmbed()
-                .setColor('#ffffff')
-                .setFooter({ text: message.guild.name });
-            
-            // By default, only add games button is necessary
-            const btns = [setGameBtn]
-
-            if (json_data.length === 0) {
-                embed.setTitle('No game has been set for news notifications yet.')
-            }
-            else {
-                embed.setTitle(`Updates List`)
-                    .addFields(get_fields(json_data))
+        // Send placeholder message
+        message.channel.send(`Getting data from database...`).then(placeholder_news_msg => {
+            // Get the updates that have been set up
+            dbUtils.get_guild_news_updates(db, message.guild.id).then(json_data => {
+                const embeds = getEmbeds(Discord, json_data)
                 
-                // Add the remove game button
-                btns.push(removeGameBtn)
-            }
-
-            message.channel.send({
-                embeds: [embed],
-                components: [new Discord.MessageActionRow().addComponents(btns)]
-            })
-            .then(news_msg => {
-                // Handle interaction with buttons
-                const filter = (i) =>
-                    i.customId === btns[0].customId ||
-                    i.customId === btns[btns.length - 1].customId   // If there is only 1 button, then there is no problem
-
-                const collector = news_msg.createMessageComponentCollector({
-                    max: 1, // This way, once clicked, the buttons will be disabled
-                    time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
-                    filter // Add the filter
-                });
-
-                collector.on("collect", async interaction => {
-                    // Check if the author of the interaction is admin.
-                    // Only admins should be able to use the buttons
-                    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-                        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
-                    }
-                    else {
-                        switch (interaction.customId) {
-                            case 'setgamebtn':
-                                await interaction.deferUpdate()
-                                handleSetUpGameNews(client, db, interaction)
-                                break;
-
-                            case 'removegamebtn':
-                                await interaction.deferUpdate()
-                                get_guild_news_updates(db, interaction.message.guild.id).then(json_data => {
-                                    handleRemoveGameNews(db, interaction, json_data)
-                                })
-                                .catch(fetch_guild_updates_error => {
-                            
-                                })
-                                break;
-
-                            default:
-                                break;
-                        } 
-                    }
-                });
-
-                collector.on("end", (_, reason) => {
-                    if (reason !== "messageDelete") {
-                        const disabledRow = new Discord.MessageActionRow().addComponents(
-                            btns.map(function(btn) {
-                                return btn.setDisabled(true)
-                            })
-                        );
-        
-                        news_msg.edit({
-                            embeds: [embed],
-                            components: [disabledRow],
-                        })
-                        .catch(msg_error => {
-                            
-                        });
-                    }
-                });
-            })
-            .catch(error => {
+                // Two default buttons
+                const setGameBtn = new Discord.MessageButton()
+                    .setCustomId('setupgamenewsbtn')
+                    .setLabel('Set Up Game')
+                    .setStyle('PRIMARY')
                 
+                const removeGameBtn = new Discord.MessageButton()
+                    .setCustomId('removegamenewsbtn')
+                    .setLabel('Remove Game')
+                    .setStyle('DANGER')
+                    .setDisabled(json_data.length === 0) // disable if the list is empty
+                
+                const btns = [setGameBtn, removeGameBtn]
+
+                if (embeds.length === 1) {
+                    // if there is nothing or there is only one page (less than 10), there is no need for pagination
+
+                    placeholder_news_msg.edit({
+                        embeds: embeds,
+                        components: [new Discord.MessageActionRow().addComponents(btns)]
+                    })
+                    .catch(error => {
+                        
+                    })
+                }
+                else {
+                    // If there is more than one page, then use pagination
+                    embedPagination(
+                        Discord, placeholder_news_msg, embeds, 120000, null, btns
+                    )
+                    .catch(paginate_error => {
+                        //console.log(paginate_error)
+                    })
+                }
+            })
+            .catch(fetch_guild_news_updates_error => {
+                console.log(fetch_guild_news_updates_error)
             })
         })
-        .catch(error => {
-            
+        .catch(placeholder_news_msg => {
+                
         })
     }
 }
 
-/**
- * Gets a list of the set up notifications in a given guild as [ { gameID, channelID }, ... ]
- * @param {*} db The DB instance
- * @param {*} guildID The guild ID
- * @returns 
- */
-function get_guild_news_updates(db, guildID) {
-    return new Promise((success, failure) => {
-        const updateslist_query = `SELECT gameID, channelID FROM UpdatesChannels WHERE guildID = '${guildID}'`
-        db.query(updateslist_query, async (error, results) => {
-            if (error) {
-                failure(error)
-            }
-            else {
-                success(results)
-            }
-        });
-    })
+function getEmbeds(Discord, json_data) {
+    embedList = []
+
+    if (json_data.length === 0) {
+        embedList.push(
+            new Discord.MessageEmbed()
+                .setColor('#ffffff')
+                .setTitle('No game has been set for news notifications yet.')
+        )
+    }
+    else {
+        const chunkSize = 10;
+        for (let i = 0; i < json_data.length; i += chunkSize) {
+            const chunk = json_data.slice(i, i + chunkSize);
+
+            embedList.push(
+                new Discord.MessageEmbed()
+                    .setColor('#ffffff')
+                    .setTitle('Updates List')
+                    .addFields(get_fields(chunk))
+            )
+        }
+    }
+    return embedList
 }
 
 function get_fields(json_data) {

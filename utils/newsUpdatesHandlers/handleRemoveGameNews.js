@@ -2,9 +2,10 @@ const gamesConfig = require('./gamesConfig')
 const utils = require('../utils')
 
 /**
- * Handle the execution of setting up notifications for game news
+ * Handle the execution of removing notifications for game news
  * @param {*} db The DB instance
  * @param {*} i The interaction that started this execution
+ * @param {*} json_data The json containing all data about set up games
  */
 const handleRemoveGameNews = async(db, i, json_data) => {
     const message = i.message

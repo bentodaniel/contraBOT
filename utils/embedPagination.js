@@ -14,7 +14,7 @@
  * @param {*} extraBtns Extra buttons to use. If single button, will be displayed in the same row. If list, will be displayed in a new row
  * @returns
  */
-const embedPpagination = async (Discord, message, pages, timeout = 120000, content_text=' ', extraBtns) => {
+const embedPagination = async (Discord, message, pages, timeout = 120000, content_text=' ', extraBtns) => {
     return new Promise((success, failure) => {
         let page = 0;
 
@@ -153,4 +153,4 @@ const embedPpagination = async (Discord, message, pages, timeout = 120000, conte
     })
 };
 
-module.exports = embedPpagination;
+module.exports = embedPagination;

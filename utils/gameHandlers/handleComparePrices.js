@@ -1,6 +1,6 @@
 const xhr_req = require('xhr-request');
 
-const embedPpagination = require('../embedPagination');
+const embedPagination = require('../embedPagination');
 
 /**
  * Handle compare prices
@@ -35,7 +35,7 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
                     .setLabel('Add to Wishlist')
                     .setStyle('PRIMARY')
                 
-                embedPpagination(
+                embedPagination(
                     Discord, reply_msg, embeds, timeout, `${user.toString()}, here are the results for '**${game_json['title']}**'`, wishlist_btn
                 )
                 .catch(paginate_error => {console.log(paginate_error)})

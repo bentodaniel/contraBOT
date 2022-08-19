@@ -3,7 +3,7 @@ const xhr_req = require('xhr-request');
 const gamesConfig = require('../../utils/newsUpdatesHandlers/gamesConfig')
 const updates = require('../../utils/updates')
 const utils = require('../../utils/utils')
-const embedPpagination = require('../../utils/embedPagination');
+const embedPagination = require('../../utils/embedPagination');
 
 module.exports = (Discord, client, db, message) => {
     console.log('IM ONLINE');
@@ -240,7 +240,7 @@ function notify_user(client, Discord, user_data, game_offers_list) {
             .then(user_msg => {
                 const embeds = generate_game_notification_embeds(Discord, offers, user_data)
 
-                embedPpagination(Discord, user_msg, embeds, 120000, ' ')
+                embedPagination(Discord, user_msg, embeds, 120000, ' ')
             })
             .catch(msg_error => {
                 console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error)
