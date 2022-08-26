@@ -82,8 +82,8 @@ function getEmbeds(Discord, json_data) {
         let channels = ''
 
         for (let i = 0; i < json_data.length; i++) {
-            const current_game = `${gamesConfig[data['gameID']].title}\n`
-            const current_channel = `<#${data['channelID']}>\n`
+            const current_game = `${gamesConfig[json_data[i]['gameID']].title}\n`
+            const current_channel = `<#${json_data[i]['channelID']}>\n`
 
             // If we can fit one more row, add it
             if (games.length + current_game.length < 1024 && channels.length + current_channel.length < 1024) {

@@ -2,7 +2,7 @@ const utils = require('../utils/utils');
 
 module.exports = {
     name: 'default',
-    short_name: 'def',
+    short_name: 'd',
     description: `Check what channel is set as the guild's default channel. Set, modify or remove the default channel.`,
     arguments: '',
     adminOnly: false,
