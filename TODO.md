@@ -15,15 +15,6 @@
 IMPORTANT !!!
 ---------------------------------------------
 
-check the size of messages and titles on game updates
-they might be too long, causing the bot to crash
-
-- also test things like, 
-    - wishlist if u have 10 or 50 games in
-    - news - what if u have lots of set up games for updates?
-
----------------------------------------------
-
 rework logging in catches
 Dont just log erros. try to add some info to them
 
@@ -32,7 +23,20 @@ Dont just log erros. try to add some info to them
 
 finish wishlist with remove button
 
---------------------------------------------------
+------------------------------------------------
+
+some buttons souldn't have a max usage probably (check select menus)
+- for example, wishlit (if any user, ever without permissions) clicks it, is instantly is disabled...
+
+- probably the correct way would be to disable AFTER execution
+
+
+------------------------------------------
+
+
+
+
+
 
 
 
@@ -40,13 +44,6 @@ finish wishlist with remove button
 --------------------------------------------
 
 add a 'remove from wishlit' button when notifying users of a wishlisted item
-
-------------------------------------------------
-
-some buttons souldn't have a max usage probably
-- for example, wishlit (if any user, ever without permissions) clicks it, is instantly is disabled...
-
-- probably the correct way would be to disable AFTER execution
 
 ---------------------------------------
 

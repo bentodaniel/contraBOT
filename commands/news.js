@@ -1,6 +1,4 @@
 const gamesConfig = require('../utils/newsUpdatesHandlers/gamesConfig')
-const handleSetUpGameNews = require('../utils/newsUpdatesHandlers/handleSetUpGameNews')
-const handleRemoveGameNews = require('../utils/newsUpdatesHandlers/handleRemoveGameNews')
 const dbUtils = require('../database/utils')
 const embedPagination = require('../utils/embedPagination')
 
@@ -57,12 +55,18 @@ module.exports = {
                 console.log(fetch_guild_news_updates_error)
             })
         })
-        .catch(placeholder_news_msg => {
+        .catch(placeholder_news_msg_error => {
                 
         })
     }
 }
 
+/**
+ * Generate all embeds needed to display the set up games for news notifications
+ * @param {*} Discord The Discord instance
+ * @param {*} json_data The json containing the set up games data
+ * @returns 
+ */
 function getEmbeds(Discord, json_data) {
     embedList = []
 
@@ -74,40 +78,73 @@ function getEmbeds(Discord, json_data) {
         )
     }
     else {
-        const chunkSize = 10;
-        for (let i = 0; i < json_data.length; i += chunkSize) {
-            const chunk = json_data.slice(i, i + chunkSize);
+        let games = ''
+        let channels = ''
 
-            embedList.push(
-                new Discord.MessageEmbed()
-                    .setColor('#ffffff')
-                    .setTitle('Updates List')
-                    .addFields(get_fields(chunk))
-            )
+        for (let i = 0; i < json_data.length; i++) {
+            const current_game = `${gamesConfig[data['gameID']].title}\n`
+            const current_channel = `<#${data['channelID']}>\n`
+
+            // If we can fit one more row, add it
+            if (games.length + current_game.length < 1024 && channels.length + current_channel.length < 1024) {
+                games += current_game
+                channels += current_channel
+            }
+            else {
+                const fields = [
+                    {
+                    "name": `Games`,
+                    "value": games,
+                    "inline": true
+                    },
+                    {
+                    "name": `Channels`,
+                    "value": channels,
+                    "inline": true
+                    }
+                ]
+
+                // create a new embed with current items
+                embedList.push(
+                    new Discord.MessageEmbed()
+                        .setColor('#ffffff')
+                        .setTitle('Updates List')
+                        .addFields(fields)
+                )
+
+                // reset games and prices
+                games = ''
+                channels = ''
+
+                // add current game and price
+                games += current_game
+                channels += current_channel
+            }
+
+            // what if it is the last index? just add embed
+            if (i === json_data.length - 1) {
+                const fields = [
+                    {
+                    "name": `Games`,
+                    "value": games,
+                    "inline": true
+                    },
+                    {
+                    "name": `Channels`,
+                    "value": channels,
+                    "inline": true
+                    }
+                ]
+
+                // create a new embed with current items
+                embedList.push(
+                    new Discord.MessageEmbed()
+                        .setColor('#ffffff')
+                        .setTitle('Updates List')
+                        .addFields(fields)
+                )
+            }
         }
     }
     return embedList
-}
-
-function get_fields(json_data) {
-    let games = ''
-    let channels = ''
-
-    for (data of json_data) {
-        games += gamesConfig[data['gameID']].title + '\n'
-        channels += `<#${data['channelID']}>\n`
-    }
-
-    return [
-        {
-        "name": `Games`,
-        "value": games,
-        "inline": true
-        },
-        {
-        "name": `Channels`,
-        "value": channels,
-        "inline": true
-        }
-    ]
 }
