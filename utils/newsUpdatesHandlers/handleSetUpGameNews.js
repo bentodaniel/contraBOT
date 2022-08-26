@@ -35,7 +35,7 @@ const handleSetUpGameNews = async(client, db, i) => {
         const filter = (click) => click.customId === 'updates_game_select'
 
         const collector = game_select_msg.createMessageComponentCollector({
-            max: 1, // The number of times a user can click on the button
+            //max: 1, // The number of times a user can click on the button
             time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
             filter // Add the filter
         });
@@ -47,6 +47,7 @@ const handleSetUpGameNews = async(client, db, i) => {
             else {
                 const gameID = interaction.values[0]
                 handleGameSelectec(client, db, interaction, gameID)
+                game_select_msg.delete().catch(error => { });
             }
         })
 
@@ -114,7 +115,7 @@ function handleGameSelectec(client ,db, i, gameID) {
             const filter = (click) => click.customId === 'updates_channel_select'
 
             const collector = channel_select_msg.createMessageComponentCollector({
-                max: 1, // The number of times a user can click on the button
+                //max: 1, // The number of times a user can click on the button
                 time: 1000 * 30, // The amount of time the collector is valid for in milliseconds,
                 filter // Add the filter
             });
@@ -126,6 +127,7 @@ function handleGameSelectec(client ,db, i, gameID) {
                 else {
                     const channelID = interaction.values[0]
                     handleAddGameToUpdatesDB(client ,db, interaction, gameID, channelID)
+                    channel_select_msg.delete().catch(error => { });
                 }
             })
 
