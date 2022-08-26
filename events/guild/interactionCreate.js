@@ -211,11 +211,16 @@ function handleRemoveGameNewsButton(db, interaction) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
         return
     }
-
-    interaction.deferUpdate()
     
     dbUtils.get_guild_news_updates(db, interaction.message.guild.id).then(json_data => {
-        handleRemoveGameNews(db, interaction, json_data)
+        if (json_data.length === 0) {
+            interaction.reply({ content: `There are no set up game news notifications.`, ephemeral: true }).catch(error => {})
+        }
+        else {
+            interaction.deferUpdate()
+
+            handleRemoveGameNews(db, interaction, json_data)
+        }
     })
     .catch(fetch_guild_updates_error => {
                                 
