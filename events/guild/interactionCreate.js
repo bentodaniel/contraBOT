@@ -4,6 +4,8 @@ const handleComparePrices = require('../../utils/gameHandlers/handleComparePrice
 const handleAddToWishlist = require('../../utils/gameHandlers/handleAddToWishlist')
 const handleSetUpGameNews = require('../../utils/newsUpdatesHandlers/handleSetUpGameNews')
 const handleRemoveGameNews = require('../../utils/newsUpdatesHandlers/handleRemoveGameNews')
+const handleSetDefaultChannel = require('../../utils/defaultChannelHandlers/handleSetDefaultChannel')
+const handleRemoveDefaultChannel = require('../../utils/defaultChannelHandlers/handleRemoveDefaultChannel')
 
 module.exports = (Discord, client, db, interaction) => {
     const idTags = interaction.customId.split('-')
@@ -18,6 +20,16 @@ module.exports = (Discord, client, db, interaction) => {
             // The modal with the form to contact the developers
             const spamCheck = idTags[1]
             handleSubmitContactModal(interaction, spamCheck)
+            break
+
+        case 'setdefaultbtn':
+            // Button to set the default channel of a guild
+            handleSetDefaultChannelButton(client, Discord, db, interaction)
+            break
+
+        case 'removedefaultbtn':
+            // Button to remove the default channel of a guild
+            handleRemoveDefaultChannelButton(Discord, db, interaction)
             break
 
         case 'setupgamenewsbtn':
@@ -75,12 +87,12 @@ module.exports = (Discord, client, db, interaction) => {
             new Discord.MessageActionRow().addComponents(
                 new Discord.TextInputComponent()
                     .setCustomId('contactEmailInput')
-                    .setLabel(`Email`)
+                    .setLabel(`Email (required if you wish to be contacted back)`)
                     .setStyle('SHORT')
                     .setMinLength(5)
                     .setMaxLength(100)
                     .setPlaceholder(`myEmail@mail.com`)
-                    .setRequired(true),
+                    .setRequired(false),
             ),
             new Discord.MessageActionRow().addComponents(
                 new Discord.TextInputComponent()
@@ -175,6 +187,42 @@ function handleSubmitContactModal(interaction, spamCheckTarget) {
             console.log('Email sent: ' + info.response);
             interaction.reply({ content: `Your email has been sent to the developers.`, ephemeral: true }).catch(error => {})
         }
+    })
+}
+
+/***********************************************
+ * DEFAULT CHANNEL FUNCTIONS
+ ***********************************************/
+
+function handleSetDefaultChannelButton(client, Discord, db, interaction) {
+    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        return
+    }
+
+    interaction.deferUpdate()
+
+    handleSetDefaultChannel(client, Discord, db, interaction)
+}
+
+function handleRemoveDefaultChannelButton(Discord, db, interaction) {
+    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        return
+    }
+
+    dbUtils.get_guild_default_channel(db, interaction.guildId).then(json_data => {
+        if (json_data.length === 0) {
+            interaction.reply({ content: `No channel is set up as default.`, ephemeral: true }).catch(error => {})
+        }
+        else {
+            interaction.deferUpdate()
+
+            handleRemoveDefaultChannel(Discord, db, interaction, json_data[0]['defaultChannelID'])
+        }
+    })
+    .catch(fetch_guild_default_error => {
+                                
     })
 }
 

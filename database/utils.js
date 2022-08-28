@@ -40,7 +40,28 @@
     })
 }
 
+/**
+ * Get the default channel for a specified guild
+ * @param {*} db The DB instance
+ * @param {*} guildID The guild's id to check in
+ * @returns 
+ */
+ function get_guild_default_channel(db, guildID) {
+    return new Promise((success, failure) => {
+        const q = `SELECT defaultChannelID FROM Guilds WHERE guildID = ${guildID} AND defaultChannelID IS NOT NULL LIMIT 1`
+        db.query(q, async (select_error, select_results) => {
+            if (select_error) {
+                failure(select_error)
+            }
+            else {
+                success(select_results)
+            }
+        })
+    })
+}
+
 module.exports = {
     get_guild_news_updates,
-    get_user_wishlist
+    get_user_wishlist,
+    get_guild_default_channel
 }
