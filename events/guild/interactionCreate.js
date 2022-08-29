@@ -88,7 +88,7 @@ module.exports = (Discord, client, db, interaction) => {
             new Discord.MessageActionRow().addComponents(
                 new Discord.TextInputComponent()
                     .setCustomId('contactEmailInput')
-                    .setLabel(`Email (required if you wish to be contacted back)`)
+                    .setLabel(`Email (if you wish to be contacted back)`)
                     .setStyle('SHORT')
                     .setMinLength(5)
                     .setMaxLength(100)
