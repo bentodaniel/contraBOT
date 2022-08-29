@@ -6,6 +6,7 @@ const handleSetUpGameNews = require('../../utils/newsUpdatesHandlers/handleSetUp
 const handleRemoveGameNews = require('../../utils/newsUpdatesHandlers/handleRemoveGameNews')
 const handleSetDefaultChannel = require('../../utils/defaultChannelHandlers/handleSetDefaultChannel')
 const handleRemoveDefaultChannel = require('../../utils/defaultChannelHandlers/handleRemoveDefaultChannel')
+const handleRemoveFromWishlist = require('../../utils/gameHandlers/handleRemoveFromWishlist')
 
 module.exports = (Discord, client, db, interaction) => {
     const idTags = interaction.customId.split('-')
@@ -194,6 +195,14 @@ function handleSubmitContactModal(interaction, spamCheckTarget) {
  * DEFAULT CHANNEL FUNCTIONS
  ***********************************************/
 
+/**
+ * Handles the click on 'set default channel' button
+ * @param {*} client The BOT's client
+ * @param {*} Discord The discord instance
+ * @param {*} db The DB instance
+ * @param {*} interaction The interaction that started this execution
+ * @returns 
+ */
 function handleSetDefaultChannelButton(client, Discord, db, interaction) {
     if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
@@ -205,6 +214,13 @@ function handleSetDefaultChannelButton(client, Discord, db, interaction) {
     handleSetDefaultChannel(client, Discord, db, interaction)
 }
 
+/**
+ * Handles the click on 'remove default channel' button
+ * @param {*} Discord The discord instance
+ * @param {*} db The DB instance
+ * @param {*} interaction The interaction that started this execution
+ * @returns 
+ */
 function handleRemoveDefaultChannelButton(Discord, db, interaction) {
     if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
@@ -372,45 +388,28 @@ function getSearchGameJSON(interaction) {
     return utils.embedToJson(embed)
 }
 
-
-
-
-
-
-
-
-
+/**
+ * Handle the execution of clicking 'remove from wishlist' button
+ * @param {*} Discord The Discord instance
+ * @param {*} db The DB instance
+ * @param {*} interaction The interaction that started this event
+ * @param {*} targetUserID The user allowed to use this button
+ * @returns 
+ */
 function handleRemoveFromWishlistButton(Discord, db, interaction, targetUserID) {
     if (interaction.user.id !== targetUserID) {
         interaction.reply({ content: `This button is not for you.`, ephemeral: true }).catch(error => {})
         return
     }
 
-    interaction.deferUpdate()
-    
     dbUtils.get_user_wishlist(db, targetUserID).then(json_data => {
         if (json_data.length === 0) {
             interaction.reply({ content: `Your wishlist is empty.`, ephemeral: true }).catch(error => {})
         }
         else {
-            const embed = new Discord.MessageEmbed()
-                .setColor('#ffffff')
-                .setTitle('Select the items you would like to remove from your wishlist')
+            interaction.deferUpdate()
 
-            interaction.message.channel.send({
-
-                // TODO
-
-            })
-
-
-            // TODO
-
-            // send message to the channel with the select menu
-
-            // create an observer for this select menu
-
-            // once used, remove it
+            handleRemoveFromWishlist(db, interaction, json_data)
         }
     })
     .catch(fetch_user_wishlist_error => {

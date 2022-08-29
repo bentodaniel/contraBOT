@@ -4,17 +4,12 @@ const utils = require('../utils')
 /**
  * Handle the execution of removing notifications for game news
  * @param {*} db The DB instance
- * @param {*} i The interaction that started this execution
+ * @param {*} interaction The interaction that started this execution
  * @param {*} json_data The json containing all data about set up games
  */
-const handleRemoveGameNews = async(db, i, json_data) => {
-    const message = i.message
-    const user = i.user
-
-    console.log(json_data)
-
-    console.log(json_data.length)
-    console.log(json_data.length === 0)
+const handleRemoveGameNews = async(db, interaction, json_data) => {
+    const message = interaction.message
+    const user = interaction.user
 
     message.channel.send({
         content : user.toString(),
@@ -44,13 +39,13 @@ const handleRemoveGameNews = async(db, i, json_data) => {
             filter // Add the filter
         });
 
-        collector.on("collect", async interaction => {
-            if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-                interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        collector.on("collect", async i => {
+            if (!i.memberPermissions.has('ADMINISTRATOR')) {
+                i.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {})
             }
             else {
                 let gamesIDs = ''
-                for (gameid of interaction.values) {
+                for (gameid of i.values) {
                     gamesIDs += `'${gameid}', `
                 }
                 gamesIDs = gamesIDs.slice(0, -2) // remove the ', '
@@ -63,7 +58,7 @@ const handleRemoveGameNews = async(db, i, json_data) => {
                     }
                     else {
                         // Send message confirming the removal of the default channel
-                        interaction.message.channel.send({
+                        i.message.channel.send({
                             embeds : [{
                                 'type' : 'rich',
                                 'title': `Game news notifications removed.`,
@@ -83,10 +78,10 @@ const handleRemoveGameNews = async(db, i, json_data) => {
 
         collector.on("end", (_, reason) => {
             if (reason !== "messageDelete") {
-                select_remove_game_msg.delete().catch(error => { });                }
-            });
+                select_remove_game_msg.delete().catch(error => { });
+            }
         })
-
+    })
     .catch(select_remove_game_msg_error => {
 
     })

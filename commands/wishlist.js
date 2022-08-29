@@ -1,4 +1,5 @@
-const utils = require('../utils/utils')
+const dbUtils = require('../database/utils')
+const embedPagination = require('../utils/embedPagination')
 
 module.exports = {
     name: 'wishlist',
@@ -9,76 +10,141 @@ module.exports = {
     showOnHelp: true,
     async execute(client, message, args, Discord, db) {
         // Check if a user was mentioned. If not, then the author is the target
-        var user = message.mentions.users.first()
-        if (user === undefined) {
-            user = message.author
+        var target_user = message.mentions.users.first()
+        if (target_user === undefined) {
+            target_user = message.author
         }
 
-        message.channel.send(`Getting ${user.username}'s wishlist...`).then(msg => {
-            utils.get_user_wishlist(db, user.id).then(json_data => {
-                if (json_data.length === 0) {
-                    msg.edit({
-                        'content' : ' ',
-                        'embeds' : [{
-                            'type' : 'rich',
-                            'title': `${user.username}'s wishlist is empty`,
-                            'color' : 0x6fff00
-                        }]
+        // Send placeholder message
+        message.channel.send(`Getting data from database...`).then(placeholder_wishlist_msg => {
+            dbUtils.get_user_wishlist(db, target_user.id).then(json_data => {
+                const embeds = getEmbeds(Discord, json_data, target_user)
+                
+                // create the button
+                // by default, disable
+                const removeWishBtn = new Discord.MessageButton()
+                    .setCustomId(`removefromwishlistbtn-${target_user.id}`)
+                    .setLabel('Remove from Wishlist')
+                    .setStyle('DANGER')
+                    .setDisabled(json_data.length === 0) // disable if the list is empty
+
+                if (embeds.length === 1) {
+                    // if there is nothing or there is only one page (less than 10), there is no need for pagination
+
+                    placeholder_wishlist_msg.edit({
+                        embeds: embeds,
+                        components: [new Discord.MessageActionRow().addComponents(removeWishBtn)]
                     })
-                    .catch(msg_error => {
-                        console.log(`ERROR :: could not send 'empty wishlist' message on wishlist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-                    });
+                    .catch(error => {
+                        console.log(error)
+                    })
                 }
                 else {
-                    embed = new Discord.MessageEmbed()
-                        .setTitle(`${user.username}'s wishlist`)
-                        .setColor('#6fff00')
-                    
-                    embed = get_fields(json_data, embed)
-
-                    msg.edit({
-                        'content' : ' ',
-                        'embeds' : [embed]
+                    // If there is more than one page, then use pagination
+                    embedPagination(
+                        Discord, placeholder_wishlist_msg, embeds, 120000, null, removeWishBtn
+                    )
+                    .catch(paginate_error => {
+                        console.log(paginate_error)
                     })
-                    .catch(msg_error => {
-                        console.log(`ERROR :: could not send 'wishlist' message on wishlist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-                    });
                 }
             })
             .catch(err => {
                 //console.log('ERROR :: failed to get wishlist\n ', err) // already logged when executing function
-                utils.send_error_message(msg, 'Failed to get wishlist data', 'edit')
+                //utils.send_error_message(msg, 'Failed to get wishlist data', 'edit')
             })
         })
-        .catch(msg_error => {
-            console.log(`ERROR :: could not send placeholder message on wishlist to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
-        });
+        .catch(placeholder_wishlist_msg_error => {
+                
+        })
     }
 }
 
-function get_fields(json_data, embed) {
-    var games = ''
-    var prices = ''
+/**
+ * Generate all embeds needed to display the wishlist
+ * @param {*} Discord The Discord instance
+ * @param {*} json_data The json containing the wishlist data
+ * @param {*} target_user The targeted user
+ * @returns 
+ */
+function getEmbeds(Discord, json_data, target_user) {
+    embedList = []
 
-    for (data of json_data) {
-        games += `[${data['gameID']}](${data['gameLink']})\n`
-        prices += `${data['price']}€\n`
+    if (json_data.length === 0) {
+        embedList.push(
+            new Discord.MessageEmbed()
+                .setColor('#ffffff')
+                .setTitle(`${target_user.username}'s wishlist is empty.`)
+        )
     }
+    else {
+        var games = ''
+        var prices = ''
 
-    embed.addFields(
-        {
-            "name": `Game Title`,
-            "value": games,
-            "inline": true
-        },
-        {
-            "name": `Desired Price`,
-            "value": prices,
-            "inline": true
+        for (let i = 0; i < json_data.length; i++) {
+            const current_game = `[${json_data[i]['gameID']}](${json_data[i]['gameLink']})\n`
+            const current_price = `${json_data[i]['price']}€\n`
+
+            // If we can fit one more row, add it
+            if (games.length + current_game.length < 1024 && prices.length + current_price.length < 1024) {
+                games += current_game
+                prices += current_price
+            }
+            else {
+                const fields = [
+                    {
+                        "name": `Game Title`,
+                        "value": games,
+                        "inline": true
+                    },
+                    {
+                        "name": `Desired Price`,
+                        "value": prices,
+                        "inline": true
+                    }
+                ]
+                
+                // create a new embed with current items
+                embedList.push(
+                    new Discord.MessageEmbed()
+                        .setColor('#ffffff')
+                        .setTitle(`${target_user.username}'s wishlist`)
+                        .addFields(fields)
+                )
+
+                // reset games and prices
+                games = ''
+                prices = ''
+
+                // add current game and price
+                games += current_game
+                prices += current_price
+            }
+
+            // what if it is the last index? just add embed
+            if (i === json_data.length - 1) {
+                const fields = [
+                    {
+                        "name": `Game Title`,
+                        "value": games,
+                        "inline": true
+                    },
+                    {
+                        "name": `Desired Price`,
+                        "value": prices,
+                        "inline": true
+                    }
+                ]
+                
+                // create a new embed with current items
+                embedList.push(
+                    new Discord.MessageEmbed()
+                        .setColor('#ffffff')
+                        .setTitle(`${target_user.username}'s wishlist`)
+                        .addFields(fields)
+                )
+            }
         }
-    )
-
-    // TODO - in the future, could also display the store, if steam is integrated
-    
-    return embed
+    }
+    return embedList
 }

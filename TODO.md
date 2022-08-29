@@ -19,19 +19,8 @@ rework logging in catches
 Dont just log erros. try to add some info to them
 
 
-------------------------------------------
-
-finish wishlist with remove button
-
 ------------------------------------------------
 
-some buttons souldn't have a max usage probably (check select menus)
-- for example, wishlit (if any user, ever without permissions) clicks it, is instantly is disabled...
-
-- probably the correct way would be to disable AFTER execution
-
-
-------------------------------------------
 
 
 
