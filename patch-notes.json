@@ -23,8 +23,8 @@
     {
         "display": true,
         "operation" : "update",
-        "date" : "2022/08/10",
+        "date" : "2022/08/30",
         "title" : "Complete contraBOT overhaul",
-        "description" : "Changed commands to be more intuitive. Commands 'price' and 'addwish' are now just 'search'. Commands 'setupdates', 'removeupdates' and 'updateslist' is now just 'updates'."
+        "description" : "Changed commands to be more intuitive. Commands 'price' and 'addwish' are now just 'search'. Commands 'setupdates', 'removeupdates' and 'updateslist' is now just 'news'. Commands 'setdefault' and 'removedefault' are now just 'default'."
     }
 ]
