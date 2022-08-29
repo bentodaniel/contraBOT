@@ -15,13 +15,11 @@
 IMPORTANT !!!
 ---------------------------------------------
 
-rework logging in catches
-Dont just log erros. try to add some info to them
-
-
 ------------------------------------------------
 
+pagination buttons -> use emojis instead
 
+------------------------------------------------
 
 
 

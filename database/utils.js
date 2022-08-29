@@ -30,8 +30,7 @@
         
         db.query(wishlist_query, async (error, results) => {
             if (error) {
-                console.log(`ERROR :: failed to get wishlist for user '${userID}'\n `, error)
-                failure()
+                failure(error)
             }
             else {
                 success(results)

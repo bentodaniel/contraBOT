@@ -27,7 +27,7 @@ module.exports = {
                 components: [new Discord.MessageActionRow().addComponents(contactBtn)]
             })
             .catch(msg_error => {
-                console.log(`ERROR :: could not send 'help' message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+                console.log(`ERROR :: Could not send 'help' message to channel ${message.channelId} in guild ${message.guildId} :: `, msg_error)
             });
         })
     }

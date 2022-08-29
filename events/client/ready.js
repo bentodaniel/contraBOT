@@ -2,7 +2,7 @@ const request = require('request');
 const xhr_req = require('xhr-request');
 const gamesConfig = require('../../utils/newsUpdatesHandlers/gamesConfig')
 const updates = require('../../utils/updates')
-const utils = require('../../utils/utils')
+const handleComparePrices = require('../../utils/gameHandlers/handleComparePrices')
 const embedPagination = require('../../utils/embedPagination');
 
 module.exports = (Discord, client, db, message) => {
@@ -38,7 +38,7 @@ async function handle_news(client, db) {
     db.query(patch_query, async (error, recorded_results) => {
         if (error) {
             // No need to tell the users
-            console.log(`ERROR :: failed to get last patches`, error)
+            console.log(`ERROR :: failed to get last patches :: `, error)
         }
         else {
             for (const [ key, value ] of Object.entries(gamesConfig)) {
@@ -112,7 +112,7 @@ function handle_news_messaging(client, db, game, news_data, game_data) {
     db.query(channels_query, async (error, results) => {
         if (error) {
             // No need to tell the users
-            console.log(`ERROR :: failed to get update channels for game '${game}'\n `, error)
+            console.log(`ERROR :: failed to get update channels for game '${game}' :: `, error)
         }
         else {
             send_news_messages(results, client, news_data, game_data)
@@ -157,7 +157,7 @@ async function send_news_messages(db_data, client, data, value) {
                 }]
             })
             .catch(msg_error => {
-                console.log(`ERROR :: could not send news message to channel ${channel.id}\n `, msg_error)
+                console.log(`ERROR :: Failed to send news message to channel ${channel.id} :: `, msg_error)
             });
         }
     }
@@ -170,7 +170,7 @@ function record_into_db(db, game, news_data) {
 
         db.query(q, async (error, results) => {
             if (error) {
-                console.log(`ERROR :: Coundn't record last news into db for game ${game}\n`, error)
+                console.log(`ERROR :: Coundn't record last news into db for game ${game} :: `, error)
             }
             else {
                 console.log(`Recorded '${url}' as last news into db for game ${game}`)
@@ -189,7 +189,7 @@ function handle_wishlist(Discord, client, db) {
     db.query(games_query, async (games_error, games_results) => {
         if (games_error) {
             // No need to tell the users
-            console.log(`ERROR :: failed to get the games from wishlist for update\n `, games_error)
+            console.log(`ERROR :: failed to get the games from wishlist for update :: `, games_error)
         }
         else {
             // execute for each game
@@ -197,13 +197,13 @@ function handle_wishlist(Discord, client, db) {
                 const gameProductID = game['gameProductID']
 
                 // get the offers for this game
-                utils.get_game_offers(gameProductID, 'eur', 10).then(game_offers_list => {
+                handleComparePrices.get_game_offers(gameProductID, 'eur', 10, 'allkeyshop').then(game_offers_list => {
                     // find what users have this game in their wishlist
                     const users_query = `SELECT userID, gameID, gameLink, gameImageLink, price FROM WishList WHERE gameProductID = ${gameProductID} AND receiveNotifications = 1`
                     db.query(users_query, async (users_error, users_results) => {
                         if (users_error) {
                             // No need to tell the users
-                            console.log(`ERROR :: failed to get the users with game ${gameProductID} on their wishlist\n `, users_error)
+                            console.log(`ERROR :: failed to get the users with game ${gameProductID} on their wishlist :: `, users_error)
                         }
                         else {
                             // now we have to loop through each user and check if there are offers that are ok with his price
@@ -214,8 +214,8 @@ function handle_wishlist(Discord, client, db) {
                         }
                     })
                 })
-                .catch(err => {
-                    // No need to do anything
+                .catch(get_game_offers_error => {
+                    console.log(`ERROR :: Failed to get game offers on 'ready.handle_wishlist' :: `, get_game_offers_error)
                 })
             }
         }
@@ -243,13 +243,12 @@ function notify_user(client, Discord, user_data, game_offers_list) {
                 embedPagination(Discord, user_msg, embeds, 120000, ' ')
             })
             .catch(msg_error => {
-                console.log(`ERROR :: couldn\'t notify user ${user.id} about a wishlisted game\n `, msg_error)
+                console.log(`ERROR :: Failed to notify user ${user.id} about a wishlisted game :: `, msg_error)
             });
         }
     })
     .catch(user_fetch_error => {
-
-        console.log(user_fetch_error)
+        console.log(`ERROR :: Failed to get user from client on 'ready.notify_user' :: `, user_fetch_error)
 
         //console.log(`WARNING :: Could not find user ${user_data['userID']} during wishlist update. Disabling notifications\n `, user_fetch_error)
     
@@ -315,7 +314,7 @@ function handle_patch_notes(client, Discord, db) {
     db.query(q, async (error, results) => {
         if (error) {
             // No need to inform any user
-            console.log(`ERROR :: failed to get guilds with set default channel`)
+            console.log(`ERROR :: failed to get guilds with set default channel :: `, error)
         }
         else {
             var fs = require('fs');
@@ -351,12 +350,12 @@ function notify_server(client, Discord, guild_data, patch_data) {
             files: ['./images/contraLOGO.png']
         })
         .catch(msg_error => {
-            console.log(`ERROR :: couldn\'t notify guild ${guild_data['guildID']} in channel ${guild_data['defaultChannelID']} about patch notes\n `, msg_error)
+            console.log(`ERROR :: Failed to notify guild ${guild_data['guildID']} in channel ${guild_data['defaultChannelID']} about patch notes :: `, msg_error)
         });
     })
     .catch(channel_fetch_error => {
-        console.log(channel_fetch_error)
+        console.log(`ERROR :: Failed to get channel from client on 'ready.notify_server' :: `, channel_fetch_error)
 
-        //no need to notify anyone (?)
+        // TODO - no need to notify anyone (?)
     });;
 }

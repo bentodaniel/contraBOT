@@ -21,7 +21,9 @@ const handleAddToWishlist = async (db, interaction, game_json, price) => {
 
             // Check if there is still space for more rows
             if (wished_games.length >= entry_limit && !gameInList(game_json['productID'], wished_games)) {
-                interaction.reply({ content: `You have reached your wishlist's limit (${entry_limit} games).`, ephemeral: true }).catch(error => {})
+                interaction.reply({ content: `You have reached your wishlist's limit (${entry_limit} games).`, ephemeral: true }).catch(error => {
+                    console.log(`ERROR :: Failed to send 'max wishlist reached' reply on 'handleAddToWishlist' :: `, error)
+                })
             }
             else {
                 // Insert or replace a game in wishlist
@@ -29,20 +31,32 @@ const handleAddToWishlist = async (db, interaction, game_json, price) => {
                 db.query(replace_q, async (error, results) => {
                     if (error) {
                         console.log(error)
-                        interaction.reply({ content: `Failed to add the game '${game_json['title']}' to your wishlist.`, ephemeral: true }).catch(error => {})
+                        interaction.reply({ content: `Failed to add the game '${game_json['title']}' to your wishlist.`, ephemeral: true }).catch(error => {
+                            console.log(`ERROR :: Failed to send 'failed to add game to wishlist' reply on 'handleAddToWishlist' :: `, error)
+                        })
                     }
                     else {
-                        interaction.reply({ content: `The game '${game_json['title']}' has been added to your wishlist with target price of ${price}€.`, ephemeral: true }).catch(error => {})
+                        interaction.reply({ content: `The game '${game_json['title']}' has been added to your wishlist with target price of ${price}€.`, ephemeral: true }).catch(error => {
+                            console.log(`ERROR :: Failed to send 'success' reply on 'handleAddToWishlist' :: `, error)
+                        })
                     }
                 });
             }
         })
         .catch(premium_error => {
-            console.log(premium_error)
+            console.log(`ERROR :: Failed to fetch user type handleAddToWishlist :: `, premium_error)
+
+            interaction.reply({ content: `Failed to fetch permissions. Please try again`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'fail' reply on 'handleAddToWishlist' :: `, error)
+            })
         })
     })
     .catch(select_wish_error => {
-        console.log(select_wish_error)
+        console.log(`ERROR :: Failed to fetch wishlisted games type handleAddToWishlist :: `, premium_error)
+
+        interaction.reply({ content: `There was an error contacting database. Please try again`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'fail to contact db' reply on 'handleAddToWishlist' :: `, error)
+        })
     })
 }
 

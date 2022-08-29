@@ -27,7 +27,7 @@ module.exports = (Discord, client, db, message) => {
             }]
         })
         .catch(msg_error => {
-            console.log(`ERROR :: could not send 'wrong command' message to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+            console.log(`ERROR :: Failed to send 'wrong command' message to channel ${message.channelId} in guild ${message.guildId} :: `, msg_error)
         });
     }
 }

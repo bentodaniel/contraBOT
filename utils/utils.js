@@ -1,30 +1,3 @@
-const MsgType = {
-	success: 0x6fff00,
-	error: 0xff0000
-}
-
-/**
- * Edits a message
- * @param {*} message The message to edit
- * @param {*} content The content of the message
- * @param {*} title The title of the embed
- * @param {MsgType} type The type of message
- */
- function edit_message(message, content, title, type) {
-    message.edit({
-        'content' : content,
-        'embeds' : [{
-            'type' : 'rich',
-            'title': title,
-            'color' : type,
-        }],
-        'components': []
-    })
-    .catch(msg_error => {
-        console.log(`ERROR :: failed to edit message on utils.edit_message to channel ${message.channelId}\n `, msg_error)
-    });
-}
-
 /**
  * Parses a search results embed back into a json format { link, image_link, title, productID, price }
  * @param {*} embed The embed to parse
@@ -96,8 +69,6 @@ const MsgType = {
 }
 
 module.exports = {
-    MsgType,
-    edit_message,
     embedToJson,
     parse_channels_to_select_options
 }

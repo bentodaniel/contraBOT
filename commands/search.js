@@ -1,7 +1,6 @@
 const request = require('request');
 const cheerio = require('cheerio');
 
-const utils = require('../utils/utils');
 const embedPagination = require('../utils/embedPagination');
 
 module.exports = {
@@ -20,10 +19,30 @@ module.exports = {
             // Get the list of search results
             get_games_list(store, game).then(results_list => {
                 if (results_list === undefined) {
-                    utils.edit_message(placeholder_search_msg, ' ', 'Failed to get the data', utils.MsgType.error)
+                    placeholder_search_msg.edit({
+                        content : ' ',
+                        embeds : [{
+                            'type' : 'rich',
+                            'title': `There was an error while trying to get the search results. Please try again.`,
+                            'color' : 0xffffff,
+                        }]
+                    })
+                    .catch(error => {
+                        console.log(`ERROR :: failed to edit 'null search results' message on 'search' command to channel ${message.channelId} :: `, error)
+                    });
                 }
                 else if (results_list.length === 0){
-                    utils.edit_message(placeholder_search_msg, ' ', `There are no results for '${game}'`, utils.MsgType.success)
+                    placeholder_search_msg.edit({
+                        content : ' ',
+                        embeds : [{
+                            'type' : 'rich',
+                            'title': `There are no results for '${game}'. Try using another search terms.`,
+                            'color' : 0xffffff,
+                        }]
+                    })
+                    .catch(error => {
+                        console.log(`ERROR :: failed to edit 'there are no search results' message on 'search' command to channel ${message.channelId} :: `, error)
+                    });
                 }
                 else {
                     // Generate the embeds and the buttons for paginated message
@@ -42,16 +61,30 @@ module.exports = {
                     embedPagination(
                         Discord, placeholder_search_msg, embeds, 120000, `${message.author.toString()}, here are the results for '**${game}**'`, extraButtonList
                     )
-                    .catch(paginate_error => {})
+                    .catch(paginate_error => {
+                        console.log(`ERROR :: Failed to send paginated search results message for 'search' command :: `, paginate_error)
+                    })
                 }
             })
-            .catch(err => {
-                utils.edit_message(placeholder_search_msg, ' ', 'Failed to get the data', utils.MsgType.error)
-                console.log(err)
+            .catch(fetch_games_list_error => {
+                console.log(`ERROR :: Failed to get games list for 'search' command :: `, fetch_games_list_error)
+
+                // Notify the user
+                placeholder_search_msg.edit({
+                    content : ' ',
+                    embeds : [{
+                        'type' : 'rich',
+                        'title': `There was an error while trying to get the search results. Please try again.`,
+                        'color' : 0xffffff,
+                    }]
+                })
+                .catch(error => {
+                    console.log(`ERROR :: failed to edit 'failed to get search results' message on 'search' command to channel ${message.channelId} :: `, error)
+                });
             })
         })
         .catch(msg_error => {
-            console.log(`ERROR :: could not send placeholder message on search to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+            console.log(`ERROR :: could not send placeholder message on search to channel ${message.channelId} in guild ${message.guildId} :: `, msg_error)
         });
     }
 }
@@ -82,7 +115,7 @@ function get_allkeyshop_games_list(game_search) {
     return new Promise((success, failure) => {
         request(`https://www.allkeyshop.com/blog/catalogue/search-${game_search}/`, function (error, response, body) {
             if (error || !body){
-                console.log(`ERROR :: trying to search for '${game_search}'\n `, error);
+                console.log(`ERROR :: trying to search for '${game_search}' :: `, error);
                 failure()
             }
             else {

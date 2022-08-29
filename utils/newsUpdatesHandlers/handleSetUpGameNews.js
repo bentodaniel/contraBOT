@@ -42,23 +42,29 @@ const handleSetUpGameNews = async(client, db, i) => {
 
         collector.on("collect", async interaction => {
             if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-                interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+                interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
+                    console.log(`ERROR :: Failed to send 'select menu not for you' reply on 'handleSetUpGameNews' :: `, error)
+                })
             }
             else {
                 const gameID = interaction.values[0]
                 handleGameSelectec(client, db, interaction, gameID)
-                game_select_msg.delete().catch(error => { });
+                game_select_msg.delete().catch(error => {
+                    console.log(`ERROR :: Failed to remove selection message on 'handleSetUpGameNews' on success :: `, error)
+                });
             }
         })
 
         collector.on("end", (_, reason) => {
             if (reason !== "messageDelete") {
-                game_select_msg.delete().catch(error => { });
+                game_select_msg.delete().catch(error => {
+                    console.log(`ERROR :: Failed to remove selection message on 'handleSetUpGameNews' on timeout :: `, error)
+                });
             }
         });
     })
     .catch(game_select_msg_error => {
-
+        console.log(`ERROR :: Failed to send 'game selection' message on 'handleSetUpGameNews' :: `, game_select_msg_error)
     })
 }
 
@@ -122,27 +128,37 @@ function handleGameSelectec(client ,db, i, gameID) {
 
             collector.on("collect", async interaction => {
                 if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-                    interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+                    interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
+                        console.log(`ERROR :: Failed to send 'select menu not for you' reply on 'handleSetUpGameNews.handleGameSelectec' :: `, error)
+                    })
                 }
                 else {
                     const channelID = interaction.values[0]
                     handleAddGameToUpdatesDB(client ,db, interaction, gameID, channelID)
-                    channel_select_msg.delete().catch(error => { });
+                    channel_select_msg.delete().catch(error => {
+                        console.log(`ERROR :: Failed to remove channel selection message on 'handleSetUpGameNews.handleGameSelectec' on success :: `, error)
+                    });
                 }
             })
 
             collector.on("end", (_, reason) => {
                 if (reason !== "messageDelete") {
-                    channel_select_msg.delete().catch(error => { });
+                    channel_select_msg.delete().catch(error => {
+                        console.log(`ERROR :: Failed to remove channel selection message on 'handleSetUpGameNews.handleGameSelectec' on timeout :: `, error)
+                    });
                 }
             });
         })
         .catch(channel_select_msg_error => {
-
+            console.log(`ERROR :: Failed to send 'channel select' message on 'handleSetUpGameNews.handleGameSelectec' :: `, channel_select_msg_error)
         })
     })
     .catch(channel_fetch_error => {
-        
+        console.log(`ERROR :: Failed to fetch guild channels on 'handleSetUpGameNews.handleGameSelectec' :: `, channel_fetch_error)
+
+        i.reply({ content: `Failed to fetch channels in this server. Please try again`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'fail to get channels' reply on 'handleSetUpGameNews.handleGameSelectec' :: `, error)
+        })
     })
 }
 
@@ -168,7 +184,7 @@ async function handleAddGameToUpdatesDB(client, db, interaction, gameID, channel
                     `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, ${null})`
                 );
             } catch (err) {
-                console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db during setupdates\n `, err)
+                console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db during setupdates :: `, err)
             }
         }
 
@@ -180,7 +196,9 @@ async function handleAddGameToUpdatesDB(client, db, interaction, gameID, channel
         const insert_updates_query = `REPLACE INTO UpdatesChannels (gameID, channelID, guildID) VALUES('${gameID}', ${channel.id}, ${guild.id})`
         db.query(insert_updates_query, async (error, results) => {
             if (error) {
-                interaction.reply({ content: `Failed to set up news notifications for '${gamesConfig[gameID].title}'.`, ephemeral: true }).catch(error => {})
+                interaction.reply({ content: `Failed to set up news notifications for '${gamesConfig[gameID].title}'.`, ephemeral: true }).catch(error => {
+                    console.log(`ERROR :: Failed to send 'failed to set up' reply on 'handleSetUpGameNews.handleAddGameToUpdatesDB' :: `, error)
+                })
             }
             else {
                 // Send message confirming the removal of the default channel
@@ -193,7 +211,7 @@ async function handleAddGameToUpdatesDB(client, db, interaction, gameID, channel
                     }]
                 })
                 .catch(error => {
-                    
+                    console.log(`ERROR :: Failed to send 'success' message on 'handleSetUpGameNews.handleAddGameToUpdatesDB' :: `, error)
                 })
             }
         });

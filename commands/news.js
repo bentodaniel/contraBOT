@@ -38,7 +38,7 @@ module.exports = {
                         components: [new Discord.MessageActionRow().addComponents(btns)]
                     })
                     .catch(error => {
-                        
+                        console.log(`ERROR :: Failed to send news message for 'news' command :: `, error)
                     })
                 }
                 else {
@@ -47,16 +47,28 @@ module.exports = {
                         Discord, placeholder_news_msg, embeds, 120000, null, btns
                     )
                     .catch(paginate_error => {
-                        //console.log(paginate_error)
+                        console.log(`ERROR :: Failed to send paginated news message for 'news' command :: `, paginate_error)
                     })
                 }
             })
             .catch(fetch_guild_news_updates_error => {
-                console.log(fetch_guild_news_updates_error)
+                console.log(`ERROR :: Failed to send news message for 'news' command :: `, fetch_guild_news_updates_error)
+
+                // Edit placeholder to inform the user
+                placeholder_news_msg.edit({
+                    embeds : [{
+                        'type' : 'rich',
+                        'title': `There was an error while trying to get the list containing the games that are set up for news notifications from database. Please try again.`,
+                        'color' : 0xffffff,
+                    }]
+                })
+                .catch(error => {
+                    console.log(`ERROR :: Failed to send error message for 'news' command :: `, error)
+                })
             })
         })
         .catch(placeholder_news_msg_error => {
-                
+            console.log(`ERROR :: Failed to send placeholder news message for 'news' command :: `, placeholder_news_msg_error)   
         })
     }
 }

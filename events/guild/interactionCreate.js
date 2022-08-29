@@ -128,7 +128,7 @@ module.exports = (Discord, client, db, interaction) => {
         ]);
 
     await interaction.showModal(modal).catch(err => {
-        
+        console.log(`ERROR :: Failed to show contact form modal on 'interactionCreate.handleContactButton' :: `, err)
     });
 }
 
@@ -159,7 +159,9 @@ function handleSubmitContactModal(interaction, spamCheckTarget) {
     const check = interaction.fields.getTextInputValue('contactCheckInput')
 
     if (check !== spamCheckTarget) {
-        interaction.reply({ content: `Failed spam check.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `Failed spam check.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'spam check failed' reply on 'interactionCreate.handleSubmitContactModal' :: `, error)
+        })
         return
     }
 
@@ -183,10 +185,14 @@ function handleSubmitContactModal(interaction, spamCheckTarget) {
     transporter.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log('Failed to send email:\n ', error);
-            interaction.reply({ content: `Failed to send email to developers.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `Failed to send email to developers.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'failed to send email' reply on 'interactionCreate.handleSubmitContactModal' :: `, error)
+            })
         } else {
             console.log('Email sent: ' + info.response);
-            interaction.reply({ content: `Your email has been sent to the developers.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `Your email has been sent to the developers.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'email sent' reply on 'interactionCreate.handleSubmitContactModal' :: `, error)
+            })
         }
     })
 }
@@ -205,7 +211,9 @@ function handleSubmitContactModal(interaction, spamCheckTarget) {
  */
 function handleSetDefaultChannelButton(client, Discord, db, interaction) {
     if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleSetDefaultChannelButton' :: `, error)
+        })
         return
     }
 
@@ -223,13 +231,17 @@ function handleSetDefaultChannelButton(client, Discord, db, interaction) {
  */
 function handleRemoveDefaultChannelButton(Discord, db, interaction) {
     if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleRemoveDefaultChannelButton' :: `, error)
+        })
         return
     }
 
     dbUtils.get_guild_default_channel(db, interaction.guildId).then(json_data => {
         if (json_data.length === 0) {
-            interaction.reply({ content: `No channel is set up as default.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `No channel is set up as default.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'no default channel' reply on 'interactionCreate.handleRemoveDefaultChannelButton' :: `, error)
+            })
         }
         else {
             interaction.deferUpdate()
@@ -238,7 +250,11 @@ function handleRemoveDefaultChannelButton(Discord, db, interaction) {
         }
     })
     .catch(fetch_guild_default_error => {
-                                
+        console.log(`ERROR :: Failed to get guild's default channel on 'interactionCreate.handleRemoveDefaultChannelButton' :: `, fetch_guild_default_error)
+
+        interaction.reply({ content: `Failed to get default channel data. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'failed to get default channel data' reply on 'interactionCreate.handleRemoveDefaultChannelButton' :: `, error)
+        })
     })
 }
 
@@ -255,7 +271,9 @@ function handleRemoveDefaultChannelButton(Discord, db, interaction) {
  */
 function handleSetUpGameNewsButton(client, db, interaction) {
     if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleSetUpGameNewsButton' :: `, error)
+        })
         return
     }
 
@@ -272,13 +290,17 @@ function handleSetUpGameNewsButton(client, db, interaction) {
  */
 function handleRemoveGameNewsButton(db, interaction) {
     if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
-        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleRemoveGameNewsButton' :: `, error)
+        })
         return
     }
     
     dbUtils.get_guild_news_updates(db, interaction.message.guild.id).then(json_data => {
         if (json_data.length === 0) {
-            interaction.reply({ content: `There are no set up game news notifications.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `There are no set up game news notifications.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'no set up notifications' reply on 'interactionCreate.handleRemoveGameNewsButton' :: `, error)
+            })
         }
         else {
             interaction.deferUpdate()
@@ -287,7 +309,11 @@ function handleRemoveGameNewsButton(db, interaction) {
         }
     })
     .catch(fetch_guild_updates_error => {
-                                
+        console.log(`ERROR :: Failed to get guild's set up updates on 'interactionCreate.handleRemoveDefaultChannelButton' :: `, fetch_guild_updates_error)
+
+        interaction.reply({ content: `Failed to get games set up for notifications. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'failed to get set up games' reply on 'interactionCreate.handleRemoveGameNewsButton' :: `, error)
+        })
     })
 }
 
@@ -302,11 +328,13 @@ function handleRemoveGameNewsButton(db, interaction) {
 function handlePriceButton(Discord, interaction) {
     const game_json = getSearchGameJSON(interaction)
     if (game_json === undefined) {
-        interaction.reply({ content: `There was an unexpected error. Please try again.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `There was an unexpected error. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'unexpected error' reply on 'interactionCreate.handlePriceButton' :: `, error)
+        })
         return
     }
 
-    handleComparePrices(Discord, interaction, game_json, 120000)
+    handleComparePrices.handleComparePrices(Discord, interaction, game_json, 120000)
 }
 
 /**
@@ -317,7 +345,9 @@ function handlePriceButton(Discord, interaction) {
 async function handleAddToWishlistButton(Discord, interaction) {
     const game_json = getSearchGameJSON(interaction)
     if (game_json === undefined) {
-        interaction.reply({ content: `There was an unexpected error. Please try again.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `There was an unexpected error. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'unexpected error' reply on 'interactionCreate.handleAddToWishlistButton' :: `, error)
+        })
         return
     }
 
@@ -349,7 +379,7 @@ async function handleAddToWishlistButton(Discord, interaction) {
         ]);
 
     await interaction.showModal(modal).catch(err => {
-        
+        console.log(`ERROR :: Failed to show price modal on 'interactionCreate.handleAddToWishlistButton' :: `, err)
     });
 }
 
@@ -360,7 +390,9 @@ async function handleAddToWishlistButton(Discord, interaction) {
 function handleSubmitPriceModal(db, interaction) {
     const game_json = getSearchGameJSON(interaction)
     if (game_json === undefined) {
-        interaction.reply({ content: `There was an unexpected error. Please try again.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `There was an unexpected error. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'unexpected error' reply on 'interactionCreate.handleSubmitPriceModal' :: `, error)
+        })
         return
     }
     
@@ -368,7 +400,9 @@ function handleSubmitPriceModal(db, interaction) {
     const price = parseFloat(value)
 
     if (isNaN(price)) {
-        interaction.reply({ content: `'${value}' is not a valid price target. Please try again.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `'${value}' is not a valid price target. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'not valid price' reply on 'interactionCreate.handleSubmitPriceModal' :: `, error)
+        })
     }
     else {
         handleAddToWishlist(db, interaction, game_json, price)
@@ -398,13 +432,17 @@ function getSearchGameJSON(interaction) {
  */
 function handleRemoveFromWishlistButton(Discord, db, interaction, targetUserID) {
     if (interaction.user.id !== targetUserID) {
-        interaction.reply({ content: `This button is not for you.`, ephemeral: true }).catch(error => {})
+        interaction.reply({ content: `This button is not for you.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'button not for you' reply on 'interactionCreate.handleRemoveFromWishlistButton' :: `, error)
+        })
         return
     }
 
     dbUtils.get_user_wishlist(db, targetUserID).then(json_data => {
         if (json_data.length === 0) {
-            interaction.reply({ content: `Your wishlist is empty.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `Your wishlist is empty.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'empty wishlist' reply on 'interactionCreate.handleRemoveFromWishlistButton' :: `, error)
+            })
         }
         else {
             interaction.deferUpdate()
@@ -413,6 +451,10 @@ function handleRemoveFromWishlistButton(Discord, db, interaction, targetUserID) 
         }
     })
     .catch(fetch_user_wishlist_error => {
-        interaction.reply({ content: `Failed to get wishlist data. Please try again.`, ephemeral: true }).catch(error => {})
+        console.log(`ERROR :: Failed to get wishlist on 'interactionCreate.handleRemoveFromWishlistButton' :: `, fetch_user_wishlist_error)
+
+        interaction.reply({ content: `Failed to get wishlist data. Please try again.`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'failed to get wishlist' reply on 'interactionCreate.handleRemoveFromWishlistButton' :: `, error)
+        })
     })
 }

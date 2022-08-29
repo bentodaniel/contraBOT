@@ -101,7 +101,7 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
                     components: rows,
                 })
                 .catch(msg_error => {
-                    console.log(`ERROR :: could not edit paginated message after collect\n `, msg_error) // No info of channel or guild because it could also be in dm
+                    console.log(`ERROR :: Failed to edit paginated message after collect :: `, msg_error)
                 });
                 collector.resetTimer();
             });
@@ -139,7 +139,7 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
                         components: disabledRows,
                     })
                     .catch(msg_error => {
-                        console.log(`ERROR :: could not edit paginated message end\n `, msg_error) // No info of channel or guild because it could also be in dm
+                        console.log(`ERROR :: Failed to edit paginated message end :: `, msg_error)
                     });
                 }
             });
@@ -147,7 +147,7 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
             success(curPage)
         })
         .catch(msg_error => {
-            console.log(`ERROR :: could not send paginated message\n `, msg_error) // No info of channel or guild because it could also be in dm
+            console.log(`ERROR :: Failed to send paginated message :: `, msg_error)
             failure()
         });
     })

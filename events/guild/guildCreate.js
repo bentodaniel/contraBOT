@@ -17,7 +17,7 @@ module.exports = (Discord, client, db, guild) => {
             `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, ${null})`
         );
     } catch (err) {
-        console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db\n `, err)
+        console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db :: `, err)
     }
 
     guild.channels.fetch().then(channels => {
@@ -31,7 +31,7 @@ module.exports = (Discord, client, db, guild) => {
             }]
         })
         .catch(msg_error => {
-            console.log(`ERROR :: could not send 'just arrived' message to channel ${channel.id} in guild ${guild.id}\n `, msg_error)
+            console.log(`ERROR :: Failed to send 'just arrived' message to channel ${channel.id} in guild ${guild.id} :: `, msg_error)
         });
     })
 }

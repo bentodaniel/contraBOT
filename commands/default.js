@@ -43,12 +43,23 @@ module.exports = {
                 components: [new Discord.MessageActionRow().addComponents(btns)]
             })
             .catch(error => {
-                console.log(error)
+                console.log(`ERROR :: Failed to send message for 'default' command :: `, error)
             })
         })
-        .catch(error => {
-            //`There was an error while trying to get info of the default channel. Please try again.`
-            console.log(error)
+        .catch(fetch_default_channel_error => {
+            console.log(`ERROR :: Failed to get default data from database during 'default' command :: `, fetch_default_channel_error)
+
+            // Send error message to inform the user
+            message.channel.send({
+                embeds : [{
+                    'type' : 'rich',
+                    'title': `There was an error while trying to get default channel data. Please try again.`,
+                    'color' : 0xffffff,
+                }]
+            })
+            .catch(error => {
+                console.log(`ERROR :: Failed to send error message for 'default' command :: `, error)
+            })
         })
     }
 }

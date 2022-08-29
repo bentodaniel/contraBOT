@@ -11,7 +11,9 @@ const handleRemoveDefaultChannel = async(Discord, db, interaction, channelID) =>
     const replace_q = `REPLACE INTO Guilds (guildID, guildOwnerID, defaultChannelID) VALUES(${guild.id}, ${guild.ownerId}, ${null})`
     db.query(replace_q, async (replace_error, replace_results) => {
         if (replace_error) {
-            interaction.reply({ content: `Failed to remove the default channel. Please try again.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `Failed to remove the default channel. Please try again.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'failed to remove default channel' reply on 'handleRemoveDefaultChannel' :: `, error)
+            })
         }
         else {
             // Send message confirming the removal of the default channel
@@ -24,7 +26,7 @@ const handleRemoveDefaultChannel = async(Discord, db, interaction, channelID) =>
                 ]
             })
             .catch(error => {
-                
+                console.log(`ERROR :: Failed to send 'default channel removed' reply on 'handleRemoveDefaultChannel' :: `, error)
             })
         }
     });

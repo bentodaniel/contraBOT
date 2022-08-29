@@ -211,7 +211,7 @@ async function scrape_cycle_helper(url) {
         var data = {}
         request(url, function (error, response, body) {
             if (error || !body){
-                console.log(`ERROR :: couldn't get request data for scrape_cycle_helper in ${url}\n `, error);
+                console.log(`ERROR :: couldn't get request data for scrape_cycle_helper in ${url} :: `, error);
             }
             else {
                 data['url'] = url

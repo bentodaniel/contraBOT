@@ -15,12 +15,16 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
     const selection_message = interaction.message
     const user = interaction.user
 
-    get_allkeyshop_game_offers(game_json['productID'], 'eur', 10).then(game_offers_list => {
+    get_game_offers(game_json['productID'], 'eur', 10, 'allkeyshop').then(game_offers_list => {
         if (game_offers_list === undefined) {
-            interaction.reply({ content: `Failed to get the data for '${game_json['title']}'.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `Failed to get the data for '${game_json['title']}'.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'fail to get data' reply on 'handleComparePrices' :: `, error)
+            })
         }
         else if (game_offers_list.length === 0){
-            interaction.reply({ content: `There are no offers for '${game_json['title']}'.`, ephemeral: true }).catch(error => {})
+            interaction.reply({ content: `There are no offers for '${game_json['title']}'.`, ephemeral: true }).catch(error => {
+                console.log(`ERROR :: Failed to send 'no offers' reply on 'handleComparePrices' :: `, error)
+            })
         }
         else {
             const embeds = generate_compare_prices_embeds(Discord, game_offers_list, game_json)
@@ -40,13 +44,33 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
                 )
                 .catch(paginate_error => {console.log(paginate_error)})
             })
-            .catch(err => {console.log(err)})
+            .catch(err => {
+                console.log(`ERROR :: Failed to send placeholder reply on 'handleComparePrices' :: `, err)
+            })
         }
     })
-    .catch(err => {
-        //utils.send_error_message(selection_message, 'Failed to get the data', 'edit')
-        console.log(err)
+    .catch(get_game_offers_error => {
+        console.log(`ERROR :: Failed to fetch offers for a game in handleComparePrices :: `, get_game_offers_error)
+
+        interaction.reply({ content: `Failed to get offers for this game. Please try again`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'fail to get offers' reply on 'handleComparePrices' :: `, error)
+        })
     })
+}
+
+/**
+ * Gets a number of available offers for a certain game
+ * @param {*} gameProductID The ID of the product
+ * @param {*} currency The currency
+ * @param {*} limit The maximum number of entries
+ * @param {*} store The store. Can be 'allkeyshop'
+ * @returns 
+ */
+function get_game_offers(gameProductID, currency, limit, store) {
+    if (store === 'allkeyshop') {
+        return get_allkeyshop_game_offers(gameProductID, currency, limit)
+    }
+    return undefined
 }
 
 /**
@@ -65,7 +89,7 @@ async function get_allkeyshop_game_offers(gameProductID, currency, limit) {
             json: true
         }, function (err, req_data) {
             if (err) {
-                console.log(`ERROR :: failed to get xhr data for product ${gameProductID}\n `, err)
+                console.log(`ERROR :: failed to get xhr data for product ${gameProductID} :: `, err)
                 failure()
             }
             else {
@@ -153,4 +177,7 @@ function generate_compare_prices_embeds(Discord, game_offers_list, game_json) {
     return embeds;
 }
 
-module.exports = handleComparePrices
+module.exports = {
+    handleComparePrices,
+    get_game_offers
+}

@@ -45,7 +45,9 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
 
             collector.on("collect", async i => {
                 if (!i.memberPermissions.has('ADMINISTRATOR')) {
-                    i.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+                    i.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
+                        console.log(`ERROR :: Failed to send 'select menu for admins' reply on 'handleSetDefaultChannel' :: `, error)
+                    })
                 }
                 else {
                     const guild = i.message.guild
@@ -57,7 +59,9 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
                     const q = `REPLACE INTO Guilds (guildID, guildOwnerID, defaultChannelID) VALUES(${guild.id}, ${guild.ownerId}, ${channel.id})`
                     db.query(q, async (error, results) => {
                         if (error) {
-                            i.reply({ content: `Failed to set default channel.`, ephemeral: true }).catch(error => {})
+                            i.reply({ content: `Failed to set default channel.`, ephemeral: true }).catch(error => {
+                                console.log(`ERROR :: Failed to send 'fail to set default' reply on 'handleSetDefaultChannel' :: `, error)
+                            })
                         }
                         else {
                             // Send message confirming the removal of the default channel
@@ -70,26 +74,34 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
                                 ]
                             })
                             .catch(error => {
-                                
+                                console.log(`ERROR :: Failed to send 'success' reply on 'handleSetDefaultChannel' :: `, error)
                             })
                         }
                     });
-                    select_msg.delete().catch(error => { });
+                    select_msg.delete().catch(error => {
+                        console.log(`ERROR :: Failed to delete select msg on 'handleSetDefaultChannel' success :: `, error)
+                    });
                 }
             });
 
             collector.on("end", (_, reason) => {
                 if (reason !== "messageDelete") {
-                    select_msg.delete().catch(error => { });
+                    select_msg.delete().catch(error => {
+                        console.log(`ERROR :: Failed to delete select msg on 'handleSetDefaultChannel' timeout :: `, error)
+                    });
                 }
             });
         })
         .catch(msg_error => {
-            //console.log(`ERROR :: could not send 'channel selection' message on setdefault to channel ${message.channelId} in guild ${message.guildId}\n `, msg_error)
+            console.log(`ERROR :: Failed to send 'channel selection' message on handleSetDefaultChannel :: `, msg_error)
         });
     })
     .catch(channel_fetch_error => {
-        
+        console.log(`ERROR :: Failed to fetch channels in guild on handleSetDefaultChannel :: `, channel_fetch_error)
+
+        interaction.reply({ content: `Failed to fetch channels in this server. Please try again`, ephemeral: true }).catch(error => {
+            console.log(`ERROR :: Failed to send 'fail' reply on 'handleSetDefaultChannel' :: `, error)
+        })
     })
 }
 

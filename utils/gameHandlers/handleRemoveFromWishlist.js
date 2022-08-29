@@ -40,7 +40,9 @@ const handleRemoveFromWishlist = async(db, interaction, json_data) => {
 
         collector.on("collect", async i => {
             if (i.user.id !== user.id) {
-                i.reply({ content: `This button is not for you.`, ephemeral: true }).catch(error => {})
+                i.reply({ content: `This button is not for you.`, ephemeral: true }).catch(error => {
+                    console.log(`ERROR :: Failed to send 'button not for you' reply on 'handleRemoveFromWishlist' :: `, error)
+                })
             }
             else {
                 let gamesProductIDs = ''
@@ -54,26 +56,34 @@ const handleRemoveFromWishlist = async(db, interaction, json_data) => {
 
                 db.query(q, async (error, results) => {
                     if (error) {
-                        i.reply({ content: `Failed to remove one or more games from your wishlist.`, ephemeral: true }).catch(error => {})
+                        i.reply({ content: `Failed to remove one or more games from your wishlist.`, ephemeral: true }).catch(error => {
+                            console.log(`ERROR :: Failed to send 'failed to remove' reply on 'handleRemoveFromWishlist' :: `, error)
+                        })
                     }
                     else {
                         // Send message confirming the removal of items from the wishlist
-                        i.reply({ content: `Successfully removed one or more games from your wishlist.`, ephemeral: true }).catch(error => {})
+                        i.reply({ content: `Successfully removed one or more games from your wishlist.`, ephemeral: true }).catch(error => {
+                            console.log(`ERROR :: Failed to send 'success' reply on 'handleRemoveFromWishlist' :: `, error)
+                        })
                     }
                 });
 
-                select_remove_from_wishlist_msg.delete().catch(error => { });
+                select_remove_from_wishlist_msg.delete().catch(error => {
+                    console.log(`ERROR :: Failed to remove select message on 'handleRemoveFromWishlist' on success :: `, error)
+                });
             }            
         })
 
         collector.on("end", (_, reason) => {
             if (reason !== "messageDelete") {
-                select_remove_from_wishlist_msg.delete().catch(error => { });
+                select_remove_from_wishlist_msg.delete().catch(error => {
+                    console.log(`ERROR :: Failed to remove select message on 'handleRemoveFromWishlist' on timeout :: `, error)
+                });
             }
         })
     })
     .catch(select_remove_from_wishlist_msg_error => {
-    
+        console.log(`ERROR :: Failed to send selection message on 'handleRemoveFromWishlist' :: `, select_remove_from_wishlist_msg_error)
     });
 }
 

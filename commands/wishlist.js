@@ -36,7 +36,7 @@ module.exports = {
                         components: [new Discord.MessageActionRow().addComponents(removeWishBtn)]
                     })
                     .catch(error => {
-                        console.log(error)
+                        console.log(`ERROR :: Failed to send wishlist message for 'wishlist' command :: `, error)
                     })
                 }
                 else {
@@ -45,17 +45,28 @@ module.exports = {
                         Discord, placeholder_wishlist_msg, embeds, 120000, null, removeWishBtn
                     )
                     .catch(paginate_error => {
-                        console.log(paginate_error)
+                        console.log(`ERROR :: Failed to send paginated wishlist message for 'wishlist' command :: `, error)
                     })
                 }
             })
             .catch(err => {
-                //console.log('ERROR :: failed to get wishlist\n ', err) // already logged when executing function
-                //utils.send_error_message(msg, 'Failed to get wishlist data', 'edit')
+                console.log(`ERROR :: Failed to get wishlist data on 'wishlist' command :: `, err)
+
+                // Edit placeholder to inform the user
+                placeholder_wishlist_msg.edit({
+                    embeds : [{
+                        'type' : 'rich',
+                        'title': `There was an error while trying to get wishlist data from database. Please try again.`,
+                        'color' : 0xffffff,
+                    }]
+                })
+                .catch(error => {
+                    console.log(`ERROR :: Failed to send error message for 'wishlist' command :: `, error)
+                })
             })
         })
         .catch(placeholder_wishlist_msg_error => {
-                
+            console.log(`ERROR :: Failed to send placeholder message for 'wishlist' command :: `, placeholder_wishlist_msg_error)
         })
     }
 }

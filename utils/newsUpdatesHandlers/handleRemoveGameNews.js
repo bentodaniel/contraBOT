@@ -41,7 +41,9 @@ const handleRemoveGameNews = async(db, interaction, json_data) => {
 
         collector.on("collect", async i => {
             if (!i.memberPermissions.has('ADMINISTRATOR')) {
-                i.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {})
+                i.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
+                    console.log(`ERROR :: Failed to send 'select menu for admins only' reply on 'handleRemoveGameNews' :: `, error)
+                })
             }
             else {
                 let gamesIDs = ''
@@ -54,7 +56,9 @@ const handleRemoveGameNews = async(db, interaction, json_data) => {
 
                 db.query(q, async (error, results) => {
                     if (error) {
-                        i.reply({ content: `There was an error while trying to remove games from the news notifications list.`, ephemeral: true }).catch(error => {})
+                        i.reply({ content: `There was an error while trying to remove games from the news notifications list.`, ephemeral: true }).catch(error => {
+                            console.log(`ERROR :: Failed to send 'error removing' reply on 'handleRemoveGameNews' :: `, error)
+                        })
                     }
                     else {
                         // Send message confirming the removal of the default channel
@@ -67,23 +71,27 @@ const handleRemoveGameNews = async(db, interaction, json_data) => {
                             }]
                         })
                         .catch(error => {
-                            
+                            console.log(`ERROR :: Failed to send 'success' reply on 'handleRemoveGameNews' :: `, error)
                         })
                     }
                 });
 
-                select_remove_game_msg.delete().catch(error => { });
+                select_remove_game_msg.delete().catch(error => {
+                    console.log(`ERROR :: Failed to remove selection message on 'handleRemoveGameNews' on success :: `, error)
+                });
             }
         })
 
         collector.on("end", (_, reason) => {
             if (reason !== "messageDelete") {
-                select_remove_game_msg.delete().catch(error => { });
+                select_remove_game_msg.delete().catch(error => {
+                    console.log(`ERROR :: Failed to remove selection message on 'handleRemoveGameNews' on timeout :: `, error)
+                });
             }
         })
     })
     .catch(select_remove_game_msg_error => {
-
+        console.log(`ERROR :: Failed to send selection message on 'handleRemoveGameNews' :: `, select_remove_game_msg_error)
     })
 }
 

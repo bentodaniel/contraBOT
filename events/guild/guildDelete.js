@@ -7,7 +7,7 @@ module.exports = (Discord, client, db, guild) => {
             `DELETE FROM Guilds WHERE guildID = ${guild.id}`
         );
     } catch (err) {
-        console.log(`ERROR :: failed to delete guild ${guild.name} with id ${guild.id} into db\n `, err)
+        console.log(`ERROR :: failed to delete guild ${guild.name} with id ${guild.id} into db :: `, err)
     }
 }
 
