@@ -142,11 +142,11 @@ async function send_news_messages(db_data, client, data, value) {
                 'tts': false,
                 'embeds' : [{
                     'type' : 'rich',
-                    'title': `${d['title']}`,
+                    'title': `${d['title']}`.substring(0, 256),
                     'color' : 0xff7d00,
-                    'description': `${d['content']}`,
+                    'description': `${d['content']}`.substring(0, 4096),
                     'footer': {
-                        'text': `${value.title} - ${d['date']}`
+                        'text': `${value.title} - ${d['date']}`.substring(0, 2048)
                     },
                     'url' : `${d['url']}`,
                     'thumbnail': {

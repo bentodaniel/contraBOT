@@ -26,10 +26,6 @@ Dont just log erros. try to add some info to them
 
 
 
-
-
-
-
 --------------------------------------------
 
 add a 'remove from wishlit' button when notifying users of a wishlisted item
