@@ -21,19 +21,19 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
         const buttonList = [
             new Discord.MessageButton()
                 .setCustomId('firstbtn')
-                .setLabel('⏮')
+                .setEmoji('<:skip_first_icon:1013929634120880329>')
                 .setStyle('SECONDARY'),
             new Discord.MessageButton()
                 .setCustomId('previousbtn')
-                .setLabel('◀')
+                .setEmoji('<:previous_icon:1013929741390192791>')
                 .setStyle('SECONDARY'),
             new Discord.MessageButton()
                 .setCustomId('nextbtn')
-                .setLabel('▶')
+                .setEmoji('<:next_icon:1013930064087355462>')
                 .setStyle('SECONDARY'),
             new Discord.MessageButton()
                 .setCustomId('lastbtn')
-                .setLabel('⏭')
+                .setEmoji('<:skip_last_icon:1013930143854633181>')
                 .setStyle('SECONDARY')
         ]
     
