@@ -90,7 +90,7 @@ module.exports = (Discord, client, db, interaction) => {
                     .setCustomId('contactEmailInput')
                     .setLabel(`Email (if you wish to be contacted back)`)
                     .setStyle('SHORT')
-                    .setMinLength(5)
+                    .setMinLength(0)
                     .setMaxLength(100)
                     .setPlaceholder(`myEmail@mail.com`)
                     .setRequired(false),
