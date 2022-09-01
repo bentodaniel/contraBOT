@@ -13,9 +13,15 @@ module.exports = {
  * @returns 
  */
 async function execute(body, game, game_recorded_data) {
-    const json_data = await scrape_parse(body, game)
-    const news_data = parse_data(json_data, game_recorded_data)
-    return news_data
+    try {
+        const json_data = await scrape_parse(body, game)
+        const news_data = parse_data(json_data, game_recorded_data)
+        return news_data
+    }
+    catch(err) {
+        console.log(`ERROR :: There was an error while trying to scrape news data for ${game} :: `, err)
+        return {}
+    }
 }
 
 // Execute the scrape function correspondent to the game
@@ -23,17 +29,20 @@ async function scrape_parse(body, game) {
     if (game === 'free') {
         return await scrape_free(body)
     }
+    else if (game === 'apex') {
+        return await scrape_apex(body)
+    }
     else if (game === 'csgo') {
         return await scrape_csgo(body)
     }
-    else if (game === 'valorant') {
-        return await scrape_valorant(body)
+    else if (game === 'cycle') {
+        return await scrape_cycle(body)
     }
     else if (game === 'lol') {
         return await scrape_lol(body)
     }
-    else if (game === 'cycle') {
-        return await scrape_cycle(body)
+    else if (game === 'valorant') {
+        return await scrape_valorant(body)
     }
     else {
         console.log(`ERROR :: Not implemented. Tried to get news for '${game}'`)
@@ -107,6 +116,51 @@ function parse_data(json_data, game_recorded_data) {
 
 // -----------------------------------------------
 
+async function scrape_apex(body) {
+    var json_data = []
+    const $ = cheerio.load(body);
+
+    // Loop through each of the news posts
+    await $('ea-tile').each(function(i, tile){
+        var data = {}
+
+        // Loop through the children
+        for (child of $(tile).children()) {
+            if (child.name === 'h3') {
+                data['title'] = $(child).text()
+            }
+            else if (child.name === 'div') {
+                // we will have 2 divs, first 'Apex Legends' then the date. just replace it
+                data['date'] = $(child).text()
+            }
+            else if (child.name === 'ea-tile-copy') {
+                data['content'] = 'N/A'
+
+                const parsed_text = $(child).text().split(/\s*\n\s*/g)
+
+                if (parsed_text.length >= 2) {
+                    data['content'] = parsed_text[1] // This should work out, as long as they dont change it
+                }
+            }
+            else if (child.name === 'ea-cta') {
+                const baseLink = 'https://www.ea.com'
+
+                data['url'] = baseLink
+
+                const link_child = $(child).children()[0]
+                const href = $(link_child).attr('href')
+                if (href !== undefined) {
+                    data['url'] += href
+                }
+            }
+        }
+        json_data.push(data)
+    })
+    return json_data
+}
+
+// -----------------------------------------------
+
 async function scrape_csgo(body) {
     var json_data = []
     const $ = cheerio.load(body);
@@ -130,54 +184,6 @@ async function scrape_csgo(body) {
             else if (child.name === 'p') {
                 // post_date is also a <p> but it should not enter here so its ok
                 data['content'] = $(child).text()
-            }
-        }
-        json_data.push(data)
-    })
-    return json_data
-}
-
-// -----------------------------------------------
-
-async function scrape_valorant(body) {
-    var json_data = []
-
-    const articles = body.result.pageContext.data.articles
-
-    Object.entries(articles).forEach(([key, value]) => {
-        var data = {}
-
-        data['title'] = value.title
-        data['date'] = value.date.split('T')[0]
-        data['content'] = value.description
-        data['url'] = value.external_link
-        if (data['url'] === '') {
-            data['url'] = 'https://playvalorant.com/en-us' + value.url.url
-        }
-        json_data.push(data)
-    })
-    return json_data
-}
-
-// -----------------------------------------------
-
-async function scrape_lol(body) {
-    var json_data = []
-
-    const articles = body.result.data.articles.nodes
-
-    Object.entries(articles).forEach(([key, value]) => {
-        var data = {}
-
-        data['title'] = value.title
-        data['date'] = value.date.split('T')[0]
-        data['content'] = value.description
-        data['url'] = value.youtube_link
-        if (data['url'] === '') {
-            data['url'] = value.external_link
-            
-            if (data['url'] === '') {
-                data['url'] = 'https://www.leagueoflegends.com/en-us' + value.url.url
             }
         }
         json_data.push(data)
@@ -244,4 +250,52 @@ async function scrape_cycle_helper(url) {
             }
         })
     })
+}
+
+// -----------------------------------------------
+
+async function scrape_lol(body) {
+    var json_data = []
+
+    const articles = body.result.data.articles.nodes
+
+    Object.entries(articles).forEach(([key, value]) => {
+        var data = {}
+
+        data['title'] = value.title
+        data['date'] = value.date.split('T')[0]
+        data['content'] = value.description
+        data['url'] = value.youtube_link
+        if (data['url'] === '') {
+            data['url'] = value.external_link
+            
+            if (data['url'] === '') {
+                data['url'] = 'https://www.leagueoflegends.com/en-us' + value.url.url
+            }
+        }
+        json_data.push(data)
+    })
+    return json_data
+}
+
+// -----------------------------------------------
+
+async function scrape_valorant(body) {
+    var json_data = []
+
+    const articles = body.result.pageContext.data.articles
+
+    Object.entries(articles).forEach(([key, value]) => {
+        var data = {}
+
+        data['title'] = value.title
+        data['date'] = value.date.split('T')[0]
+        data['content'] = value.description
+        data['url'] = value.external_link
+        if (data['url'] === '') {
+            data['url'] = 'https://playvalorant.com/en-us' + value.url.url
+        }
+        json_data.push(data)
+    })
+    return json_data
 }

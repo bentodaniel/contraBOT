@@ -15,9 +15,6 @@
 IMPORTANT !!!
 ---------------------------------------------
 
---> is it possible for interaction create to only listen to evens caused in the bot's messages?
-
--------------------------------
 
 
 --------------------------------------------

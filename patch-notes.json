@@ -26,5 +26,12 @@
         "date" : "2022/08/30",
         "title" : "Complete contraBOT overhaul",
         "description" : "Changed commands to be more intuitive. Commands 'price' and 'addwish' are now just 'search'. Commands 'setupdates', 'removeupdates' and 'updateslist' is now just 'news'. Commands 'setdefault' and 'removedefault' are now just 'default'."
+    },
+    {
+        "display": true,
+        "operation" : "update",
+        "date" : "2022/09/01",
+        "title" : "Apex Legends is now available",
+        "description" : "Apex Legends has been added to the available games for news notifications. Set it up for notifications if you want to receive updates on this game."
     }
 ]

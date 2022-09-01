@@ -1,6 +1,6 @@
 module.exports = (Discord, client, db, message) => {
     var prefix = process.env.MSG_PREFIX
-    
+
     if (!message.content.startsWith(prefix) || message.author.bot)
         return;
 

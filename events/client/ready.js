@@ -16,7 +16,7 @@ module.exports = (Discord, client, db, message) => {
     // Execute and then only execute once in a while
     handle_news(client, db)
     setInterval( function() { handle_news(client, db); }, 3600000 * 6 ); // 1 hour * 6  (3600000 * 12)
-    
+
     // Wait and then execute every so often
     setTimeout(function() {
         // Execute and then only execute once in a while
