@@ -357,27 +357,8 @@ async function scrape_wow(body) {
                 const base_link = 'https://worldofwarcraft.com'
                 data['url'] = base_link + $(child).attr('href')
             } 
-
-
-/*
-
-                const link_child = $(child).children()[0]
-                data['url'] = $(link_child).attr('href')
-                data['title'] = $(link_child).text()
-            }
-            else if (cName === 'post_date') {
-                data['date'] = $(child).text().replaceAll(' ', '').replaceAll('-', '')
-            }
-            else if (child.name === 'p') {
-                // post_date is also a <p> but it should not enter here so its ok
-                data['content'] = $(child).text()
-            }
-*/
-
         }
-        
         json_data.push(data)
     })
-    console.log(json_data)
     return json_data
 }
