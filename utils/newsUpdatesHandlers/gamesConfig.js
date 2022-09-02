@@ -34,5 +34,11 @@ module.exports = {
         is_xhr : true,
         title : 'Valorant',
         logo : 'https://images.cults3d.com/4QqRV9kLYYEuw9ur_X3yjQl1sjk=/516x516/https://files.cults3d.com/uploaders/15024335/illustration-file/a86d53e4-2bd9-4a8f-9550-986686c3131a/gi0mAjIh_400x400.png'
-    }
+    },
+    wow : {
+        url : 'https://worldofwarcraft.com/en-us/news',
+        is_xhr : false,
+        title : 'World of Warcraft',
+        logo : 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/WoW_icon.svg/2048px-WoW_icon.svg.png'
+    },
 }

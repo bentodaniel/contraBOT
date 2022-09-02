@@ -44,6 +44,9 @@ async function scrape_parse(body, game) {
     else if (game === 'valorant') {
         return await scrape_valorant(body)
     }
+    else if (game === 'wow') {
+        return await scrape_wow(body)
+    }
     else {
         console.log(`ERROR :: Not implemented. Tried to get news for '${game}'`)
         return undefined
@@ -297,5 +300,84 @@ async function scrape_valorant(body) {
         }
         json_data.push(data)
     })
+    return json_data
+}
+
+// -----------------------------------------------
+
+async function scrape_wow(body) {
+    var json_data = []
+    const $ = cheerio.load(body);
+
+    // Loop through each of the news posts
+    await $('.NewsBlog').each(function(i, item){
+        var data = {}
+
+        // Loop through the children
+        for (child of $(item).children()) {
+
+            if (child.name === 'div') {
+                const list_block = $(child).children()[0]
+                const content_block = $(list_block).children()[1]
+
+                for (block_child of $(content_block).children()) {
+                    var cName = $(block_child).attr('class')
+
+                    if (cName === 'contain-large contain-left') {
+                        // its the title and description
+                        for (content_data of $(block_child).children()) {
+                            var contentCName = $(content_data).attr('class')
+
+                            if (contentCName === 'NewsBlog-title') {
+                                data['title'] = $(content_data).text()
+                            }
+                            else if (contentCName === 'NewsBlog-desc color-beige-medium font-size-xSmall') {
+                                data['content'] = $(content_data).text()
+                            }
+                        }
+                    }
+                    else {
+                        // its the time
+                        const date_div = $(block_child).find('.NewsBlog-date')
+                        const data_props = $(date_div).attr('data-props')
+
+                        var re = new RegExp('\{\"iso8601\"\:\"(.*)T.*');
+                        var r = data_props.match(re);
+
+                        if (r) {
+                            data['date'] = r[1]
+                        }
+                        else {
+                            data['date'] = 'N/A'
+                        }
+                    }
+                }
+            }
+            else if (child.name === 'a') {
+                const base_link = 'https://worldofwarcraft.com'
+                data['url'] = base_link + $(child).attr('href')
+            } 
+
+
+/*
+
+                const link_child = $(child).children()[0]
+                data['url'] = $(link_child).attr('href')
+                data['title'] = $(link_child).text()
+            }
+            else if (cName === 'post_date') {
+                data['date'] = $(child).text().replaceAll(' ', '').replaceAll('-', '')
+            }
+            else if (child.name === 'p') {
+                // post_date is also a <p> but it should not enter here so its ok
+                data['content'] = $(child).text()
+            }
+*/
+
+        }
+        
+        json_data.push(data)
+    })
+    console.log(json_data)
     return json_data
 }

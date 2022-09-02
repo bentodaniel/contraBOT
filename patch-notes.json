@@ -33,5 +33,12 @@
         "date" : "2022/09/01",
         "title" : "Apex Legends is now available",
         "description" : "Apex Legends has been added to the available games for news notifications. Set it up for notifications if you want to receive updates on this game."
+    },
+    {
+        "display": true,
+        "operation" : "update",
+        "date" : "2022/09/02",
+        "title" : "World of Warcraft is now available",
+        "description" : "World of Warcraft has been added to the available games for news notifications. Set it up for notifications if you want to receive updates on this game."
     }
 ]

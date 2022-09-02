@@ -129,36 +129,41 @@ function handle_news_messaging(client, db, game, news_data, game_data) {
  */
 async function send_news_messages(db_data, client, data, value) {
     for (entry_point of db_data) {
-        const channel = await client.channels.fetch(entry_point['channelID'])
+        try {
+            const channel = await client.channels.fetch(entry_point['channelID'])
 
-        // TODO vvvv - this should only send if the date is at max 1 day difference
-        // this is because of downtime, to prevent spam of old news
+            // TODO vvvv - this should only send if the date is at max 1 day difference
+            // this is because of downtime, to prevent spam of old news
 
-        // Loop in reverse to print oldest first
-        for (var i = data.length - 1; i >= 0; i--) {
-            var d = data[i]
-            channel.send({
-                'content' : ' ',
-                'tts': false,
-                'embeds' : [{
-                    'type' : 'rich',
-                    'title': `${d['title']}`.substring(0, 256),
-                    'color' : 0xff7d00,
-                    'description': `${d['content']}`.substring(0, 4096),
-                    'footer': {
-                        'text': `${value.title} - ${d['date']}`.substring(0, 2048)
-                    },
-                    'url' : `${d['url']}`,
-                    'thumbnail': {
-                        'url': `${value.logo}`,
-                        'height': 0,
-                        'width': 0
-                      }
-                }]
-            })
-            .catch(msg_error => {
-                console.log(`ERROR :: Failed to send news message to channel ${channel.id} :: `, msg_error)
-            });
+            // Loop in reverse to print oldest first
+            for (var i = data.length - 1; i >= 0; i--) {
+                var d = data[i]
+                channel.send({
+                    'content' : ' ',
+                    'tts': false,
+                    'embeds' : [{
+                        'type' : 'rich',
+                        'title': `${d['title']}`.substring(0, 256),
+                        'color' : 0xff7d00,
+                        'description': `${d['content']}`.substring(0, 4096),
+                        'footer': {
+                            'text': `${value.title} - ${d['date']}`.substring(0, 2048)
+                        },
+                        'url' : `${d['url']}`,
+                        'thumbnail': {
+                            'url': `${value.logo}`,
+                            'height': 0,
+                            'width': 0
+                        }
+                    }]
+                })
+                .catch(msg_error => {
+                    console.log(`ERROR :: Failed to send news message to channel ${channel.id} :: `, msg_error)
+                });
+            }
+        }
+        catch (err) {
+            console.log('ERROR :: something went wrong while trying to send a news message :: ', err)
         }
     }
 }
