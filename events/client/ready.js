@@ -1,7 +1,5 @@
-const request = require('request');
-const xhr_req = require('xhr-request');
 const gamesConfig = require('../../utils/newsUpdatesHandlers/gamesConfig')
-const updates = require('../../utils/updates')
+const handleFetchNews = require('../../utils/newsUpdatesHandlers/handleFetchNews')
 const handleComparePrices = require('../../utils/gameHandlers/handleComparePrices')
 const embedPagination = require('../../utils/embedPagination');
 
@@ -42,41 +40,25 @@ async function handle_news(client, db) {
         }
         else {
             for (const [ key, value ] of Object.entries(gamesConfig)) {
-                new Promise(resolve => {
-                    if (value.is_xhr) { // Get xhr data
-                        xhr_req(value.url, {
-                            json: true
-                        }, function (err, req_data) {
-                            if (err) {
-                                console.log(err)
-                            }
-                            else {
-                                // Get last recorded news from db
-                                const game_recorded_data = get_recorded_game_data(recorded_results, key)
-                                // Get news according to recorded data
-                                const game_news_data = updates.execute(req_data, key, game_recorded_data)
-                                resolve(game_news_data)
-                            }
-                        })
-                    }
-                    else { // Get html data
-                        request(value.url, function (error, response, body) {
-                            if (error || !body){
-                                console.log(error);
-                            }
-                            else {
-                                // Get last recorded news from db
-                                const game_recorded_data = get_recorded_game_data(recorded_results, key)
-                                // Get news according to recorded data
-                                const game_news_data = updates.execute(body, key, game_recorded_data)
-                                resolve(game_news_data)
-                            }
-                        })
-                    }
-                }).then(news_data => {
-                    handle_news_messaging(client, db, key, news_data, value)
+                handleFetchNews(
+                    key, 
+                    value, 
+                    5
+                ).then(news_data => {
+                    // Get last recorded news from db
+                    const game_recorded_data = get_game_recorded_data(recorded_results, key)
+                    
+                    if (game_recorded_data !== undefined && game_recorded_data !== {}) {
+                        // Get only the valid news
+                        const valid_news_data = validate_news(news_data, game_recorded_data.setDate, game_recorded_data.updateLink, 2)
 
-                    record_into_db(db, key, news_data)
+                        handle_news_messaging(client, db, key, valid_news_data, value)
+
+                        record_into_db(db, key, valid_news_data)
+                    }
+                })
+                .catch(error => {
+                    console.log(`ERROR :: Something went wrong during 'handle_news' :: `, error)
                 })
             }
         }
@@ -89,13 +71,43 @@ async function handle_news(client, db) {
  * @param {*} game The game we are looking for
  * @returns 
  */
-function get_recorded_game_data(game_data, game) {
+function get_game_recorded_data(game_data, game) {
     for (gdata of game_data) {
         if (gdata.gameID === game) {
             return gdata
         }
     }
     return {}
+}
+
+/**
+ * Gets and returns the valid news from a list of news
+ * News are valid if they are newer than the latest_date, their url is different than the recorded_url and if they are not older than now - max_days_old
+ * @param {*} news_data The list containing news in the format { url, title, date, content }. This data is ordered from newest to oldest
+ * @param {*} latest_date The Date of the last recorded entry
+ * @param {*} recorded_url The recorded url of the latest news
+ * @param {*} max_days_old How old can the news be?
+ */
+function validate_news(news_data, latest_date, recorded_url, max_days_old) {
+    var valid_news = []
+
+    for (n_data of news_data) {
+        if (n_data.url === recorded_url) {
+            break
+        }
+
+        const date = new Date(n_data.date) 
+
+        if (date > latest_date) {
+            const diffTime = Math.abs(new Date() - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= max_days_old) {
+                valid_news.push(n_data)
+            }
+        }
+    }
+    return valid_news
 }
 
 /**
