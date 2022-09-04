@@ -40,5 +40,12 @@
         "date" : "2022/09/02",
         "title" : "World of Warcraft is now available",
         "description" : "World of Warcraft has been added to the available games for news notifications. Set it up for notifications if you want to receive updates on this game."
+    },
+    {
+        "display": false,
+        "operation" : "update",
+        "date" : "2022/09/04",
+        "title" : "Add use of Steam API",
+        "description" : "Steam API is now used to fetch game news."
     }
 ]
