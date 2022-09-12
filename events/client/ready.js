@@ -11,6 +11,8 @@ module.exports = (Discord, client, db, message) => {
     });
     client.user.setStatus("online");
 
+    cleanUp(client, db)
+
     // Execute and then only execute once in a while
     handle_news(client, db)
     setInterval( function() { handle_news(client, db); }, 3600000 * 6 ); // 1 hour * 6  (3600000 * 12)
@@ -24,6 +26,36 @@ module.exports = (Discord, client, db, message) => {
 
     // Send patch notes messages
     handle_patch_notes(client, Discord, db)
+}
+
+/********************************************
+ *      CLEANUP FUNCTIONS
+ ********************************************/
+
+function cleanUp(client, db) {
+    console.log('Executing cleanUp...')
+
+    client.guilds.fetch().then(guilds => {
+        let guildIDs = ''
+        for (entry of guilds.entries()) {
+            const guildID = entry[0]
+            guildIDs += `'${guildID}', `
+        }
+        guildIDs = guildIDs.slice(0, -2) // remove the ', '
+
+        const q = `DELETE FROM Guilds WHERE guildID NOT IN (${guildIDs})`
+        db.query(q, async (error, results) => {
+            if (error) {
+                console.log(`ERROR :: Could not remove from db :: `, error)
+            }
+            else {
+                console.log(`Successfully removed from db on 'cleanup'`)
+            }
+        });
+    })
+    .catch(error => {
+        console.log(`ERROR :: Something went wrong during 'cleanup' :: `, error)
+    })
 }
 
 /********************************************
