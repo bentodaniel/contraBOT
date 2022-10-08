@@ -15,6 +15,11 @@
 IMPORTANT !!!
 ---------------------------------------------
 
+WHEN CLEANUP -> we should also cleanup the channels.
+a channel may have been deleted while the bot was offline, so, we should check that before letting the bot do anything else
+
+
+----------------------------------------
 count the calls to steam API
 
 --------------------------------------------

@@ -47,5 +47,12 @@
         "date" : "2022/09/04",
         "title" : "Add use of Steam API",
         "description" : "Steam API is now used to fetch game news."
+    },
+    {
+        "display": false,
+        "operation" : "update",
+        "date" : "2022/10/08",
+        "title" : "Fix some bugs",
+        "description" : "Fixed some bugs and added new ones to fix later."
     }
 ]

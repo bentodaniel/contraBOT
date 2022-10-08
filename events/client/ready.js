@@ -3,7 +3,7 @@ const handleFetchNews = require('../../utils/newsUpdatesHandlers/handleFetchNews
 const handleComparePrices = require('../../utils/gameHandlers/handleComparePrices')
 const embedPagination = require('../../utils/embedPagination');
 
-module.exports = (Discord, client, db, message) => {
+module.exports = (Discord, client, db, c) => {
     console.log('IM ONLINE');
 
     client.user.setActivity(` out for games\' data`, {
@@ -35,6 +35,7 @@ module.exports = (Discord, client, db, message) => {
 function cleanUp(client, db) {
     console.log('Executing cleanUp...')
 
+    // Remove guild that have left in the meantime
     client.guilds.fetch().then(guilds => {
         let guildIDs = ''
         for (entry of guilds.entries()) {
@@ -56,6 +57,10 @@ function cleanUp(client, db) {
     .catch(error => {
         console.log(`ERROR :: Something went wrong during 'cleanup' :: `, error)
     })
+
+    // Remove channels that have been removed in the meantime
+
+    // TODO
 }
 
 /********************************************
@@ -122,6 +127,10 @@ function get_game_recorded_data(game_data, game) {
  */
 function validate_news(news_data, latest_date, recorded_url, max_days_old) {
     var valid_news = []
+
+    if (news_data === null || news_data === undefined){
+        return valid_news
+    }
 
     for (n_data of news_data) {
         if (n_data.url === recorded_url) {

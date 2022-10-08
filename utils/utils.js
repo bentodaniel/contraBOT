@@ -41,10 +41,7 @@
  function parse_channels_to_select_options(channels, guild) {
     res = []
     channels.forEach(channel => {
-        const has_permissions = channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
-                                channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
-                                channel.permissionsFor(guild.me).has('EMBED_LINKS') &&
-                                channel.permissionsFor(guild.me).has('ATTACH_FILES')
+        const has_permissions = get_has_permissions(channel, guild.me)
 
         if (channel.type === 'GUILD_TEXT') {
             var emoji = '❌'
@@ -68,7 +65,15 @@
     return res
 }
 
+function get_has_permissions(channel, me) {
+    return channel.permissionsFor(me).has('VIEW_CHANNEL') && 
+        channel.permissionsFor(me).has('SEND_MESSAGES') &&
+        channel.permissionsFor(me).has('EMBED_LINKS') &&
+        channel.permissionsFor(me).has('ATTACH_FILES')
+}
+
 module.exports = {
     embedToJson,
-    parse_channels_to_select_options
+    parse_channels_to_select_options,
+    get_has_permissions
 }

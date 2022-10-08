@@ -13,27 +13,41 @@ module.exports = (Discord, client, db, guild) => {
         console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db :: `, err)
     }
 
-    const channel = guild.channels.cache.find(channel => 
-        channel.type === 'GUILD_TEXT' && 
-        channel.permissionsFor(guild.me).has('VIEW_CHANNEL') &&
-        channel.permissionsFor(guild.me).has('SEND_MESSAGES') &&
-        channel.permissionsFor(guild.me).has('EMBED_LINKS')
+    var msg_content = {
+        embeds : [{
+            'type' : 'rich',
+            'title': 'Just arrived',
+            'color' : 0x00FFFF,
+            'description': `Get a list of all my commands with **${process.env.MSG_PREFIX}help**`,
+        }]
+    }
+
+    // Find a channel where the bot has all required permissions
+    var channel = guild.channels.cache.find(channel => 
+        channel.type === 'GUILD_TEXT' && utils.get_has_permissions(channel, guild.me)
     )
 
+    // If no valid channel was found, try to find one with little permissions
+    if (channel === undefined || channel === null) {
+        channel = guild.channels.cache.find(channel => 
+            channel.type === 'GUILD_TEXT' &&
+            channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
+            channel.permissionsFor(guild.me).has('SEND_MESSAGES')
+        )
+
+        msg_content = {
+            content : `I do not have all necessary permissions.\nI require: 'View Channel', 'Send Messages', 'Embed Links', 'Attach Files'`
+        }
+    }
+
+    // If there is a channel with required permissions
     if (channel !== undefined && channel !== null){
-        guild.channels.fetch().then(channels => {
-            // Send a 'greetings' message and then send a 'select default' message
-            channel.send({
-                embeds : [{
-                    'type' : 'rich',
-                    'title': 'Just arrived',
-                    'color' : 0x00FFFF,
-                    'description': `Get a list of all my commands with **${process.env.MSG_PREFIX}help**`,
-                }]
-            })
-            .catch(msg_error => {
-                console.log(`ERROR :: Failed to send 'just arrived' message to channel ${channel.id} in guild ${guild.id} :: `, msg_error)
-            });
-        })
+        // Send a 'greetings' message
+        channel.send(
+            msg_content
+        )
+        .catch(msg_error => {
+            console.log(`ERROR :: Failed to send 'just arrived' message to channel ${channel.id} in guild ${guild.id} :: `, msg_error)
+        });
     }
 }

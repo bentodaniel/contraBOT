@@ -1,3 +1,5 @@
+const utils = require('../../utils/utils')
+
 module.exports = (Discord, client, db, message) => {
     var prefix = process.env.MSG_PREFIX
 
@@ -13,7 +15,19 @@ module.exports = (Discord, client, db, message) => {
     const command_file = client.commands.get(command)
 
     if (command_file) {
-        command_file.execute(client, message, args, Discord, db);
+        // If it has all needed permissions, execute
+        if (utils.get_has_permissions(message.channel, message.guild.me)) {
+            command_file.execute(client, message, args, Discord, db);
+        }
+        else {
+            // Otherwise, try to inform the user
+            message.channel.send({
+                content : `I do not have all necessary permissions.\nI require: 'View Channel', 'Send Messages', 'Embed Links', 'Attach Files'`
+            })
+            .catch(msg_error => {
+                console.log(`ERROR :: Failed to send 'no permissions' message to channel ${message.channelId} in guild ${message.guildId} :: `, msg_error)
+            });
+        }
     }
     else {
         message.channel.send({

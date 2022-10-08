@@ -15,19 +15,19 @@ module.exports = {
     },
     apex : {
         title : 'Apex Legends',
-        xhr_url: `http://api.steampowered.com/ISteamNews/GetNewsForApp/${steamAPIcallVersion}/?appid=1172470&count=${max_entries}&maxlength=${max_length}`,
+        xhr_url: `https://api.steampowered.com/ISteamNews/GetNewsForApp/${steamAPIcallVersion}/?appid=1172470&count=${max_entries}&maxlength=${max_length}`,
         html_url : 'https://www.ea.com/games/apex-legends/news',
         logo : 'https://logodownload.org/wp-content/uploads/2019/02/apex-legends-logo-1.png'
     },
     csgo : {
         title : 'Counter-Strike: Global Offensive',
-        xhr_url: `http://api.steampowered.com/ISteamNews/GetNewsForApp/${steamAPIcallVersion}/?appid=730&count=${max_entries}&maxlength=${max_length}`,
+        xhr_url: `https://api.steampowered.com/ISteamNews/GetNewsForApp/${steamAPIcallVersion}/?appid=730&count=${max_entries}&maxlength=${max_length}`,
         html_url : 'https://blog.counter-strike.net/index.php/category/updates/',
         logo : 'https://cnlgaming.gg/wp-content/uploads/ava-CSGO.png'
     },
     cycle : {
         title : 'The Cycle: Frontier',
-        xhr_url: `http://api.steampowered.com/ISteamNews/GetNewsForApp/${steamAPIcallVersion}/?appid=868270&count=${max_entries}&maxlength=${max_length}`,
+        xhr_url: `https://api.steampowered.com/ISteamNews/GetNewsForApp/${steamAPIcallVersion}/?appid=868270&count=${max_entries}&maxlength=${max_length}`,
         html_url : 'https://thecycle.game/news-and-media',
         logo : 'https://yt3.ggpht.com/CJ4b0OKg5izpM6wl0LxIOcZ9cixUtOM0ZO6_-4B8lQnAJTjkzb3Th6pXVneSV1wPFcSo_B3bl8o=s900-c-k-c0x00ffffff-no-rj'
     },
