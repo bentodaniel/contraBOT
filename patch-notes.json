@@ -51,7 +51,7 @@
     {
         "display": false,
         "operation" : "update",
-        "date" : "2022/10/08",
+        "date" : "2022/10/24",
         "title" : "Fix some bugs",
         "description" : "Fixed some bugs and added new ones to fix later."
     }
