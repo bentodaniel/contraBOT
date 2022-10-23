@@ -40,6 +40,11 @@
  */
  function parse_channels_to_select_options(channels, guild) {
     res = []
+
+    if (channels === null || channels === undefined || guild === null || guild === undefined) {
+        return res
+    }
+    
     channels.forEach(channel => {
         const has_permissions = get_has_permissions(channel, guild.me)
 
