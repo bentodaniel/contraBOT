@@ -76,11 +76,20 @@ const handleSetUpGameNews = async(client, db, i) => {
 function parse_game_data(games) {
     res = []
     for (const [ game_id, game_data ] of Object.entries(games)) {
-        res.push({
+        var option = {
             'label': game_data.title,
             'value': '' + game_id,
             'default': false
-        })
+        }
+
+        if (game_data.emoji) {
+            option['emoji'] = {
+                'id': game_data.emoji.id,
+                'name': game_data.emoji.name
+            }
+        }
+        
+        res.push(option)
     }
     return res
 }

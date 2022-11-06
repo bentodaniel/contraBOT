@@ -16,7 +16,7 @@ module.exports = (Discord, client, db, message) => {
 
     if (command_file) {
 
-        const has_permissions = false
+        var has_permissions = false
         try {
             has_permissions = utils.get_has_permissions(message.channel, message.guild.me)
         }
