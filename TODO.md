@@ -18,6 +18,15 @@ IMPORTANT !!!
 WHEN CLEANUP -> we should also cleanup the channels.
 a channel may have been deleted while the bot was offline, so, we should check that before letting the bot do anything else
 
+---------------------------------------------
+
+should also maybe register the links when sending price notifications to users
+to prevent spamming the same every 2 hours or so
+
+
+
+
+
 
 ----------------------------------------
 count the calls to steam API

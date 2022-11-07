@@ -58,8 +58,8 @@
     {
         "display": true,
         "operation": "update",
-        "date": "2022/11/10",
-        "title": "Add more games available for news",
-        "description": "Added Dota2, COD:MW2 and Payday 2 to the available games for news."
+        "date": "2022/11/07",
+        "title": "Add more games available for news and QoL improvements",
+        "description": "Added Dota2, COD:MW2, Payday 2, Warframe, Rust, PUBG, Destiny 2, Team Fortress 2, Brawlhalla and Tom Clancy's Rainbow Six Siege to the available games for news.\nAlso added the game's logo to be easier when selecting games for news."
     }
 ]

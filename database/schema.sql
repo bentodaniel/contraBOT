@@ -24,6 +24,7 @@ CREATE TABLE LastUpdates (
 );
 
 CREATE TABLE WishList (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     userID VARCHAR(100) NOT NULL,
     gameID VARCHAR(100) NOT NULL,
     gameProductID VARCHAR(50) NOT NULL,
@@ -36,6 +37,16 @@ CREATE TABLE WishList (
 );
 
 ALTER TABLE `WishList` ADD UNIQUE `unique_index`(`userID`, `gameProductID`);
+
+CREATE TABLE PricesNotified (
+    wishlistID INT NOT NULL,
+    offerLink VARCHAR(255) NOT NULL,
+    price FLOAT NOT NULL,
+    addDate DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (wishlistID) 
+        REFERENCES WishList(id)
+        ON DELETE CASCADE
+);
 
 CREATE TABLE PremiumUsers (
     userID VARCHAR(100) NOT NULL PRIMARY KEY

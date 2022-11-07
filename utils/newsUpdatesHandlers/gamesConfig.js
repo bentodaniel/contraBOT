@@ -31,6 +31,15 @@ module.exports = {
             name : 'game_apex_legends'
         }
     },
+    brawlhalla : {
+        title : 'Brawlhalla',
+        xhr_url : get_steam_link(291550),
+        logo : 'https://i.dlpng.com/static/png/6829432_preview.png',
+        emoji : {
+            id : '1039244307997139026',
+            name : 'game_brawlhalla'
+        }
+    },
     cod_mw2 : {
         title : 'Call of Duty: Modern Warfare II',
         xhr_url : get_steam_link(1938090),
@@ -60,6 +69,15 @@ module.exports = {
             name : 'game_cycle'
         }
     },
+    destiny2 : {
+        title : 'Destiny 2',
+        xhr_url : get_steam_link(1085660),
+        logo : 'https://pngimage.net/wp-content/uploads/2018/05/destiny-logo-png-2.png',
+        emoji : {
+            id : '1039153879327199272',
+            name : 'game_destiny2'
+        }
+    },
     dota2 : {
         title : 'Dota 2',
         xhr_url : get_steam_link(570),
@@ -67,6 +85,15 @@ module.exports = {
         emoji : {
             id : '1038951592700940350',
             name : 'game_dota2'
+        }
+    },
+    gta5 : {
+        title : 'Grand Theft Auto V',
+        xhr_url : get_steam_link(271590),
+        logo : 'https://i.pinimg.com/originals/62/0c/89/620c89a5f0347147ea17036be706fc1b.png',
+        emoji : {
+            id : '1039150627059683368',
+            name : 'game_gta5'
         }
     },
     lol : {
@@ -87,6 +114,42 @@ module.exports = {
             name : 'game_payday2'
         }
     },
+    pubg : {
+        title : 'PUBG: BATTLEGROUNDS',
+        xhr_url : get_steam_link(578080),
+        logo : 'https://www.pngkey.com/png/full/28-280593_logo-pubg-logo-png-white.png',
+        emoji : {
+            id : '1039152471341285426',
+            name : 'game_pubg'
+        }
+    },
+    r6s : {
+        title : 'Tom Clancy\'s Rainbow Six Siege',
+        xhr_url : get_steam_link(359550),
+        logo : 'https://static.wikia.nocookie.net/logopedia/images/7/79/R6S_old_icon.png',
+        emoji : {
+            id : '1039245587587006584',
+            name : 'game_r6s'
+        }
+    },
+    rust : {
+        title : 'Rust',
+        xhr_url : get_steam_link(252490),
+        logo : 'https://aws1.discourse-cdn.com/business20/uploads/facepunch1/original/3X/e/a/ea6186e222e07c6ad661259bfda0cbce94288ffb.png',
+        emoji : {
+            id : '1039149945418174535',
+            name : 'game_rust'
+        }
+    },
+    tf2 : {
+        title : 'Team Fortress 2',
+        xhr_url : get_steam_link(440),
+        logo : 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Team_Fortress_2_style_logo.svg/1024px-Team_Fortress_2_style_logo.svg.png',
+        emoji : {
+            id : '1039242884903354518',
+            name : 'game_tf2'
+        }
+    },
     valorant : {
         title : 'Valorant',
         xhr_url : 'https://playvalorant.com/page-data/en-us/news/game-updates/page-data.json',
@@ -94,6 +157,15 @@ module.exports = {
         emoji : {
             id : '1038949650301980717',
             name : 'game_valorant'
+        }
+    },
+    warframe : {
+        title : 'Warframe',
+        xhr_url : get_steam_link(230410),
+        logo : 'https://n9e5v4d8.ssl.hwcdn.net/images/longlanding/lotusIcon.jpg',
+        emoji : {
+            id : '1039135568606539778',
+            name : 'game_warframe'
         }
     },
     wow : {
