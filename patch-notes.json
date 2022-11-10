@@ -1,5 +1,6 @@
 [
     {
+        "id" : 0,
         "display": true,
         "operation" : "release",
         "date" : "2022/08/02",
@@ -7,6 +8,7 @@
         "description" : "ContraBOT notifies your server of game changes on four different games and also notifies you of current free game deals.\nContraBOT can check the price of any given game on AllKeyShop. You can also add any game to your wishlist and contraBOT will notify you if that game reaches your wanted price on AllKeyShop."
     },
     {
+        "id" : 1,
         "display": false,
         "operation" : "update",
         "date" : "2022/08/06",
@@ -14,6 +16,7 @@
         "description" : "contraBOT now is able to notify servers of its patch notes"
     },
     {
+        "id" : 2,
         "display": false,
         "operation" : "update",
         "date" : "2022/08/08",
@@ -21,6 +24,7 @@
         "description" : "You can now directly add a game to your wishlist when cheking its price using a single click."
     },
     {
+        "id" : 3,
         "display": true,
         "operation" : "update",
         "date" : "2022/08/30",
@@ -28,6 +32,7 @@
         "description" : "Changed commands to be more intuitive. Commands 'price' and 'addwish' are now just 'search'. Commands 'setupdates', 'removeupdates' and 'updateslist' is now just 'news'. Commands 'setdefault' and 'removedefault' are now just 'default'."
     },
     {
+        "id" : 4,
         "display": true,
         "operation" : "update",
         "date" : "2022/09/01",
@@ -35,6 +40,7 @@
         "description" : "Apex Legends has been added to the available games for news notifications. Set it up for notifications if you want to receive updates on this game."
     },
     {
+        "id" : 5,
         "display": true,
         "operation" : "update",
         "date" : "2022/09/02",
@@ -42,6 +48,7 @@
         "description" : "World of Warcraft has been added to the available games for news notifications. Set it up for notifications if you want to receive updates on this game."
     },
     {
+        "id" : 6,
         "display": false,
         "operation" : "update",
         "date" : "2022/09/04",
@@ -49,6 +56,7 @@
         "description" : "Steam API is now used to fetch game news."
     },
     {
+        "id" : 7,
         "display": false,
         "operation" : "update",
         "date" : "2022/10/24",
@@ -56,6 +64,7 @@
         "description" : "Fixed some bugs and added new ones to fix later."
     },
     {
+        "id" : 8,
         "display": true,
         "operation": "update",
         "date": "2022/11/07",

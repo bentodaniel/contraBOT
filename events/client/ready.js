@@ -385,10 +385,20 @@ function handle_patch_notes(client, Discord, db) {
             if (last.display) {
                 // Loop through each server's data
                 for (guild_data of results) {
-                    notify_server(client, Discord, guild_data, last)
+                    // Avoid sending the same patch twice (in case of server restart)
+                    if (guild_data.lastPatchID < last.id) {
+                        notify_server(client, Discord, guild_data, last)
+
+                        const replace_q = `REPLACE INTO Guilds (guildID, guildOwnerID, defaultChannelID, lastPatchID) VALUES('${guild_data.guildID}', '${guild_data.guildOwnerID}', '${guild_data.defaultChannelID}', ${last.id})`
+                        db.query(replace_q, async (replace_error, replace_results) => {
+                            if (error) {
+                                // No need to inform any user
+                                console.log(`ERROR :: failed to update 'lastPatchID' on guilds for guild '${guild_data.guildID}' :: `, error)
+                            }
+                        })
+                    }
                 }
             }
-
         }
     })
 }

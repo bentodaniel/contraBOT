@@ -23,6 +23,12 @@ a channel may have been deleted while the bot was offline, so, we should check t
 should also maybe register the links when sending price notifications to users
 to prevent spamming the same every 2 hours or so
 
+---------------------------------------------
+
+when setting up games for news, allow the selection of multiple games?
+
+-----------------------------------------------
+
 
 
 
