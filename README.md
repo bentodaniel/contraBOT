@@ -10,6 +10,10 @@ Hosted at : https://top.gg/bot/988500050973958184
 
 
 ## Development
+
+Bot developed with [Discord.JS](https://discord.js.org/#/docs/discord.js/main/general/welcome).
+
+
 To add a game to the list available for news/patch notes, it is as simple as modifying
 `gamesConfig.js` IF the patch notes come from Steam. Otherwise, it is also necessary
 to change `parseHTML.js` or ``parseXHR.js`. 
