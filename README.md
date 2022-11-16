@@ -1,9 +1,12 @@
-# discord_price_checker_bot
+# contraBOT
 A Discord bot that checks the price of items on AllKeyShop andallows the user to add a
 game to their wishlist. The bot will notify the user once the price drops under a 
 specified amount.
 
 This bot can also notify servers of news and patch notes on games.
+
+
+Hosted at : https://top.gg/bot/988500050973958184
 
 
 ## Development
