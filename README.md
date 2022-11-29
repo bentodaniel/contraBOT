@@ -1,4 +1,4 @@
-# discord_price_checker_bot
+# contraBOT
 A Discord bot that checks the price of items on AllKeyShop andallows the user to add a
 game to their wishlist. The bot will notify the user once the price drops under a 
 specified amount.
@@ -6,7 +6,14 @@ specified amount.
 This bot can also notify servers of news and patch notes on games.
 
 
+Hosted at : https://top.gg/bot/988500050973958184
+
+
 ## Development
+
+Bot developed with [Discord.JS](https://discord.js.org/#/docs/discord.js/main/general/welcome).
+
+
 To add a game to the list available for news/patch notes, it is as simple as modifying
 `gamesConfig.js` IF the patch notes come from Steam. Otherwise, it is also necessary
 to change `parseHTML.js` or ``parseXHR.js`. 
