@@ -190,7 +190,7 @@ async function handleAddGameToUpdatesDB(client, db, interaction, gameID, channel
             // add to table Guilds
             try {
                 db.query(
-                    `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, ${null})`
+                    `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, DEFAULT, DEFAULT)`
                 );
             } catch (err) {
                 console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db during setupdates :: `, err)

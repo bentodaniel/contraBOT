@@ -7,7 +7,7 @@ module.exports = (Discord, client, db, guild) => {
     // Add to db.
     try {
         db.query(
-            `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, ${null})`
+            `INSERT INTO Guilds VALUES (${guild.id}, ${guild.ownerId}, DEFAULT, DEFAULT)`
         );
     } catch (err) {
         console.log(`ERROR :: failed to insert guild ${guild.name} with id ${guild.id} into db :: `, err)
