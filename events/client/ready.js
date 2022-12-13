@@ -11,7 +11,29 @@ module.exports = (Discord, client, db, c) => {
     });
     client.user.setStatus("online");
 
+    // Set up application commands
+    let appCommands = client.application?.commands
+
+    // Use for testing purposes
+    //const testGuildID = ''
+    //const testGuild = client.guilds.cache.get(testGuildID)
+    //if (testGuild) {
+    //    appCommands = testGuild.commands
+    //}
+
+    appCommands?.create({
+        name: 'status',
+        description: 'Replies with status'
+    })
+
     cleanUp(client, db)
+
+
+
+    // TODO - Uncomment for testing
+    //handle_wishlist(Discord, client, db)
+
+
 
     // Execute and then only execute once in a while
     handle_news(client, db)
@@ -281,6 +303,11 @@ function handle_wishlist(Discord, client, db) {
 }
 
 function notify_user(client, Discord, user_data, game_offers_list) {
+
+    // TODO - Uncomment for testing
+    //console.log(user_data)
+    //console.log(game_offers_list)
+
     client.users.fetch(user_data['userID'], false).then((user) => {
         // Create a list containing the offers with an equal or lower price than requested
         var offers = []

@@ -9,6 +9,11 @@ const handleRemoveDefaultChannel = require('../../utils/defaultChannelHandlers/h
 const handleRemoveFromWishlist = require('../../utils/gameHandlers/handleRemoveFromWishlist')
 
 module.exports = (Discord, client, db, interaction) => {
+    if (interaction.isCommand()) {
+        handleApplicationCommands(interaction)
+        return
+    }
+
     const idTags = interaction.customId.split('-')
     const interactionID = idTags[0]
     switch (interactionID) {
@@ -65,6 +70,20 @@ module.exports = (Discord, client, db, interaction) => {
 
         default:
             break;
+    }
+}
+
+async function handleApplicationCommands(interaction) {
+    const { commandName, options } = interaction
+
+    if (commandName === 'status') {
+        interaction.reply({
+            content: 'I\'m alive \\o/',
+            ephemeral: true
+        })
+        .catch(error => {
+            console.log('Could not reply to status command')
+        })
     }
 }
 

@@ -15,6 +15,10 @@
 IMPORTANT !!!
 ---------------------------------------------
 
+last patch ID is not being recorded into DB
+
+---------------------------------------------
+
 WHEN CLEANUP -> we should also cleanup the channels.
 a channel may have been deleted while the bot was offline, so, we should check that before letting the bot do anything else
 
