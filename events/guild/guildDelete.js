@@ -1,5 +1,9 @@
 module.exports = (Discord, client, db, guild) => {
     
+    if (!guild.available) {
+        return
+    }
+
     console.log(`Left guild ${guild.name}, id ${guild.id}`);
 
     try {
