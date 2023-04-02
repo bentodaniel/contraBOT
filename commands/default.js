@@ -13,21 +13,21 @@ module.exports = {
         // Get the default channel
         dbUtils.get_guild_default_channel(db, guild.id).then(default_channel_results => {            
             // Two default buttons
-            const setDefaultBtn = new Discord.MessageButton()
+            const setDefaultBtn = new Discord.ButtonBuilder()
                 .setCustomId('setdefaultbtn')
                 .setLabel('Set Default')
-                .setStyle('PRIMARY')
+                .setStyle('Primary')
             
-            const removeDefaultBtn = new Discord.MessageButton()
+            const removeDefaultBtn = new Discord.ButtonBuilder()
                 .setCustomId('removedefaultbtn')
                 .setLabel('Remove Default')
-                .setStyle('DANGER')
+                .setStyle('Danger')
                 .setDisabled(default_channel_results.length === 0) // disable if there is no default channel set
             
             const btns = [setDefaultBtn, removeDefaultBtn]
 
             // Create the embed and the component, which will serve as placeholders
-            const embed  = new Discord.MessageEmbed()
+            const embed  = new Discord.EmbedBuilder()
                 .setColor('#ffffff')
 
             if (default_channel_results.length === 0) {
@@ -40,7 +40,7 @@ module.exports = {
 
             message.channel.send({
                 embeds: [embed],
-                components: [new Discord.MessageActionRow().addComponents(btns)]
+                components: [new Discord.ActionRowBuilder().addComponents(btns)]
             })
             .catch(error => {
                 console.log(`ERROR :: Failed to send message for 'default' command :: `, error)

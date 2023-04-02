@@ -4,10 +4,11 @@ const utils = require('../utils');
 /**
  * Handle the execution of setting up notifications for game news
  * @param {*} client The bot's client
+ * @param {*} Discord The discord package
  * @param {*} db The DB instance
  * @param {*} i The interaction that started this execution
  */
-const handleSetUpGameNews = async(client, db, i) => {
+const handleSetUpGameNews = async(client, Discord, db, i) => {
     const message = i.message
     const user = i.user
 
@@ -41,14 +42,14 @@ const handleSetUpGameNews = async(client, db, i) => {
         });
 
         collector.on("collect", async interaction => {
-            if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+            if (!interaction.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
                 interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
                     console.log(`ERROR :: Failed to send 'select menu not for you' reply on 'handleSetUpGameNews' :: `, error)
                 })
             }
             else {
                 const gameID = interaction.values[0]
-                handleGameSelectec(client, db, interaction, gameID)
+                handleGameSelectec(client, Discord, db, interaction, gameID)
                 game_select_msg.delete().catch(error => {
                     console.log(`ERROR :: Failed to remove selection message on 'handleSetUpGameNews' on success :: `, error)
                 });
@@ -97,15 +98,28 @@ function parse_game_data(games) {
 /**
  * Execute after a game has been selected for news notifications
  * @param {*} client The bot's client
+ * @param {*} Discord The Discord package
  * @param {*} db The DB instance
  * @param {*} i The interaction that started this execution
  * @param {*} gameID The id if the selected game
  */
-function handleGameSelectec(client ,db, i, gameID) {
+function handleGameSelectec(client, Discord, db, i, gameID) {
     const message = i.message
     const user = i.user
 
-    message.guild.channels.fetch().then(channels => {
+    message.guild.channels.fetch().then(async channels => {
+        const options = await utils.parse_channels_to_select_options(channels, message.guild);
+
+        const row = new Discord.ActionRowBuilder()
+			.addComponents(
+				new Discord.StringSelectMenuBuilder()
+					.setCustomId('updates_channel_select')
+					.setPlaceholder('Select channel')
+					.setMinValues(1)
+					.setMaxValues(1)
+					.addOptions(options),
+			);
+
         message.channel.send({
             content : user.toString(),
             embeds : [{
@@ -114,17 +128,7 @@ function handleGameSelectec(client ,db, i, gameID) {
                 'description': `I do not have all necessary permissions in channels marked with ❌\n\nPermissions: 'View Channel', 'Send Messages', 'Embed Links', 'Attach Files' are necessary.`,
                 'color' : 0xffffff,
             }],
-            components: [{
-                'type': 1,
-                'components': [{
-                    "custom_id": `updates_channel_select`,
-                    "placeholder": `Select channel`,
-                    "options": utils.parse_channels_to_select_options(channels, message.guild),
-                    "min_values": 1,
-                    "max_values": 1,
-                    "type": 3
-                }]
-            }]
+            components: [row]
         })
         .then(channel_select_msg => {
             const filter = (click) => click.customId === 'updates_channel_select'
@@ -136,7 +140,7 @@ function handleGameSelectec(client ,db, i, gameID) {
             });
 
             collector.on("collect", async interaction => {
-                if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+                if (!interaction.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
                     interaction.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
                         console.log(`ERROR :: Failed to send 'select menu not for you' reply on 'handleSetUpGameNews.handleGameSelectec' :: `, error)
                     })

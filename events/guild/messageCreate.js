@@ -18,7 +18,7 @@ module.exports = (Discord, client, db, message) => {
 
         var has_permissions = false
         try {
-            has_permissions = utils.get_has_permissions(message.channel, message.guild.me)
+            has_permissions = utils.get_has_permissions(message.guild, message.channel)
         }
         catch(error) {
             console.log(`ERROR :: Failed to check for permissions on 'messageCreate'. Channel ${message.channelId} in guild ${message.guildId} :: `, error)

@@ -19,7 +19,7 @@ const handleRemoveDefaultChannel = async(Discord, db, interaction, channelID) =>
             // Send message confirming the removal of the default channel
             interaction.message.channel.send({
                 embeds: [
-                    new Discord.MessageEmbed()
+                    new Discord.EmbedBuilder()
                         .setColor('#ffffff')
                         .setTitle(`Default Channel Removed`)
                         .setDescription(`Channel <#${channelID}> is no longer the default channel.`)

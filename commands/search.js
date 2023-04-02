@@ -48,14 +48,14 @@ module.exports = {
                     // Generate the embeds and the buttons for paginated message
                     const embeds = generateEmbeds(Discord, results_list)
                     const extraButtonList = [
-                        new Discord.MessageButton()
+                        new Discord.ButtonBuilder()
                             .setCustomId('pricebtn')
                             .setLabel('Compare Prices')
-                            .setStyle('PRIMARY'),
-                        new Discord.MessageButton()
+                            .setStyle('Primary'),
+                        new Discord.ButtonBuilder()
                             .setCustomId('wishlistbtn')
                             .setLabel('Add to Wishlist')
-                            .setStyle('PRIMARY')
+                            .setStyle('Primary')
                     ]
 
                     embedPagination(
@@ -168,12 +168,12 @@ function get_allkeyshop_games_list(game_search) {
 /**
  * Generates the embeds for the search results
  * @param {*} results_list The list of results for a game search
- * @returns A list of MessageEmbed
+ * @returns A list of EmbedBuilder
  */
 function generateEmbeds(Discord, results_list) {
     var embeds = [];
     for (game of results_list) {
-        var embed = new Discord.MessageEmbed()
+        var embed = new Discord.EmbedBuilder()
             .setTitle(`${game['title']} [${game['productID']}]`)
             .setURL(game['link'])
             .setColor('#ffffff')

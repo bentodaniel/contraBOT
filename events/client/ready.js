@@ -346,7 +346,7 @@ function notify_user(client, Discord, user_data, game_offers_list) {
 function generate_game_notification_embeds(Discord, offers, user_data) {
     var embeds = [];
     for (game of offers) {
-        var embed = new Discord.MessageEmbed()
+        var embed = new Discord.EmbedBuilder()
             .setTitle(user_data['gameID'])
             .setURL(user_data['gameLink'])
             .setDescription(`Target price: ${user_data['price']}€\n\n[${game['market']} - BUY](${game['buy_link']})\n`)
@@ -432,7 +432,7 @@ function handle_patch_notes(client, Discord, db) {
 
 function notify_server(client, Discord, guild_data, patch_data) {
     client.channels.fetch(guild_data['defaultChannelID']).then(channel => {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
                         .setColor(0xFFFFFF)
                         .setTitle(patch_data.title)
                         .setDescription(patch_data.description)

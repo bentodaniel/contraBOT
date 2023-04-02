@@ -13,7 +13,19 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
     const message = interaction.message
     const user = interaction.user
 
-    message.guild.channels.fetch().then(channels => {
+    message.guild.channels.fetch().then(async channels => {
+        const options = await utils.parse_channels_to_select_options(channels, message.guild);
+
+        const row = new Discord.ActionRowBuilder()
+			.addComponents(
+				new Discord.StringSelectMenuBuilder()
+					.setCustomId('default_channel_select')
+					.setPlaceholder('Select default channel')
+					.setMinValues(1)
+					.setMaxValues(1)
+					.addOptions(options),
+			);
+        
         message.channel.send({
             content : user.toString(),
             embeds : [{
@@ -22,17 +34,7 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
                 'description': `I do not have all necessary permissions in channels marked with ❌\n\nPermissions: 'View Channel', 'Send Messages', 'Embed Links', 'Attach Files' are necessary.`,
                 'color' : 0xffffff,
             }],
-            components: [{
-                'type': 1,
-                'components': [{
-                    "custom_id": `default_channel_select`,
-                    "placeholder": `Select default channel`,
-                    "options": utils.parse_channels_to_select_options(channels, message.guild),
-                    "min_values": 1,
-                    "max_values": 1,
-                    "type": 3
-                }]
-            }]
+            components: [row]
         })
         .then(select_msg => {
             const filter = (i) => i.customId === 'default_channel_select'
@@ -44,7 +46,7 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
             });
 
             collector.on("collect", async i => {
-                if (!i.memberPermissions.has('ADMINISTRATOR')) {
+                if (!i.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
                     i.reply({ content: `This select menu is for the administrators' use only.`, ephemeral: true }).catch(error => {
                         console.log(`ERROR :: Failed to send 'select menu for admins' reply on 'handleSetDefaultChannel' :: `, error)
                     })
@@ -67,7 +69,7 @@ const handleSetDefaultChannel = async(client, Discord, db, interaction) => {
                             // Send message confirming the removal of the default channel
                             i.message.channel.send({
                                 embeds: [
-                                    new Discord.MessageEmbed()
+                                    new Discord.EmbedBuilder()
                                         .setColor('#ffffff')
                                         .setTitle(`Default Channel Set`)
                                         .setDescription(`Channel <#${channelID}> has been set as default.`)

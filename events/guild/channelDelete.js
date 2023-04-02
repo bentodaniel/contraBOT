@@ -1,5 +1,5 @@
 module.exports = (Discord, client, db, channel) => {
-    if (channel.type === 'GUILD_TEXT') {
+    if (channel.type === Discord.ChannelType.GuildText) {
         console.log(`Channel ${channel.id} has been removed. Trying to remove it from database...`)
 
         // A channel can be associated with both, default and notifications, so we must execute queries for both cases

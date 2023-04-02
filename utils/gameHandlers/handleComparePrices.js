@@ -34,10 +34,10 @@ const handleComparePrices = async (Discord, interaction, game_json, timeout=1200
                 fetchReply: true
             })
             .then(reply_msg => {
-                const wishlist_btn = new Discord.MessageButton()
+                const wishlist_btn = new Discord.ButtonBuilder()
                     .setCustomId('wishlistbtn')
                     .setLabel('Add to Wishlist')
-                    .setStyle('PRIMARY')
+                    .setStyle('Primary')
                 
                 embedPagination(
                     Discord, reply_msg, embeds, timeout, `${user.toString()}, here are the results for '**${game_json['title']}**'`, wishlist_btn
@@ -134,7 +134,7 @@ async function get_allkeyshop_game_offers(gameProductID, currency, limit) {
 function generate_compare_prices_embeds(Discord, game_offers_list, game_json) {
     var embeds = [];
     for (game_offer of game_offers_list) {
-        const embed = new Discord.MessageEmbed()
+        const embed = new Discord.EmbedBuilder()
             .setTitle(`${game_json['title']} [${game_json['productID']}]`)
             .setURL(game_json['link'])
             .setDescription(`[${game_offer['market']} - BUY](${game_offer['buy_link']})\n`)

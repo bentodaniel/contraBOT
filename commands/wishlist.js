@@ -22,10 +22,10 @@ module.exports = {
                 
                 // create the button
                 // by default, disable
-                const removeWishBtn = new Discord.MessageButton()
+                const removeWishBtn = new Discord.ButtonBuilder()
                     .setCustomId(`removefromwishlistbtn-${target_user.id}`)
                     .setLabel('Remove from Wishlist')
-                    .setStyle('DANGER')
+                    .setStyle('Danger')
                     .setDisabled(json_data.length === 0) // disable if the list is empty
 
                 if (embeds.length === 1) {
@@ -33,7 +33,7 @@ module.exports = {
 
                     placeholder_wishlist_msg.edit({
                         embeds: embeds,
-                        components: [new Discord.MessageActionRow().addComponents(removeWishBtn)]
+                        components: [new Discord.ActionRowBuilder().addComponents(removeWishBtn)]
                     })
                     .catch(error => {
                         console.log(`ERROR :: Failed to send wishlist message for 'wishlist' command :: `, error)
@@ -83,7 +83,7 @@ function getEmbeds(Discord, json_data, target_user) {
 
     if (json_data.length === 0) {
         embedList.push(
-            new Discord.MessageEmbed()
+            new Discord.EmbedBuilder()
                 .setColor('#ffffff')
                 .setTitle(`${target_user.username}'s wishlist is empty.`)
         )
@@ -117,7 +117,7 @@ function getEmbeds(Discord, json_data, target_user) {
                 
                 // create a new embed with current items
                 embedList.push(
-                    new Discord.MessageEmbed()
+                    new Discord.EmbedBuilder()
                         .setColor('#ffffff')
                         .setTitle(`${target_user.username}'s wishlist`)
                         .addFields(fields)
@@ -149,7 +149,7 @@ function getEmbeds(Discord, json_data, target_user) {
                 
                 // create a new embed with current items
                 embedList.push(
-                    new Discord.MessageEmbed()
+                    new Discord.EmbedBuilder()
                         .setColor('#ffffff')
                         .setTitle(`${target_user.username}'s wishlist`)
                         .addFields(fields)

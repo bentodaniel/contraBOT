@@ -17,15 +17,15 @@ module.exports = {
                 const embeds = getEmbeds(Discord, json_data)
                 
                 // Two default buttons
-                const setGameBtn = new Discord.MessageButton()
+                const setGameBtn = new Discord.ButtonBuilder()
                     .setCustomId('setupgamenewsbtn')
                     .setLabel('Set Up Game')
-                    .setStyle('PRIMARY')
+                    .setStyle('Primary')
                 
-                const removeGameBtn = new Discord.MessageButton()
+                const removeGameBtn = new Discord.ButtonBuilder()
                     .setCustomId('removegamenewsbtn')
                     .setLabel('Remove Game')
-                    .setStyle('DANGER')
+                    .setStyle('Danger')
                     .setDisabled(json_data.length === 0) // disable if the list is empty
                 
                 const btns = [setGameBtn, removeGameBtn]
@@ -35,7 +35,7 @@ module.exports = {
 
                     placeholder_news_msg.edit({
                         embeds: embeds,
-                        components: [new Discord.MessageActionRow().addComponents(btns)]
+                        components: [new Discord.ActionRowBuilder().addComponents(btns)]
                     })
                     .catch(error => {
                         console.log(`ERROR :: Failed to send news message for 'news' command :: `, error)
@@ -84,7 +84,7 @@ function getEmbeds(Discord, json_data) {
 
     if (json_data.length === 0) {
         embedList.push(
-            new Discord.MessageEmbed()
+            new Discord.EmbedBuilder()
                 .setColor('#ffffff')
                 .setTitle('No game has been set for news notifications yet.')
         )
@@ -118,7 +118,7 @@ function getEmbeds(Discord, json_data) {
 
                 // create a new embed with current items
                 embedList.push(
-                    new Discord.MessageEmbed()
+                    new Discord.EmbedBuilder()
                         .setColor('#ffffff')
                         .setTitle('Updates List')
                         .addFields(fields)
@@ -150,7 +150,7 @@ function getEmbeds(Discord, json_data) {
 
                 // create a new embed with current items
                 embedList.push(
-                    new Discord.MessageEmbed()
+                    new Discord.EmbedBuilder()
                         .setColor('#ffffff')
                         .setTitle('Updates List')
                         .addFields(fields)

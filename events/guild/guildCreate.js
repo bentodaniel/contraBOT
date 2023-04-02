@@ -24,15 +24,15 @@ module.exports = (Discord, client, db, guild) => {
 
     // Find a channel where the bot has all required permissions
     var channel = guild.channels.cache.find(channel => 
-        channel.type === 'GUILD_TEXT' && utils.get_has_permissions(channel, guild.me)
+        channel.type === Discord.ChannelType.GuildText && utils.get_has_permissions(guild, channel)
     )
 
     // If no valid channel was found, try to find one with little permissions
     if (channel === undefined || channel === null) {
         channel = guild.channels.cache.find(channel => 
-            channel.type === 'GUILD_TEXT' &&
-            channel.permissionsFor(guild.me).has('VIEW_CHANNEL') && 
-            channel.permissionsFor(guild.me).has('SEND_MESSAGES')
+            channel.type === Discord.ChannelType.GuildText &&
+            channel.permissionsFor(guild.me).has(Discord.PermissionsBitField.Flags.ViewChannel) && 
+            channel.permissionsFor(guild.me).has(Discord.PermissionsBitField.Flags.SendMessages)
         )
 
         msg_content = {

@@ -40,7 +40,7 @@ module.exports = (Discord, client, db, interaction) => {
 
         case 'setupgamenewsbtn':
             // Button to set up a game for notifications on news/updates
-            handleSetUpGameNewsButton(client, db, interaction)
+            handleSetUpGameNewsButton(client, Discord, db, interaction)
             break
 
         case 'removegamenewsbtn':
@@ -100,45 +100,45 @@ async function handleApplicationCommands(interaction) {
     const spamCheckLength = 7
     const spamCheck = generateSpamCheck(spamCheckLength)
     
-    const modal = new Discord.Modal()
+    const modal = new Discord.ModalBuilder()
         .setCustomId(`contactModal-${spamCheck}`)
         .setTitle('Contact Us!')
         .addComponents([
-            new Discord.MessageActionRow().addComponents(
-                new Discord.TextInputComponent()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.TextInputBuilder()
                     .setCustomId('contactEmailInput')
                     .setLabel(`Email (if you wish to be contacted back)`)
-                    .setStyle('SHORT')
+                    .setStyle('Short')
                     .setMinLength(0)
                     .setMaxLength(100)
                     .setPlaceholder(`myEmail@mail.com`)
                     .setRequired(false),
             ),
-            new Discord.MessageActionRow().addComponents(
-                new Discord.TextInputComponent()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.TextInputBuilder()
                     .setCustomId('contactSubjectInput')
                     .setLabel(`Subject`)
-                    .setStyle('SHORT')
+                    .setStyle('Short')
                     .setMinLength(10)
                     .setMaxLength(500)
                     .setPlaceholder(`Reason for contact`)
                     .setRequired(true),
             ),
-            new Discord.MessageActionRow().addComponents(
-                new Discord.TextInputComponent()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.TextInputBuilder()
                     .setCustomId('contactContentInput')
                     .setLabel(`Content`)
-                    .setStyle('PARAGRAPH')
+                    .setStyle('Paragraph')
                     .setMinLength(20)
                     .setMaxLength(4000)
                     .setPlaceholder(`I am contacting you because...`)
                     .setRequired(true),
             ),
-            new Discord.MessageActionRow().addComponents(
-                new Discord.TextInputComponent()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.TextInputBuilder()
                     .setCustomId('contactCheckInput')
                     .setLabel(`Are you a human? [ ${spamCheck} ]`)
-                    .setStyle('SHORT')
+                    .setStyle('Short')
                     .setMinLength(spamCheckLength)
                     .setMaxLength(spamCheckLength)
                     .setPlaceholder(`${spamCheck}`)
@@ -229,7 +229,7 @@ function handleSubmitContactModal(interaction, spamCheckTarget) {
  * @returns 
  */
 function handleSetDefaultChannelButton(client, Discord, db, interaction) {
-    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+    if (!interaction.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
             console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleSetDefaultChannelButton' :: `, error)
         })
@@ -249,7 +249,7 @@ function handleSetDefaultChannelButton(client, Discord, db, interaction) {
  * @returns 
  */
 function handleRemoveDefaultChannelButton(Discord, db, interaction) {
-    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+    if (!interaction.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
             console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleRemoveDefaultChannelButton' :: `, error)
         })
@@ -288,8 +288,8 @@ function handleRemoveDefaultChannelButton(Discord, db, interaction) {
  * @param {*} interaction The interaction that started this execution
  * @returns 
  */
-function handleSetUpGameNewsButton(client, db, interaction) {
-    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+function handleSetUpGameNewsButton(client, Discord, db, interaction) {
+    if (!interaction.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
             console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleSetUpGameNewsButton' :: `, error)
         })
@@ -298,7 +298,7 @@ function handleSetUpGameNewsButton(client, db, interaction) {
 
     interaction.deferUpdate()
 
-    handleSetUpGameNews(client, db, interaction)
+    handleSetUpGameNews(client, Discord, db, interaction)
 }
 
 /**
@@ -308,7 +308,7 @@ function handleSetUpGameNewsButton(client, db, interaction) {
  * @returns 
  */
 function handleRemoveGameNewsButton(db, interaction) {
-    if (!interaction.memberPermissions.has('ADMINISTRATOR')) {
+    if (!interaction.memberPermissions.has(Discord.PermissionsBitField.Flags.Administrator)) {
         interaction.reply({ content: `This button is for the administrators' use only.`, ephemeral: true }).catch(error => {
             console.log(`ERROR :: Failed to send 'button for admins' reply on 'interactionCreate.handleRemoveGameNewsButton' :: `, error)
         })
@@ -380,15 +380,15 @@ async function handleAddToWishlistButton(Discord, interaction) {
     const currentPrice = parseFloat(game_json['price'])
     const defaultPrice = (currentPrice - 0.01).toFixed(2); // round to 2 decimal places
 
-    const modal = new Discord.Modal()
+    const modal = new Discord.ModalBuilder()
         .setCustomId('priceModal')
         .setTitle(title)
         .addComponents([
-            new Discord.MessageActionRow().addComponents(
-                new Discord.TextInputComponent()
+            new Discord.ActionRowBuilder().addComponents(
+                new Discord.TextInputBuilder()
                     .setCustomId('priceInput')
                     .setLabel(`Price target (€)`)
-                    .setStyle('SHORT')
+                    .setStyle('Short')
                     .setMinLength(1)
                     .setMaxLength(10)
                     .setPlaceholder(`${defaultPrice}`)

@@ -8,7 +8,7 @@
  * Creates a pagination embed~
  * @param {Discord} Discord The Discord instance
  * @param {Message} message The message we will be editing
- * @param {MessageEmbed[]} pages The embeds to paginate
+ * @param {EmbedBuilder[]} pages The embeds to paginate
  * @param {number} timeout The time for the buttons to keep alive
  * @param {*} content_text The text for the message content
  * @param {*} extraBtns Extra buttons to use. If single button, will be displayed in the same row. If list, will be displayed in a new row
@@ -19,25 +19,25 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
         let page = 0;
 
         const buttonList = [
-            new Discord.MessageButton()
+            new Discord.ButtonBuilder()
                 .setCustomId('firstbtn')
                 .setEmoji('<:skip_first_icon:1013929634120880329>')
-                .setStyle('SECONDARY'),
-            new Discord.MessageButton()
+                .setStyle('Secondary'),
+            new Discord.ButtonBuilder()
                 .setCustomId('previousbtn')
                 .setEmoji('<:previous_icon:1013929741390192791>')
-                .setStyle('SECONDARY'),
-            new Discord.MessageButton()
+                .setStyle('Secondary'),
+            new Discord.ButtonBuilder()
                 .setCustomId('nextbtn')
                 .setEmoji('<:next_icon:1013930064087355462>')
-                .setStyle('SECONDARY'),
-            new Discord.MessageButton()
+                .setStyle('Secondary'),
+            new Discord.ButtonBuilder()
                 .setCustomId('lastbtn')
                 .setEmoji('<:skip_last_icon:1013930143854633181>')
-                .setStyle('SECONDARY')
+                .setStyle('Secondary')
         ]
     
-        const topRow = new Discord.MessageActionRow().addComponents(buttonList);
+        const topRow = new Discord.ActionRowBuilder().addComponents(buttonList);
 
         // The navidation buttons are always default
         var rows = [topRow]
@@ -50,7 +50,7 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
             }
             // If it is an array and has at least one obj, then its a new row
             else if (extraBtns.length > 0) {
-                const lowRow = new Discord.MessageActionRow().addComponents(extraBtns);
+                const lowRow = new Discord.ActionRowBuilder().addComponents(extraBtns);
                 rows.push(lowRow)
             }
         }
@@ -64,10 +64,10 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
         })
         .then(async function(curPage) {
             const filter = (i) =>
-                i.customId === buttonList[0].customId ||
-                i.customId === buttonList[1].customId ||
-                i.customId === buttonList[2].customId ||
-                i.customId === buttonList[3].customId;
+                i.customId === buttonList[0].data.custom_id ||
+                i.customId === buttonList[1].data.custom_id ||
+                i.customId === buttonList[2].data.custom_id ||
+                i.customId === buttonList[3].data.custom_id;
     
             const collector = await curPage.createMessageComponentCollector({
                 filter,
@@ -76,19 +76,19 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
         
             collector.on("collect", async (i) => {
                 switch (i.customId) {
-                    case buttonList[0].customId:
+                    case buttonList[0].data.custom_id:
                         // first
                         page = 0;
                         break;
-                    case buttonList[1].customId:
+                    case buttonList[1].data.custom_id:
                         // previous
                         page = page > 0 ? --page : pages.length - 1;
                         break;
-                    case buttonList[2].customId:
+                    case buttonList[2].data.custom_id:
                         // next
                         page = page + 1 < pages.length ? ++page : 0;
                         break;
-                    case buttonList[3].customId:
+                    case buttonList[3].data.custom_id:
                         // last
                         page = pages.length - 1;
                         break;
@@ -108,7 +108,7 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
         
             collector.on("end", (_, reason) => {
                 if (reason !== "messageDelete") {
-                    const disabledTopRow = new Discord.MessageActionRow().addComponents(
+                    const disabledTopRow = new Discord.ActionRowBuilder().addComponents(
                         buttonList[0].setDisabled(true),
                         buttonList[1].setDisabled(true),
                         buttonList[2].setDisabled(true),
@@ -125,7 +125,7 @@ const embedPagination = async (Discord, message, pages, timeout = 120000, conten
                         }
                         // If it is an array and has at least one obj, then its a new row
                         else if (extraBtns.length > 0) {
-                            const disabledLowRow = new Discord.MessageActionRow().addComponents(
+                            const disabledLowRow = new Discord.ActionRowBuilder().addComponents(
                                 extraBtns.map(function(btn) {
                                     return btn.setDisabled(true)
                                 })

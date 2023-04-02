@@ -10,13 +10,13 @@ module.exports = {
     showOnHelp: true,
     execute(client, message, args, Discord, db) {
         client.users.fetch(dev_id).then(dev_user => {
-            const contactBtn = new Discord.MessageButton()
+            const contactBtn = new Discord.ButtonBuilder()
                 .setCustomId('contactbtn')
                 .setLabel('Contact Developer')
-                .setStyle('SECONDARY')
+                .setStyle('Secondary')
 
             // Create the embed and the component, which will serve as placeholders
-            const embed  = new Discord.MessageEmbed()
+            const embed  = new Discord.EmbedBuilder()
                 .setColor('#ffffff')
                 .setTitle(`Available Commands`)
                 .setDescription(get_commands())
@@ -24,7 +24,7 @@ module.exports = {
 
             message.channel.send({
                 embeds: [embed],
-                components: [new Discord.MessageActionRow().addComponents(contactBtn)]
+                components: [new Discord.ActionRowBuilder().addComponents(contactBtn)]
             })
             .catch(msg_error => {
                 console.log(`ERROR :: Could not send 'help' message to channel ${message.channelId} in guild ${message.guildId} :: `, msg_error)

@@ -1,4 +1,3 @@
-const Discord = require('discord.js');
 require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` })
 require('console-stamp')(console, { 
     format: ':date(yyyy/mm/dd HH:MM:ss)' 
@@ -6,11 +5,14 @@ require('console-stamp')(console, {
 
 const db = require('./database/db')
 
+const Discord = require('discord.js');
+
 const allIntents = { 
     intents: [
-        Discord.Intents.FLAGS.GUILDS,
-        Discord.Intents.FLAGS.GUILD_MESSAGES,
-        Discord.Intents.FLAGS.DIRECT_MESSAGES,
+        Discord.GatewayIntentBits.Guilds,
+		Discord.GatewayIntentBits.GuildMessages,
+		Discord.GatewayIntentBits.DirectMessages,
+        Discord.GatewayIntentBits.MessageContent
     ] 
 };
 

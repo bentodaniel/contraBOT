@@ -1,8 +1,10 @@
+const { PermissionsBitField, ChannelType } = require('discord.js');
+
 /**
  * Parses a search results embed back into a json format { link, image_link, title, productID, price }
  * @param {*} embed The embed to parse
  */
- function embedToJson(embed) {
+function embedToJson(embed) {
     try {
         var game_json = {}
 
@@ -38,27 +40,28 @@
  * @param {*} guild The guild
  * @returns 
  */
- function parse_channels_to_select_options(channels, guild) {
-    res = []
+async function parse_channels_to_select_options(channels, guild) {
+    var promises = []
 
     if (channels === null || channels === undefined || guild === null || guild === undefined) {
-        return res
+        return promises
     }
-    
-    channels.forEach(channel => {
-        const has_permissions = get_has_permissions(channel, guild.me)
 
-        if (channel.type === 'GUILD_TEXT') {
+    for(channel_data of channels) {
+        const channel = channel_data[1]
+
+        if (channel.type === ChannelType.GuildText) {
             var emoji = '❌'
             
+            const has_permissions = get_has_permissions(guild, channel)
             if (has_permissions) {
                 emoji = '✅'
             }
 
-            res.push({
+            promises.push({
                 'label': channel.name,
                 'emoji': {
-                    'id': null,
+                    //'id': null,
                     'name': emoji,
                 },
                 'description': channel.parent.name,
@@ -66,15 +69,16 @@
                 'default': false
             })
         }
-    });
-    return res
+    }
+    return Promise.all(promises)
 }
 
-function get_has_permissions(channel, me) {
-    return channel.permissionsFor(me).has('VIEW_CHANNEL') && 
-        channel.permissionsFor(me).has('SEND_MESSAGES') &&
-        channel.permissionsFor(me).has('EMBED_LINKS') &&
-        channel.permissionsFor(me).has('ATTACH_FILES')
+function get_has_permissions(guild, channel) {
+    const perms = guild.members.me?.permissionsIn(channel)
+    return perms.has(PermissionsBitField.Flags.ViewChannel) && 
+        perms.has(PermissionsBitField.Flags.SendMessages) &&
+        perms.has(PermissionsBitField.Flags.EmbedLinks) &&
+        perms.has(PermissionsBitField.Flags.AttachFiles)
 }
 
 module.exports = {
