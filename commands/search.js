@@ -178,7 +178,7 @@ function generateEmbeds(Discord, results_list) {
             .setTitle(`${game['title']} [${game['productID']}]`)
             .setURL(game['link'])
             .setColor('#ffffff')
-            .setThumbnail(game['image_link'].replaceAll()) // comes in like "'https:\\link'"
+            .setThumbnail(game['image_link'].replace(/["']/g, "")) // comes in like "'https:\\link'"
             .setDescription(game['infos'])
             .addFields(
                 { name: `Price`, value: `${game['price']}`, inline: true }
