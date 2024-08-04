@@ -173,12 +173,13 @@ function get_allkeyshop_games_list(game_search) {
 function generateEmbeds(Discord, results_list) {
     var embeds = [];
     for (game of results_list) {
+        game['image_link'] = game['image_link'].replace(/["']/g, ""); // comes in like "'https:\\link'"
         console.log(game)
         var embed = new Discord.EmbedBuilder()
             .setTitle(`${game['title']} [${game['productID']}]`)
             .setURL(game['link'])
             .setColor('#ffffff')
-            .setThumbnail(game['image_link'].replace(/["']/g, "")) // comes in like "'https:\\link'"
+            .setThumbnail(game['image_link'])
             .setDescription(game['infos'])
             .addFields(
                 { name: `Price`, value: `${game['price']}`, inline: true }
